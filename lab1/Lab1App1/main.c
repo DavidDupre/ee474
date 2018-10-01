@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 const unsigned int CYCLES_PER_SEC = 480000000;
 
