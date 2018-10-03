@@ -28,6 +28,9 @@
 *.so.*
 *.dylib
 
+#Vs folders
+*vscode/
+
 # Executables
 *.exe
 *.out
