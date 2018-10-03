@@ -105,10 +105,10 @@ void setup(void) {
 const char letters[] = {'A', 'B', 'C', 'D'};
 const unsigned int delays_ms[] = {1000, 2000, 1000, 2000};
 
-void myDelay(unsigned int delay_ms) {
+void myDelay(unsigned int* delay_ms) {
   // software delays are more strictly optimized out by arduino's compiler
   // this uses a system call instead
-  delay(delay_ms);
+  delay(*delay_ms);
 }
 
 void loop(void) 
@@ -119,11 +119,11 @@ void loop(void)
     tft.setCursor(0, 0);
     tft.print(letters[i]);
 
-    myDelay(delays_ms[i]);
+    myDelay(&delays_ms[i]);
 
     // Resets the screen to all black
     tft.fillScreen(BLACK);
 
-    myDelay(delays_ms[i]);
+    myDelay(&delays_ms[i]);
   }
 }
