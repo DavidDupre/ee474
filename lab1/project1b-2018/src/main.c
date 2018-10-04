@@ -7,7 +7,9 @@ int main()
 {
 	int i = 0;									//  declare a working variable
 
-	char myArray[5];							//  declare a character array
+	// The problem was that the array was not long enough.
+	// This problem was identified after examining all constants in the file.
+	char myArray[6];							//  declare a character array
 
 	for (i = 0; i <= 5; i++)					//  fill array with characters
 	{
