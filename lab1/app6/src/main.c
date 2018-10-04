@@ -4,13 +4,11 @@
 #define CYCLES_PER_MSEC 480000
 
 
+void delay(const unsigned int *delays_ms);
+
+
 const char letters[] = {'A', 'B', 'C', 'D'};
 const unsigned int delays_ms[] = {1000, 2000, 1000, 2000};
-
-void delay(const unsigned int *delays_ms) {
-    for (volatile unsigned int i = 0; i < CYCLES_PER_MSEC * *delays_ms; i++);
-	return;
-}
 
 int main() {
     while (1) {
@@ -22,4 +20,9 @@ int main() {
         }
     }
     return 0;
+}
+
+void delay(const unsigned int *delays_ms) {
+    for (volatile unsigned int i = 0; i < CYCLES_PER_MSEC * *delays_ms; i++) { }
+	return;
 }
