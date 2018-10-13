@@ -108,8 +108,8 @@ TCB *minorTasks[] = {
 
 void setup() {
     thrusterCommand = 0;
-    fuelLevel = 50;
-    batteryLevel = 50;
+    fuelLevel = 100;
+    batteryLevel = 100;
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
