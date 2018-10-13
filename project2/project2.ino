@@ -1,5 +1,7 @@
 #include "thrusterSubsystem.h"
 #include "consoleDisplay.h"
+#include "warningAlarm.h"
+#include "colors.h"
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
@@ -68,6 +70,13 @@ ConsoleDisplayData consoleDisplayData = {
     &fuelLow
 };
 
+WarningAlarmData warningAlarmData = {
+    &batteryLow,
+    &fuelLow,
+    &batteryLevel,
+    &fuelLevel
+};
+
 TCB thrusterSubsystemTCB = {
     &thrusterSubsystemData,
     thrusterSubsystem
@@ -76,6 +85,11 @@ TCB thrusterSubsystemTCB = {
 TCB consoleDisplayTCB = {
     &consoleDisplayData,
     consoleDisplay
+};
+
+TCB warningAlarmTCB = {
+    &warningAlarmData,
+    warningAlarm
 };
 
 TCB *majorTasks[] = {
@@ -88,16 +102,18 @@ TCB *majorTasks[] = {
 TCB *minorTasks[] = {
     &thrusterSubsystemTCB,
     // console display
-    // warning alarm
+    &warningAlarmTCB
     // blink LED? Maybe not a task
 };
 
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
+    batteryLevel = 100;
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
+    tft.fillScreen(BLACK);
 }
 
 void loop() {
