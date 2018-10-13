@@ -1,6 +1,22 @@
 #include "thrusterSubsystem.h"
+#include "consoleDisplay.h"
+
+#include <Elegoo_GFX.h>    // Core graphics library
+#include <Elegoo_TFTLCD.h> // Hardware-specific library
+
+#define LCD_CS A3 // Chip Select goes to Analog 3
+#define LCD_CD A2 // Command/Data goes to Analog 2
+#define LCD_WR A1 // LCD Write goes to Analog 1
+#define LCD_RD A0 // LCD Read goes to Analog 0
+
+#define LCD_RESET A4
+
+// Setup LCD display
+Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
+
 
 #define MAJOR_CYCLE_DURATION_MS 5000
+#define TFT_IDENTIFIER 0x9341
 
 
 typedef struct {
@@ -24,9 +40,26 @@ void runTasks(TCB **taskQueue, unsigned short size);
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 
+bool solarPanelState;
+unsigned short batteryLevel;
+unsigned short powerConsumption;
+unsigned short powerGeneration;
+bool batteryLow;
+bool fuelLow;
+
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
     &fuelLevel
+};
+
+ConsoleDisplayData consoleDisplayData = {
+    &solarPanelState,
+    &batteryLevel,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &batteryLow,
+    &fuelLow
 };
 
 TCB thrusterSubsystemTCB = {
@@ -34,11 +67,16 @@ TCB thrusterSubsystemTCB = {
     thrusterSubsystem
 };
 
+TCB consoleDisplayTCB = {
+    &consoleDisplayData,
+    consoleDisplay
+};
+
 TCB *majorTasks[] = {
     // power subsystem
     &thrusterSubsystemTCB,
     // satellite comms
-    // console display
+    &consoleDisplayTCB
 };
 
 TCB *minorTasks[] = {
@@ -51,6 +89,9 @@ TCB *minorTasks[] = {
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
+
+    Serial.begin(9600);
+    tft.begin(TFT_IDENTIFIER);
 }
 
 void loop() {
