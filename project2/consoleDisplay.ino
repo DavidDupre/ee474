@@ -7,6 +7,8 @@ void consoleDisplay(void *consoleDisplayData) {
     // Cast from void to correct type
     ConsoleDisplayData *data = (ConsoleDisplayData *) consoleDisplayData;
     tft.setCursor(0,30);
+    tft.setTextSize(2);
+    tft.setTextColor(BLUE);
     // Clear bottom part of screen without warnings
     tft.fillRect(0,30,300,500,BLACK);
     tft.print("Solar panel is ");

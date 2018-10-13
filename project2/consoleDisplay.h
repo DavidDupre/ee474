@@ -9,8 +9,8 @@ typedef struct {
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
 
-    bool *fuelLow;
     bool *batteryLow;
+    bool *fuelLow;
 } ConsoleDisplayData;
 
 

@@ -40,9 +40,26 @@ void runTasks(TCB **taskQueue, unsigned short size);
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 
+bool solarPanelState;
+unsigned short batteryLevel;
+unsigned short powerConsumption;
+unsigned short powerGeneration;
+bool batteryLow;
+bool fuelLow;
+
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
     &fuelLevel
+};
+
+ConsoleDisplayData consoleDisplayData = {
+    &solarPanelState,
+    &batteryLevel,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &batteryLow,
+    &fuelLow
 };
 
 TCB thrusterSubsystemTCB = {
@@ -50,11 +67,16 @@ TCB thrusterSubsystemTCB = {
     thrusterSubsystem
 };
 
+TCB consoleDisplayTCB = {
+    &consoleDisplayData,
+    consoleDisplay
+};
+
 TCB *majorTasks[] = {
     // power subsystem
     &thrusterSubsystemTCB,
     // satellite comms
-    // console display
+    &consoleDisplayTCB
 };
 
 TCB *minorTasks[] = {
