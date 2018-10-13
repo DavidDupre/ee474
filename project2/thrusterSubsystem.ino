@@ -12,11 +12,11 @@
 
 // macros to extract data from the thruster command
 #define THRUSTER_CMD_LEFT(cmd)  ((bool) (cmd & (1 << 0)))
-#define THRUSTER_CMD_RIGHT(cmd) ((bool) (cmd & (1 << 1)))
-#define THRUSTER_CMD_UP(cmd)    ((bool) (cmd & (1 << 2)))
-#define THRUSTER_CMD_DOWN(cmd)  ((bool) (cmd & (1 << 3)))
-#define THRUSTER_CMD_MAG(cmd)   ((uint8_t) (cmd & 0xF0) >> 4)
-#define THRUSTER_CMD_DUR(cmd)   ((uint8_t) (cmd & 0xFF00) >> 8)
+#define THRUSTER_CMD_RIGHT(cmd) ((bool) ((cmd & (1 << 1)) >> 1))
+#define THRUSTER_CMD_UP(cmd)    ((bool) ((cmd & (1 << 2)) >> 2))
+#define THRUSTER_CMD_DOWN(cmd)  ((bool) ((cmd & (1 << 3)) >> 3))
+#define THRUSTER_CMD_MAG(cmd)   ((uint8_t) ((cmd & 0xF0) >> 4))
+#define THRUSTER_CMD_DUR(cmd)   ((uint8_t) ((cmd & 0xFF00) >> 8))
 
 
 /******************************************************************************
