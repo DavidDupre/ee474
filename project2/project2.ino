@@ -37,16 +37,22 @@ void setCycleMode(CycleMode mode);
 // run all the tasks in a queue
 void runTasks(TCB **taskQueue, unsigned short size);
 
+// get the mission elapsed time in milliseconds
+unsigned long globalTimeBase();
 
+
+// TCB shared variables
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
-
 bool solarPanelState;
 unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+
+// "private" variables
+unsigned long missionElapsedTime;
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -112,6 +118,7 @@ void loop() {
     // TODO maybe put all this in a dedicated schedule file
 
     unsigned long startTimeMs = millis();
+    missionElapsedTime = startTimeMs;
 
     // run one major cycle
     setCycleMode(CycleModeMajor);
@@ -119,8 +126,10 @@ void loop() {
 
     // run minor cycles until 5 seconds have passed
     setCycleMode(CycleModeMinor);
-    while (millis() - startTimeMs < MAJOR_CYCLE_DURATION_MS) {
+    missionElapsedTime = millis();
+    while (missionElapsedTime - startTimeMs < MAJOR_CYCLE_DURATION_MS) {
         runTasks(minorTasks, sizeof(minorTasks) / sizeof(TCB*));
+        missionElapsedTime = millis();
     }
 }
 
@@ -139,4 +148,8 @@ void runTasks(TCB **taskQueue, unsigned short size) {
         TCB *tcb = taskQueue[i];
         tcb->task(tcb->data);
     }
+}
+
+unsigned long globalTimeBase() {
+    return missionElapsedTime;
 }
