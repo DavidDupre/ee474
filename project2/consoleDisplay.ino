@@ -28,4 +28,7 @@ void consoleDisplay(void *consoleDisplayData) {
 
     tft.print("Power Consumption: ");
     tft.print(*(data->powerConsumption));
+
+    tft.print("Power Generation: ");
+    tft.println(*(data->powerGeneration));
 }
