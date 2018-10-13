@@ -1,3 +1,5 @@
+#include "thrusterSubsystem.h"
+
 #define MAJOR_CYCLE_DURATION_MS 5000
 
 
@@ -19,22 +21,36 @@ void setCycleMode(CycleMode mode);
 void runTasks(TCB **taskQueue, unsigned short size);
 
 
+unsigned int thrusterCommand;
+unsigned short fuelLevel;
+
+ThrusterSubsystemData thrusterSubsystemData = {
+    &thrusterCommand,
+    &fuelLevel
+};
+
+TCB thrusterSubsystemTCB = {
+    &thrusterSubsystemData,
+    thrusterSubsystem
+};
+
 TCB *majorTasks[] = {
     // power subsystem
-    // thruster task
+    &thrusterSubsystemTCB,
     // satellite comms
     // console display
 };
 
 TCB *minorTasks[] = {
-    // thruster task
+    &thrusterSubsystemTCB,
     // console display
     // warning alarm
     // blink LED? Maybe not a task
 };
 
 void setup() {
-
+    thrusterCommand = 0;
+    fuelLevel = 100;
 }
 
 void loop() {
@@ -57,11 +73,11 @@ void setCycleMode(CycleMode mode) {
     if (mode == CycleModeMajor) {
         // TODO
         // set console display to info mode
-        // set thruster TCB's command to point to the global command varaible
+        thrusterSubsystemData.thrusterCommand = &thrusterCommand;
     } else {
         // TODO
         // set console display to annunciation mode
-        // set thruster TCB's command to NULL
+        thrusterSubsystemData.thrusterCommand = NULL;
     }
 }
 
