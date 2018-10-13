@@ -24,17 +24,17 @@
  *
  * inputs:
  *  thrusterSubsystemData (void*): must be of type ThrusterSubsystemData*. If
- *      thrusterCommand is not NULL, this function will update the fuelLevel
- *      using that command. Otherwise, the last command will be used (or 0 if
- *      no command has been input yet).
+ *      thrusterCommand is not THRUSTER_CMD_NONE, this function will update the
+ *      fuelLevel using that command. Otherwise, the last command will be used
+ *      (or 0 if no command has been input yet).
  *
  * outputs: void
  *
  * description:
  *  thrusterSubsystem manages the satellite's fuel level based on the
  *  current thruster command. The current thrust command is always the last
- *  non-NULL command entered to this function, or 0 if no command has been
- *  entered yet.
+ *  non-THRUSTER_CMD_NONE command entered to this function, or 0 if no command
+ *  has been entered yet.
  *
  *  thrusterCommand is interpreted as follows:
  *
@@ -70,7 +70,7 @@
  *  else
  *      fuelLevel = fuelLevel - fuelExpended
  *
- *  if inputCommand != NULL then
+ *  if inputCommand != THRUSTER_CMD_NONE then
  *      currentCommand = inputCommand
  *  else if timePassed >= getDuration(currentCommand) then
  *      currentCommand = 0
@@ -128,13 +128,37 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
     }
 
     // update the local thruster command
-    if (data->thrusterCommand) {
-        // if the incoming command is non-null, update the local command
+    if (*data->thrusterCommand != THRUSTER_CMD_NONE) {
+        // Use the incoming command if it's not none.
+        // Set the command to NONE after accepting it, so that commands are not
+        // double-accepted.
         command = *data->thrusterCommand;
+        *data->thrusterCommand = THRUSTER_CMD_NONE;
     } else if (timePassedMs >= 1000 * THRUSTER_CMD_DUR(command)) {
         // if the current command is past its duration, clear the command
         command = 0;
     }
 
     return;
+}
+
+uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
+                               bool useDown, uint8_t magnitude,
+                               uint8_t duration) {
+    uint16_t cmd = 0;
+    if (useLeft) {
+        cmd |= 1;
+    }
+    if (useRight) {
+        cmd |= 1 << 1;
+    }
+    if (useUp) {
+        cmd |= 1 << 2;
+    }
+    if (useDown) {
+        cmd |= 1 << 3;
+    }
+    cmd |= (magnitude << 4);
+    cmd |= ((uint16_t) duration) << 8;
+    return cmd;
 }

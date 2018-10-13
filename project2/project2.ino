@@ -73,11 +73,9 @@ void setCycleMode(CycleMode mode) {
     if (mode == CycleModeMajor) {
         // TODO
         // set console display to info mode
-        thrusterSubsystemData.thrusterCommand = &thrusterCommand;
     } else {
         // TODO
         // set console display to annunciation mode
-        thrusterSubsystemData.thrusterCommand = NULL;
     }
 }
 
