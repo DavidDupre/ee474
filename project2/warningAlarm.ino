@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "warningAlarm.h"
+#include "colors.h"
 
 void warningAlarm(void *warningAlarmData) {
 
@@ -14,11 +15,10 @@ void warningAlarm(void *warningAlarmData) {
     unsigned long currentEpochMs = millis();
     unsigned long timePassedMsBattery = currentEpochMs - lastBatteryUpdateEpochMs;
     unsigned long timePassedMsFuel = currentEpochMs - lastFuelUpdateEpochMs;
-        
-    tft.setCursor(0,0);
 
     // Update battery status
-    if (*(data->batteryLevel) < 50) {
+    tft.setCursor(0,0);
+    if (*(data->batteryLevel) <= 50) {
         // Only update flash if the last update time was over a second ago
         if (timePassedMsBattery >= 1000) {
             // Draw black over batter portion
@@ -26,12 +26,12 @@ void warningAlarm(void *warningAlarmData) {
                 tft.fillRect(0,0,300,15,BLACK);
                 batteryFlashed = false;
             } else {
-                if (*(data->batteryLevel) < 10) {
+                if (*(data->batteryLevel) <= 10) {
                     tft.setTextColor(RED);
                 } else {
                     tft.setTextColor(ORANGE);
                 }
-                tft.println("BATTERY");
+                tft.print("BATTERY");
                 batteryFlashed = true;
             }
             // Update last time
@@ -40,7 +40,7 @@ void warningAlarm(void *warningAlarmData) {
         
     } else {
         tft.setTextColor(GREEN);
-        tft.println("BATTERY");
+        tft.print("BATTERY");
         batteryFlashed = false;
         // Last update time doesn't change if status is GREEN
         // This makes sure that the flashing starts immediately rather than
@@ -48,20 +48,21 @@ void warningAlarm(void *warningAlarmData) {
     }
 
     // Update fuel status
-    if (*(data->fuelLevel) < 50) {
+    tft.setCursor(0,15);
+    if (*(data->fuelLevel) <= 50) {
         // Only update flash if the last update time was over two seconds ago
         if (timePassedMsFuel >= 2000) {
             // Draw black over batter portion
-            if (batteryFlashed) {
-                tft.fillRect(0,15,300,30,BLACK);
+            if (fuelFlashed) {
+                tft.fillRect(0,15,300,16,BLACK);
                 fuelFlashed = false;
             } else {
-                if (*(data->fuelLevel) < 10) {
+                if (*(data->fuelLevel) <= 10) {
                     tft.setTextColor(RED);
                 } else {
                     tft.setTextColor(ORANGE);
                 }
-                tft.println("FUEL");
+                tft.print("FUEL");
                 fuelFlashed = true;
             }
             // Update last time
@@ -70,7 +71,7 @@ void warningAlarm(void *warningAlarmData) {
         
     } else {
         tft.setTextColor(GREEN);
-        tft.println("FUEL");
+        tft.print("FUEL");
         fuelFlashed = false;
         // Last update time doesn't change if status is GREEN
         // This makes sure that the flashing starts immediately rather than

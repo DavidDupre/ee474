@@ -3,8 +3,8 @@
 
 
 typedef struct {
-    bool *fuelLow;
     bool *batteryLow;
+    bool *fuelLow;
     unsigned short *batteryLevel;
     unsigned short *fuelLevel;
 } WarningAlarmData;
