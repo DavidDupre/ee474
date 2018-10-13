@@ -78,8 +78,6 @@
  * author: David Dupre
  *****************************************************************************/
 void thrusterSubsystem(void *thrusterSubsystemData) {
-    // TODO replace millis() with global time base
-
     /*
      * partialFuel represents the number of milliseconds it would take one
      * thruster at minimum throttle to reduce the fuelLevel by 1.
@@ -90,14 +88,14 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
     static uint16_t command = 0;
 
     // lastUpdateEpochMs is the system time of the last thrusterSubsystem call
-    static unsigned long lastUpdateEpochMs = millis();
+    static unsigned long lastUpdateEpochMs = globalTimeBase();
 
     // cast the input to the correct ThrusterSubsystemData type
     ThrusterSubsystemData *data
         = (ThrusterSubsystemData *) thrusterSubsystemData;
 
     // calculate how long the last command has been running
-    unsigned long currentEpochMs = millis();
+    unsigned long currentEpochMs = globalTimeBase();
     unsigned long timePassedMs = currentEpochMs - lastUpdateEpochMs;
     lastUpdateEpochMs = currentEpochMs;
 
