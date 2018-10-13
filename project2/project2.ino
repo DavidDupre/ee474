@@ -1,6 +1,7 @@
 #include "thrusterSubsystem.h"
 #include "consoleDisplay.h"
 #include "warningAlarm.h"
+#include "colors.h"
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
@@ -107,11 +108,12 @@ TCB *minorTasks[] = {
 
 void setup() {
     thrusterCommand = 0;
-    fuelLevel = 100;
-    batteryLevel = 100;
+    fuelLevel = 50;
+    batteryLevel = 50;
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
+    tft.fillScreen(BLACK);
 }
 
 void loop() {
