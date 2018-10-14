@@ -18,7 +18,7 @@ void schedule(TCB **taskQueue, unsigned short size) {
 
         // run through the task queue
         for (unsigned short j = 0; j < size; j++) {
-            TCB *tcb = taskQueue[i];
+            TCB *tcb = taskQueue[j];
             tcb->task(tcb->data);
         }
 

@@ -22,6 +22,7 @@ void warningAlarm(void *warningAlarmData) {
     unsigned long timePassedMsFuel = currentEpochMs - lastFuelUpdateEpochMs;
 
     // Update battery status
+    tft.setTextSize(2);
     tft.setCursor(0,0);
     if (*(data->batteryLevel) <= HALF_DEPLETED) {
         // Only update flash if the last update time was over a second ago
@@ -44,7 +45,7 @@ void warningAlarm(void *warningAlarmData) {
             // Update last time
             lastBatteryUpdateEpochMs = currentEpochMs;
         }
-        
+
     } else {
         tft.setTextColor(GREEN);
         tft.print("BATTERY");
@@ -78,7 +79,7 @@ void warningAlarm(void *warningAlarmData) {
             // Update last time
             lastFuelUpdateEpochMs = currentEpochMs;
         }
-        
+
     } else {
         tft.setTextColor(GREEN);
         tft.print("FUEL");
