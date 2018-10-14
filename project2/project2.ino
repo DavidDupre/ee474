@@ -1,5 +1,6 @@
 #include "thrusterSubsystem.h"
 #include "consoleDisplay.h"
+#include "satelliteComs.h"
 #include "warningAlarm.h"
 #include "schedule.h"
 #include "colors.h"
@@ -51,6 +52,17 @@ ConsoleDisplayData consoleDisplayData = {
     &fuelLow
 };
 
+SatelliteComsData satelliteComsData = {
+    &fuelLow,
+    &batteryLow,
+    &solarPanelState,
+    &batteryLevel,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &thrusterCommand
+};
+
 WarningAlarmData warningAlarmData = {
     &batteryLow,
     &fuelLow,
@@ -68,6 +80,11 @@ TCB consoleDisplayTCB = {
     consoleDisplay
 };
 
+TCB satelliteComsTCB = {
+    &satelliteComsData,
+    satelliteComs
+};
+
 TCB warningAlarmTCB = {
     &warningAlarmData,
     warningAlarm
@@ -76,7 +93,7 @@ TCB warningAlarmTCB = {
 TCB *taskQueue[] = {
     // power subsystem
     &thrusterSubsystemTCB,
-    // satellite comms
+    &satelliteComsTCB,
     &consoleDisplayTCB,
     &warningAlarmTCB,
     // blink LED? Maybe not a task
@@ -85,7 +102,13 @@ TCB *taskQueue[] = {
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
+    fuelLow = false;
+    batteryLow = false;
+    solarPanelState = false;
     batteryLevel = 100;
+    powerConsumption = 0;
+    powerGeneration = 0;
+
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
