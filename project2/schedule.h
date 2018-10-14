@@ -4,6 +4,7 @@
 #include "tcb.h"
 
 #define MAJOR_CYCLE_DURATION_MS 5000
+#define MINOR_CYCLE_DURATION_MS 1000
 
 
 /******************************************************************************
@@ -27,15 +28,10 @@
  *  cycles in duration.
  *
  * psuedocode:
- *  majorStartTime = now()
- *  run all tasks in order
- *  maxMinorTime = 0
- *  if now() - majorStartTime < MAJOR_DURATION - 2 * maxMinorTime then
- *      minorStartTime = now()
- *      run all tasks in order
- *      minorCycleTime = now() - minorStartTime
- *      maxMinorTime = max(maxMinorTime, minorCycleTime)
- *  delay for MAJOR_DURATION - (now() - majorStartTime)
+ *  for n minor cycles per major cycle
+ *      run each task in the task queue
+ *      delay until the minor cycle is over
+ *  delay until the major cycle is over
  *
  * author: David Dupre
  *

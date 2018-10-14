@@ -2,58 +2,38 @@
 #include "tcb.h"
 
 
-// run all the tasks in a queue
-void runTasks(TCB **taskQueue, unsigned short size);
-
-
 unsigned long missionElapsedTime = 0;
 
 void schedule(TCB **taskQueue, unsigned short size) {
-    missionElapsedTime = millis();
-    unsigned long majorStartTimeMs = missionElapsedTime;
+    unsigned long majorStartTimeMs = millis();
 
-    // do the first run through the queue
-    runTasks(taskQueue, size);
+    // it's okay if integer division rounds this down because we will delay for
+    // the remaining time
+    unsigned int minorCyclesPerMajorCycle = MAJOR_CYCLE_DURATION_MS
+                                            / MINOR_CYCLE_DURATION_MS;
 
-    /*
-     * Repeatedly through the task queue.
-     * This dynamically calculates a "minor cycle" to be the duration of
-     * another run through the task queue. This stops when there is less time
-     * remaining than twice the length of the longest minor cycle.
-     */
-    unsigned long maxMinorCycle = 0;
-    missionElapsedTime = millis();
-    while (missionElapsedTime - majorStartTimeMs
-        < MAJOR_CYCLE_DURATION_MS - maxMinorCycle * 2) {
-        unsigned long minorCycleStartTime = missionElapsedTime;
-
-        // run through the task queue
-        runTasks(taskQueue, size);
-
+    for (unsigned int i = 0; i < minorCyclesPerMajorCycle; i++) {
         // update the global time base
         missionElapsedTime = millis();
 
-        // update the max minor cycle time
-        unsigned long minorCycleMs = missionElapsedTime - minorCycleStartTime;
-        if (minorCycleMs > maxMinorCycle) {
-            maxMinorCycle = minorCycleMs;
+        // run through the task queue
+        for (unsigned short j = 0; j < size; j++) {
+            TCB *tcb = taskQueue[i];
+            tcb->task(tcb->data);
+        }
+
+        // delay until the minor cycle is over
+        if (millis() - missionElapsedTime < MINOR_CYCLE_DURATION_MS) {
+            delay(MINOR_CYCLE_DURATION_MS - (millis() - missionElapsedTime));
         }
     }
 
-    // delay up to the major cycle duration
-    missionElapsedTime = millis();
-    if (missionElapsedTime < majorStartTimeMs + MAJOR_CYCLE_DURATION_MS) {
-        delay(MAJOR_CYCLE_DURATION_MS - (missionElapsedTime - majorStartTimeMs));
+    // delay until the major cycle is over
+    if (millis() - majorStartTimeMs < MAJOR_CYCLE_DURATION_MS) {
+        delay(MAJOR_CYCLE_DURATION_MS - (millis() - majorStartTimeMs));
     }
 
     return;
-}
-
-void runTasks(TCB **taskQueue, unsigned short size) {
-    for (unsigned short i = 0; i < size; i++) {
-        TCB *tcb = taskQueue[i];
-        tcb->task(tcb->data);
-    }
 }
 
 unsigned long globalTimeBase() {
