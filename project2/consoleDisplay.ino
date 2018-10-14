@@ -1,8 +1,16 @@
 #include <stdint.h>
 #include "consoleDisplay.h"
 #include "colors.h"
+#include "schedule.h"
+
 
 void consoleDisplay(void *consoleDisplayData) {
+    // return early if less than 5 seconds have passed
+    static unsigned long lastRunTime;
+    if (globalTimeBase() - lastRunTime < MAJOR_CYCLE_DURATION_MS) {
+        return;
+    }
+    lastRunTime = globalTimeBase();
 
     // Cast from void to correct type
     ConsoleDisplayData *data = (ConsoleDisplayData *) consoleDisplayData;

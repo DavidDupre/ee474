@@ -1,7 +1,9 @@
 #include "thrusterSubsystem.h"
 #include "consoleDisplay.h"
 #include "warningAlarm.h"
+#include "schedule.h"
 #include "colors.h"
+#include "tcb.h"
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
@@ -22,32 +24,9 @@
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 
-#define MAJOR_CYCLE_DURATION_MS 5000
 #define TFT_IDENTIFIER 0x9341
 
 
-typedef struct {
-    void *data;
-    void (*task)(void *data);
-} TCB;
-
-typedef enum {
-    CycleModeMajor,
-    CycleModeMinor
-} CycleMode;
-
-
-// set the mode to major or minor
-void setCycleMode(CycleMode mode);
-
-// run all the tasks in a queue
-void runTasks(TCB **taskQueue, unsigned short size);
-
-// get the mission elapsed time in milliseconds
-unsigned long globalTimeBase();
-
-
-// TCB shared variables
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 bool solarPanelState;
@@ -56,9 +35,6 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
-
-// "private" variables
-unsigned long missionElapsedTime;
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -97,17 +73,12 @@ TCB warningAlarmTCB = {
     warningAlarm
 };
 
-TCB *majorTasks[] = {
+TCB *taskQueue[] = {
     // power subsystem
     &thrusterSubsystemTCB,
     // satellite comms
-    &consoleDisplayTCB
-};
-
-TCB *minorTasks[] = {
-    &thrusterSubsystemTCB,
-    // console display
-    &warningAlarmTCB
+    &consoleDisplayTCB,
+    &warningAlarmTCB,
     // blink LED? Maybe not a task
 };
 
@@ -125,43 +96,7 @@ void loop() {
 #ifdef RUN_TESTS
     aunit::TestRunner::run();
 #else
-    // TODO maybe put all this in a dedicated schedule file
-
-    unsigned long startTimeMs = millis();
-    missionElapsedTime = startTimeMs;
-
-    // run one major cycle
-    setCycleMode(CycleModeMajor);
-    runTasks(majorTasks, sizeof(majorTasks) / sizeof(TCB*));
-
-    // run minor cycles until 5 seconds have passed
-    setCycleMode(CycleModeMinor);
-    missionElapsedTime = millis();
-    while (missionElapsedTime - startTimeMs < MAJOR_CYCLE_DURATION_MS) {
-        runTasks(minorTasks, sizeof(minorTasks) / sizeof(TCB*));
-        missionElapsedTime = millis();
-    }
+    schedule(taskQueue, sizeof(taskQueue) / sizeof(TCB*));
 #endif  /* RUN_TESTS */
     return;
-}
-
-void setCycleMode(CycleMode mode) {
-    if (mode == CycleModeMajor) {
-        // TODO
-        // set console display to info mode
-    } else {
-        // TODO
-        // set console display to annunciation mode
-    }
-}
-
-void runTasks(TCB **taskQueue, unsigned short size) {
-    for (unsigned short i = 0; i < size; i++) {
-        TCB *tcb = taskQueue[i];
-        tcb->task(tcb->data);
-    }
-}
-
-unsigned long globalTimeBase() {
-    return missionElapsedTime;
 }
