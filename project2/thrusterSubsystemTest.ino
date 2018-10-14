@@ -53,21 +53,23 @@ test(thrusterSubsystem) {
     thrusterSubsystemFullFuel = 1000;
 
     // send the new command
+    missionElapsedTime = 0;
     thrusterSubsystem((void *) &data);
+    assertEqual(100, (int) fuelLevel);  // don't use any fuel yet
 
-    // wait for the command to finish
-    delay(2000);
+    // "wait" for command to finish
+    missionElapsedTime = 2000;
 
     // call the function again to update the fuel level
     thrusterSubsystem((void *) &data);
 
     // check that the fuel level was set to the correct amount
-    // 10 * (2 seconds) * (1 fuel/second) = 10 fuel expended
-    int expectedFuelLevel = 90;
+    // 10 * (2 seconds) * (1 fuel/second) * (2 thrusters) = 40 fuel expended
+    int expectedFuelLevel = 60;
     assertEqual(expectedFuelLevel, (int) fuelLevel);
 
     // make sure that the fuel doesn't decrease after the command ends
-    delay(1000);
+    missionElapsedTime = 3000;
     thrusterSubsystem((void *) &data);
     assertEqual(expectedFuelLevel, (int) fuelLevel);
 }
