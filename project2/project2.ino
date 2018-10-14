@@ -5,6 +5,7 @@
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
+#include <AUnit.h>         // Test framework
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2
@@ -12,6 +13,10 @@
 #define LCD_RD A0 // LCD Read goes to Analog 0
 
 #define LCD_RESET A4
+
+// include this to run tests instead of running normally
+// comment out to run normally
+// #define RUN_TESTS
 
 // Setup LCD display
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -117,6 +122,9 @@ void setup() {
 }
 
 void loop() {
+#ifdef RUN_TESTS
+    aunit::TestRunner::run();
+#else
     // TODO maybe put all this in a dedicated schedule file
 
     unsigned long startTimeMs = millis();
@@ -133,6 +141,8 @@ void loop() {
         runTasks(minorTasks, sizeof(minorTasks) / sizeof(TCB*));
         missionElapsedTime = millis();
     }
+#endif  /* RUN_TESTS */
+    return;
 }
 
 void setCycleMode(CycleMode mode) {
