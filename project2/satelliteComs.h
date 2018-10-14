@@ -12,4 +12,6 @@ typedef struct {
     unsigned int *thrusterCommand;
 } SatelliteComsData;
 
-void satelliteComms(void*);
+void satelliteComs(void* satelliteComsData);
+
+#endif  /* _SATELLITE_COMS_H_ */

@@ -1,5 +1,6 @@
 #include "satelliteComs.h"
 #include <stdint.h>
+#include "thrusterSubsystem.h"
 
 /******************************************************************************
  * name : satelliteComs
@@ -43,16 +44,37 @@ void satelliteComs(void* satelliteComsData) {
 
     unsigned int thrusterCommand = *data->thrusterCommand;
 
-    if(/* first bit is a 1 */) {
-        thrusterCommand = ~0;
+    if(thrusterCommand & 1) {
+        thrusterCommand = THRUSTER_CMD_NONE;
     }
     // Transferring data back to earth
-    Serial.println(*data->fuelLow);
-    Serial.println(*data->batteryLow);
-    Serial.println(*data->solarPanelState);
-    Serial.println(*data->batteryLevel);
-    Serial.println(*data->fuelLevel);
-    Serial.println(*data->powerConsumption);
-    Serial.println(*data->powerGeneration);
+    Serial.print("Fuel Low status is: ");
+    printBool(*data->fuelLow);
+    Serial.println();
+    Serial.print("Battery Low status is: ");
+    printBool(*data->batteryLow);
+    Serial.println();
+    Serial.print("Solar Panel state is: ");
+    printBool(*data->solarPanelState);
+    Serial.println();
+    Serial.print("Battery Level is: ");
+    Serial.print(*data->batteryLevel);
+    Serial.println();
+    Serial.print("Fuel Level is: ");
+    Serial.print(*data->fuelLevel);
+    Serial.println();
+    Serial.print("Power Consumption is: ");
+    Serial.print(*data->powerConsumption);
+    Serial.println();
+    Serial.print("Power Generation is: ");
+    Serial.print(*data->powerGeneration);
+    Serial.println();
+}
 
+void printBool(bool input) {
+    if(input) {
+        Serial.print("true");
+    } else {
+        Serial.print("false");
+    }
 }

@@ -1,5 +1,6 @@
 #include "thrusterSubsystem.h"
 #include "consoleDisplay.h"
+#include "satelliteComs.h"
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
@@ -62,6 +63,17 @@ ConsoleDisplayData consoleDisplayData = {
     &fuelLow
 };
 
+SatelliteComsData satelliteComsData = {
+    &fuelLow,
+    &batteryLow,
+    &solarPanelState,
+    &batteryLevel,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &thrusterCommand
+};
+
 TCB thrusterSubsystemTCB = {
     &thrusterSubsystemData,
     thrusterSubsystem
@@ -72,10 +84,15 @@ TCB consoleDisplayTCB = {
     consoleDisplay
 };
 
+TCB satelliteComsTCB = {
+    &satelliteComsData,
+    satelliteComs
+};
+
 TCB *majorTasks[] = {
     // power subsystem
     &thrusterSubsystemTCB,
-    // satellite comms
+    &satelliteComsTCB,
     &consoleDisplayTCB
 };
 
@@ -89,6 +106,13 @@ TCB *minorTasks[] = {
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
+    fuelLow = false;
+    batteryLow = false;
+    solarPanelState = false;
+    batteryLevel = 100;
+    powerConsumption = 0;
+    powerGeneration = 0;
+
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
