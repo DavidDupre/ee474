@@ -2,6 +2,7 @@
 #include "consoleDisplay.h"
 #include "colors.h"
 
+
 void consoleDisplay(void *consoleDisplayData) {
 
     // Cast from void to correct type

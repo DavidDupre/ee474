@@ -25,6 +25,7 @@ Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 #define MAJOR_CYCLE_DURATION_MS 5000
 #define TFT_IDENTIFIER 0x9341
 
+#define SHOW_TIMES true
 
 typedef struct {
     void *data;
@@ -104,6 +105,13 @@ TCB *majorTasks[] = {
     &consoleDisplayTCB
 };
 
+String taskNames[] = {
+    //"Power Subsystem",
+    "Thruster Subsystem",
+    //"Satellite Comms",
+    "Console Display"
+};
+
 TCB *minorTasks[] = {
     &thrusterSubsystemTCB,
     // console display
@@ -158,7 +166,15 @@ void setCycleMode(CycleMode mode) {
 void runTasks(TCB **taskQueue, unsigned short size) {
     for (unsigned short i = 0; i < size; i++) {
         TCB *tcb = taskQueue[i];
+        unsigned long startTimeUs = micros();
         tcb->task(tcb->data);
+        unsigned long endTimeUs = micros();
+        if (SHOW_TIMES) {
+            Serial.print(taskNames[i]);
+            Serial.print(" took: ");
+            Serial.print(endTimeUs - startTimeUs);
+            Serial.println(" us");
+        }
     }
 }
 
