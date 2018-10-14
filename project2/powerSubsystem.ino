@@ -6,15 +6,14 @@
      * name: powerSubsystem
      * 
      * inputs:
-     *  powerSubsystemData (void*): must be of Type powerSubsystemData*.
-     *  powerSubsystemData holds pointers to the following variables:
+     * powerSubsystemData (void*): must be of Type powerSubsystemData*.
+     * powerSubsystemData holds pointers to the following variables:
      * 
-     * solarPanelState
+     * solarPanelDeployed: bool representing whether solar panel is deployed.
      * batteryLevel: unsigned short representing the percentage level of the battery level
      *               initally set to 100.
-     * powerConsumption: unsigned short representing the power consumption per 1/3 of a major cycle. 
-     *                   initally set to 0.
-     * powerGeneration: unsigned short representing the power generation per 1/3 of a major cycle.
+     * powerConsumption: unsigned short representing the power consumption initally set to 0.
+     * powerGeneration: unsigned short representing the power generation.
      * 
      * outputs: void
      * 
@@ -28,7 +27,30 @@
      * 
      * pseudocode:
      * 
+     * setPowerConsumption to increasing
+     * set timesCalled to zero
+     * if powerConsumption is increasing
+     *  go up 2 on even, down 1 on odd
+     * else 
+     *  go down 2 on even, up 1 on odd
      * 
+     * check to see if powerConsumption should be switched
+     * if powerConsumption is increasing and > 10
+     * switch to decreasing
+     * if powerConsumption is decreasing and < 5
+     * switch to increasing
+     * 
+     * if solar panel is deployed and >95%
+     * retract solar panel
+     * otherwise if less than or equal to 50
+     * increase by 2 on even 1 on odd
+     * if more than 50
+     * increase by 2 on even
+     * 
+     * if solar panel deployed 
+     *  increment battery level by powerGeneration, deduct powerConsumption
+     * else 
+     * decrement by 3 times powerConsumption
      * 
      * author: Nick Orlov
     *****************************************************************************/ 
@@ -36,8 +58,9 @@ void powerSubsystem(void* powerSubsystemData) {
     // Casting pointer to proper data type
     PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
     unsigned short powerConsumption = *data->powerConsumption;
-    bool solarPanelState = *data->solarPanelState;
+    bool solarPanelDeployed = *data->solarPanelState;
     unsigned short batteryLevel = *data->batteryLevel;
+    unsigned short powerGeneration = *data->powerGeneration;
     
 
     // Initially the Power Consumption is increasing until it reaches 10
@@ -61,10 +84,15 @@ void powerSubsystem(void* powerSubsystemData) {
         }
     }
 
+    // Check to see if power consumption should reverse its rate of change
+    if(isIncreasing && powerConsumption > 10 || !isIncreasing && powerConsumption < 5) {
+        isIncreasing = !isIncreasing;
+    }
+
     // Checking if the solar panel should be up for power generation
-    if(solarPanelState) {
+    if(solarPanelDeployed) {
         if(batteryLevel > 95) {
-            solarPanelState = !solarPanelState;
+            solarPanelDeployed = !solarPanelDeployed;
         } else  {
             if (timesCalled % 2 == 0) {
                 batteryLevel += 2;
@@ -74,15 +102,23 @@ void powerSubsystem(void* powerSubsystemData) {
                 }
             }
         }
+        // Updating the battery level 
+        batteryLevel = batteryLevel - powerConsumption + powerGeneration;
     } else {
         if(batteryLevel <= 10) {
-            solarPanelState = !solarPanelState;
+            solarPanelDeployed = !solarPanelDeployed;
         }
+        // Updating the battery level
+        batteryLevel = batteryLevel - 3 * powerConsumption;
     }
 
-    if(solarPanelState) {
 
-    }
+    // // Incrementing the power level
+    // if(!solarPanelDeployed) {
+    //     batteryLevel = batteryLevel - 3 * powerConsumption;
+    // } else {
+    //     batteryLevel = batteryLevel - powerConsumption + powerGeneration;
+    // }
 
 
 
