@@ -93,7 +93,7 @@ TCB warningAlarmTCB = {
 TCB *taskQueue[] = {
     // power subsystem
     &thrusterSubsystemTCB,
-    // satellite comms
+    &satelliteComsTCB,
     &consoleDisplayTCB,
     &warningAlarmTCB,
     // blink LED? Maybe not a task

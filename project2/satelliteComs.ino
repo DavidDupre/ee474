@@ -1,6 +1,7 @@
 #include "satelliteComs.h"
 #include <stdint.h>
 #include "thrusterSubsystem.h"
+#include "schedule.h"
 
 /******************************************************************************
  * name : satelliteComs
@@ -40,6 +41,14 @@
 *****************************************************************************/ 
 
 void satelliteComs(void* satelliteComsData) {
+    // return early if less than 5 seconds have passed
+    static unsigned long lastRunTime;
+    if (globalTimeBase() - lastRunTime < MAJOR_CYCLE_DURATION_MS) {
+        return;
+    }
+    lastRunTime = globalTimeBase();
+
+    // rest of method
     SatelliteComsData* data = (SatelliteComsData*) satelliteComsData;
 
     unsigned int thrusterCommand = *data->thrusterCommand;
