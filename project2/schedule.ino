@@ -19,7 +19,17 @@ void schedule(TCB **taskQueue, unsigned short size) {
         // run through the task queue
         for (unsigned short j = 0; j < size; j++) {
             TCB *tcb = taskQueue[j];
+            unsigned long taskStart = micros(), taskEnd;
             tcb->task(tcb->data);
+            taskEnd = micros();
+            #ifdef GET_TIMES
+            if (0 == i) {
+                Serial.print(taskNames[j]);
+                Serial.print(" took: ");
+                Serial.print(taskEnd - taskStart);
+                Serial.println(" us to complete");
+            }
+            #endif
         }
 
         // delay until the minor cycle is over
