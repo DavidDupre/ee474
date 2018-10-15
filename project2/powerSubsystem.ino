@@ -112,17 +112,21 @@ void powerSubsystem(void* powerSubsystemData) {
         } else if (*data->batteryLevel <= BATTERY_LEVEL_MID) {
             *data->powerGeneration += 1;
         }
-        // Updating the battery level for the case of solar panel deployed
-        *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
     } else {
+        // Checking to see if the battery level is low, and if solar panel needs to be deployed
         if(*data->batteryLevel <= BATTERY_LEVEL_LOW) {
             *data->solarPanelState = !*data->solarPanelState;
         }
+    }
+
+    if(*data->solarPanelState) {
+        // Updating the battery level for the case of solar panel deployed
+        *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
+    } else {
         // Updating the battery level for solar panel not deployed
         *data->batteryLevel = *data->batteryLevel - 
         SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
     }
-
     // Incrementing times function has been called
     timesCalled+= 1;
 }
