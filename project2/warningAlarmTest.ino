@@ -12,17 +12,17 @@ test(warningAlarm) {
 
     // build the input data struct
     WarningAlarmData data = {
-    &batteryLow,
-    &fuelLow,
-    &batteryLevel,
-    &fuelLevel
+        &batteryLow,
+        &fuelLow,
+        &batteryLevel,
+        &fuelLevel
     };
 
     // send the new command
     missionElapsedTime = 0;
     warningAlarm((void *) &data);
-    assertFalse((bool) fuelLow);  // Fuel maxed
-    assertFalse((bool) batteryLow);  // Battery maxed
+    assertFalse((bool) fuelLow);    // Fuel maxed
+    assertFalse((bool) batteryLow); // Battery maxed
 
     // Next cycle
     missionElapsedTime = 5000;
@@ -46,8 +46,8 @@ test(warningAlarm) {
     // call the function again to update the warnings
     warningAlarm((void *) &data);
 
-    assertFalse((bool) fuelLow);  // Fuel medium
-    assertFalse((bool) batteryLow);  // Battery medium
+    assertFalse((bool) fuelLow);    // Fuel medium
+    assertFalse((bool) batteryLow); // Battery medium
 
     // Next cycle
     missionElapsedTime = 15000;
@@ -70,6 +70,6 @@ test(warningAlarm) {
     // call the function again to update the warnings
     warningAlarm((void *) &data);
 
-    assertFalse((bool) fuelLow);  // Fuel high
-    assertFalse((bool) batteryLow);  // Battery high
+    assertFalse((bool) fuelLow);    // Fuel high
+    assertFalse((bool) batteryLow); // Battery high
 }
