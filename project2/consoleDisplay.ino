@@ -14,12 +14,12 @@ void consoleDisplay(void *consoleDisplayData) {
 
     // Cast from void to correct type
     ConsoleDisplayData *data = (ConsoleDisplayData *) consoleDisplayData;
-    tft.setCursor(0,30);
+    tft.setCursor(0,50);
     tft.setTextSize(2);
-    tft.setTextColor(BLUE);
+    tft.setTextColor(WHITE);
     // Clear bottom part of screen without warnings
-    tft.fillRect(0,30,300,500,BLACK);
-    tft.print("Solar panel is ");
+    tft.fillRect(0,50,300,500,BLACK);
+    tft.print("Solar panel: ");
     if (*(data->solarPanelState)) {
         tft.println("deployed");
     } else {
@@ -35,7 +35,7 @@ void consoleDisplay(void *consoleDisplayData) {
     tft.println("/100");
 
     tft.print("Power Consumption: ");
-    tft.print(*(data->powerConsumption));
+    tft.println(*(data->powerConsumption));
 
     tft.print("Power Generation: ");
     tft.println(*(data->powerGeneration));

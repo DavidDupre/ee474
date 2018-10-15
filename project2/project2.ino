@@ -89,6 +89,7 @@ void setup() {
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
+    tft.setRotation(1);
     tft.fillScreen(BLACK);
 }
 

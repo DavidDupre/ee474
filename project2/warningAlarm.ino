@@ -22,14 +22,14 @@ void warningAlarm(void *warningAlarmData) {
     unsigned long timePassedMsFuel = currentEpochMs - lastFuelUpdateEpochMs;
 
     // Update battery status
-    tft.setTextSize(2);
+    tft.setTextSize(4);
     tft.setCursor(0,0);
     if (*(data->batteryLevel) <= HALF_DEPLETED) {
         // Only update flash if the last update time was over a second ago
         if (timePassedMsBattery >= BATTERY_RATE) {
             // Draw black over batter portion
             if (batteryFlashed) {
-                tft.fillRect(0,0,300,15,BLACK);
+                tft.fillRect(0,0,300,30,BLACK);
                 batteryFlashed = false;
             } else {
                 if (*(data->batteryLevel) <= LOW_LEVEL) {
@@ -57,13 +57,13 @@ void warningAlarm(void *warningAlarmData) {
     }
 
     // Update fuel status
-    tft.setCursor(0,15);
+    tft.setCursor(200,0);
     if (*(data->fuelLevel) <= HALF_DEPLETED) {
         // Only update flash if the last update time was over two seconds ago
         if (timePassedMsFuel >= FUEL_RATE) {
             // Draw black over batter portion
             if (fuelFlashed) {
-                tft.fillRect(0,15,300,16,BLACK);
+                tft.fillRect(200,0,300,30,BLACK);
                 fuelFlashed = false;
             } else {
                 if (*(data->fuelLevel) <= LOW_LEVEL) {
