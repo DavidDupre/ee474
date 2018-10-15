@@ -43,21 +43,22 @@
  * 
  * check to see if powerConsumption should be switched
  * if powerConsumption is increasing and > 10
- * switch to decreasing
+ *  switch to decreasing
+ * 
  * if powerConsumption is decreasing and < 5
- * switch to increasing
+ *  switch to increasing
  * 
  * if solar panel is deployed and >95%
- * retract solar panel
- * otherwise if less than or equal to 50
- * increase by 2 on even 1 on odd
+ *  retract solar panel
+ * else if less than or equal to 50
+ *  increase by 2 on even 1 on odd
  * if more than 50
- * increase by 2 on even
+ *  increase by 2 on even
  * 
  * if solar panel deployed 
  *  increment battery level by powerGeneration, deduct powerConsumption
  * else 
- * decrement by 3 times powerConsumption
+ *  decrement by 3 times powerConsumption
  * 
  * author: Nick Orlov
 *****************************************************************************/ 
@@ -76,7 +77,6 @@ void powerSubsystem(void* powerSubsystemData) {
     // the upper limit of POWER_CONSUMPTION_UPPER
     static bool isIncreasing = true;
     
-
     // Keeping track of the number of times the function has been called
     static int timesCalled = 0;
 
@@ -88,13 +88,11 @@ void powerSubsystem(void* powerSubsystemData) {
         } else {
             *data->powerConsumption -=1;
         }
-    } else {
+    } else if (timesCalled % 2 == 0) {
         // If on an even call: decrement by 2, odd call: increment by 1
-        if(timesCalled % 2 == 0) {
-            *data->powerConsumption -=2;
-        } else {
-            *data->powerConsumption +=1;
-        }
+        *data->powerConsumption -=2;
+    } else {
+        *data->powerConsumption +=1;
     }
 
     // Check to see if power consumption should reverse its rate of change
@@ -108,15 +106,11 @@ void powerSubsystem(void* powerSubsystemData) {
         // If the battery level is above the threshold, retract the solar panel
         if(*data->batteryLevel > HIGH_BATTERY) {
             *data->solarPanelState = !*data->solarPanelState;
-        } else  {
+        } else if(timesCalled % 2 == 0) {
             // Incrementing logic for the battery level from the solar panel
-            if (timesCalled % 2 == 0) {
-                *data->powerGeneration += 2;
-            } else {
-                if(*data->batteryLevel <= BATTERY_LEVEL_MID) {
-                    *data->powerGeneration += 1;
-                }
-            }
+            *data->powerGeneration += 2;
+        } else if (*data->batteryLevel <= BATTERY_LEVEL_MID) {
+            *data->powerGeneration += 1;
         }
         // Updating the battery level for the case of solar panel deployed
         *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
