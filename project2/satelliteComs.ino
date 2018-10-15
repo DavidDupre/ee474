@@ -51,12 +51,10 @@ void satelliteComs(void* satelliteComsData) {
     // rest of method
     SatelliteComsData* data = (SatelliteComsData*) satelliteComsData;
 
-    unsigned int thrusterCommand = *data->thrusterCommand;
-
-    if(thrusterCommand & 1) {
-        thrusterCommand = THRUSTER_CMD_NONE;
+    if(*data->thrusterCommand & 1) {
+        *data->thrusterCommand = THRUSTER_CMD_NONE;
     } else {
-        thrusterCommand = rand();
+        *data->thrusterCommand = rand();
     }
     // Transferring data back to earth
     Serial.print("Fuel Low status is: ");
