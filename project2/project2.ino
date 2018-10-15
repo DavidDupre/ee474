@@ -1,4 +1,5 @@
 #include "thrusterSubsystem.h"
+#include "powerSubsystem.h"
 #include "consoleDisplay.h"
 #include "satelliteComs.h"
 #include "warningAlarm.h"
@@ -42,6 +43,13 @@ ThrusterSubsystemData thrusterSubsystemData = {
     &fuelLevel
 };
 
+PowerSubsystemData powerSubsystemData = {
+    &solarPanelState,
+    &batteryLevel,
+    &powerConsumption,
+    &powerGeneration
+};
+
 ConsoleDisplayData consoleDisplayData = {
     &solarPanelState,
     &batteryLevel,
@@ -70,6 +78,11 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
+TCB powerSubsystemTCB = {
+    &powerSubsystemData,
+    powerSubsystem
+};
+
 TCB thrusterSubsystemTCB = {
     &thrusterSubsystemData,
     thrusterSubsystem
@@ -91,7 +104,7 @@ TCB warningAlarmTCB = {
 };
 
 TCB *taskQueue[] = {
-    // power subsystem
+    &powerSubsystemTCB,
     &thrusterSubsystemTCB,
     &satelliteComsTCB,
     &consoleDisplayTCB,

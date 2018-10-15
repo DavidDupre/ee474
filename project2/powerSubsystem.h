@@ -2,11 +2,10 @@
 #define _POWER_SUBSYSTEM_H_
 
 typedef struct {
+    bool *solarPanelState;
     unsigned short *batteryLevel;
-    unsigned short *fuelLevel;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
-    unsigned int *timeElapsed;
 } PowerSubsystemData;
 
 void powerSubsystem(void* powerSubsystemData);

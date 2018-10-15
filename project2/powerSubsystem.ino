@@ -1,11 +1,13 @@
 #include "powerSubsystem.h"
 #include <stdint.h>
+#include "schedule.h"
 
 #define HIGH_BATTERY 95
 #define BATTERY_LEVEL_MID 50
-#define BATTERY_LEVEL_LOW 10
+#define BATTERY_LEVEL_LOW 45
 #define POWER_CONSUMPTION_UPPER 10
 #define POWER_CONSUMPTION_LOWER 5
+#define SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER 3
 
 /******************************************************************************
  * name: powerSubsystem
@@ -14,7 +16,7 @@
  * powerSubsystemData (void*): must be of Type powerSubsystemData*.
  * powerSubsystemData holds pointers to the following variables:
  * 
- * solarPanelDeployed: bool representing whether solar panel is deployed.
+ * solarPanelState: bool representing whether solar panel is deployed.
  * batteryLevel: unsigned short representing the percentage level of the battery level
  *               initally set to 100.
  * powerConsumption: unsigned short representing the power consumption initally set to 0.
@@ -60,65 +62,82 @@
  * author: Nick Orlov
 *****************************************************************************/ 
 void powerSubsystem(void* powerSubsystemData) {
+    // return early if less than 5 seconds have passed
+    static unsigned long lastRunTime;
+    if (globalTimeBase() - lastRunTime < MAJOR_CYCLE_DURATION_MS) {
+        return;
+    }
+    lastRunTime = globalTimeBase();
+
     // Casting pointer to proper data type
     PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
-    unsigned short powerConsumption = *data->powerConsumption;
-    bool solarPanelDeployed = *data->solarPanelState;
-    unsigned short batteryLevel = *data->batteryLevel;
-    unsigned short powerGeneration = *data->powerGeneration;
     
-
-    // Initially the Power Consumption is increasing until it reaches 10
+    // Initially the Power Consumption is increasing until it reaches 
+    // the upper limit of POWER_CONSUMPTION_UPPER
     static bool isIncreasing = true;
+    
 
     // Keeping track of the number of times the function has been called
     static int timesCalled = 0;
 
-    // Modifying the power consumption
+    // Updates the power consumption accordingly
     if(isIncreasing) {
+        // If on an even call: increment by 2, odd call: decrement by 1
         if(timesCalled % 2 == 0) {
-            powerConsumption +=2;
+            *data->powerConsumption +=2;
         } else {
-            powerConsumption -=1;
+            *data->powerConsumption -=1;
         }
     } else {
+        // If on an even call: decrement by 2, odd call: increment by 1
         if(timesCalled % 2 == 0) {
-            powerConsumption -=2;
+            *data->powerConsumption -=2;
         } else {
-            powerConsumption +=1;
+            *data->powerConsumption +=1;
         }
     }
 
     // Check to see if power consumption should reverse its rate of change
-    if(isIncreasing && powerConsumption > POWER_CONSUMPTION_UPPER ||
-     !isIncreasing && powerConsumption < POWER_CONSUMPTION_LOWER) {
+    if(isIncreasing && *data->powerConsumption > POWER_CONSUMPTION_UPPER ||
+     !isIncreasing && *data->powerConsumption < POWER_CONSUMPTION_LOWER) {
         isIncreasing = !isIncreasing;
     }
 
     // Checking if the solar panel should be up for power generation
-    if(solarPanelDeployed) {
-        if(batteryLevel > HIGH_BATTERY) {
-            solarPanelDeployed = !solarPanelDeployed;
+    if(*data->solarPanelState) {
+        // If the battery level is above the threshold, retract the solar panel
+        if(*data->batteryLevel > HIGH_BATTERY) {
+            *data->solarPanelState = !*data->solarPanelState;
         } else  {
+            // Incrementing logic for the battery level from the solar panel
             if (timesCalled % 2 == 0) {
-                batteryLevel += 2;
+                *data->powerGeneration += 2;
             } else {
-                if(batteryLevel <= BATTERY_LEVEL_MID) {
-                    batteryLevel += 1;
+                if(*data->batteryLevel <= BATTERY_LEVEL_MID) {
+                    *data->powerGeneration += 1;
                 }
             }
         }
-        // Updating the battery level for solar panel deployed
-        batteryLevel = batteryLevel - powerConsumption + powerGeneration;
+        // Updating the battery level for the case of solar panel deployed
+        *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
     } else {
-        if(batteryLevel <= BATTERY_LEVEL_LOW) {
-            solarPanelDeployed = !solarPanelDeployed;
+        if(*data->batteryLevel <= BATTERY_LEVEL_LOW) {
+            *data->solarPanelState = !*data->solarPanelState;
         }
         // Updating the battery level for solar panel not deployed
-        batteryLevel = batteryLevel - 3 * powerConsumption;
+        *data->batteryLevel = *data->batteryLevel - 
+        SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
     }
 
     // Incrementing times function has been called
     timesCalled+= 1;
+}
+
+unsigned short capAt100(unsigned short batteryLevel) {
+    if(batteryLevel > 100) {
+        return 100;
+    } else {
+        return batteryLevel;
+    }
 }
 
