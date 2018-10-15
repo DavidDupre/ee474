@@ -21,7 +21,7 @@
 // include this to run tests instead of running normally
 // comment out to run normally
 //#define RUN_TESTS
-#define GET_TIMES
+//#define GET_TIMES
 
 // Setup LCD display
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -114,7 +114,9 @@ TCB *taskQueue[] = {
 };
 
 char *taskNames[] = {
+    "Power Subsystem Task",
     "Thruster Subsystem Task",
+    "Satellite Communication Task",
     "Console Dipslay Task",
     "Warning Alarm Task"
 };
