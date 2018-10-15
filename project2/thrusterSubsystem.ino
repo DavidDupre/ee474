@@ -19,6 +19,11 @@
 #define THRUSTER_CMD_DUR(cmd)   ((uint8_t) ((cmd & 0xFF00) >> 8))
 
 
+/*
+ * Holds the max value of a `partialFuel`. Should be changed only for testing.
+ */
+uint32_t thrusterSubsystemFullFuel = MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
+
 /******************************************************************************
  * name: thrusterSubsystem
  *
@@ -78,26 +83,24 @@
  * author: David Dupre
  *****************************************************************************/
 void thrusterSubsystem(void *thrusterSubsystemData) {
-    // TODO replace millis() with global time base
-
     /*
      * partialFuel represents the number of milliseconds it would take one
      * thruster at minimum throttle to reduce the fuelLevel by 1.
      */
-    static uint32_t partialFuel = MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
+    static uint32_t partialFuel = thrusterSubsystemFullFuel;
 
     // command is the last command entered to this function
     static uint16_t command = 0;
 
     // lastUpdateEpochMs is the system time of the last thrusterSubsystem call
-    static unsigned long lastUpdateEpochMs = millis();
+    static unsigned long lastUpdateEpochMs = globalTimeBase();
 
     // cast the input to the correct ThrusterSubsystemData type
     ThrusterSubsystemData *data
         = (ThrusterSubsystemData *) thrusterSubsystemData;
 
     // calculate how long the last command has been running
-    unsigned long currentEpochMs = millis();
+    unsigned long currentEpochMs = globalTimeBase();
     unsigned long timePassedMs = currentEpochMs - lastUpdateEpochMs;
     lastUpdateEpochMs = currentEpochMs;
 
@@ -115,10 +118,10 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
     if (partialFuelExpended >= partialFuel) {
         partialFuelExpended -= partialFuel;
         fuelExpended++;
-        partialFuel = MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
+        partialFuel = thrusterSubsystemFullFuel;
     }
-    fuelExpended += partialFuelExpended / MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
-    partialFuel -= partialFuelExpended % MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
+    fuelExpended += partialFuelExpended / thrusterSubsystemFullFuel;
+    partialFuel -= partialFuelExpended % thrusterSubsystemFullFuel;
 
     // update the output fuel level
     if (fuelExpended >= *data->fuelLevel) {

@@ -1,8 +1,14 @@
 #include "thrusterSubsystem.h"
 #include "consoleDisplay.h"
+#include "satelliteComs.h"
+#include "warningAlarm.h"
+#include "schedule.h"
+#include "colors.h"
+#include "tcb.h"
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
+#include <AUnit.h>         // Test framework
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2
@@ -11,35 +17,19 @@
 
 #define LCD_RESET A4
 
+// include this to run tests instead of running normally
+// comment out to run normally
+// #define RUN_TESTS
+
 // Setup LCD display
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 
-#define MAJOR_CYCLE_DURATION_MS 5000
 #define TFT_IDENTIFIER 0x9341
-
-
-typedef struct {
-    void *data;
-    void (*task)(void *data);
-} TCB;
-
-typedef enum {
-    CycleModeMajor,
-    CycleModeMinor
-} CycleMode;
-
-
-// set the mode to major or minor
-void setCycleMode(CycleMode mode);
-
-// run all the tasks in a queue
-void runTasks(TCB **taskQueue, unsigned short size);
 
 
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
-
 bool solarPanelState;
 unsigned short batteryLevel;
 unsigned short powerConsumption;
@@ -62,6 +52,24 @@ ConsoleDisplayData consoleDisplayData = {
     &fuelLow
 };
 
+SatelliteComsData satelliteComsData = {
+    &fuelLow,
+    &batteryLow,
+    &solarPanelState,
+    &batteryLevel,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &thrusterCommand
+};
+
+WarningAlarmData warningAlarmData = {
+    &batteryLow,
+    &fuelLow,
+    &batteryLevel,
+    &fuelLevel
+};
+
 TCB thrusterSubsystemTCB = {
     &thrusterSubsystemData,
     thrusterSubsystem
@@ -72,57 +80,46 @@ TCB consoleDisplayTCB = {
     consoleDisplay
 };
 
-TCB *majorTasks[] = {
-    // power subsystem
-    &thrusterSubsystemTCB,
-    // satellite comms
-    &consoleDisplayTCB
+TCB satelliteComsTCB = {
+    &satelliteComsData,
+    satelliteComs
 };
 
-TCB *minorTasks[] = {
+TCB warningAlarmTCB = {
+    &warningAlarmData,
+    warningAlarm
+};
+
+TCB *taskQueue[] = {
+    // power subsystem
     &thrusterSubsystemTCB,
-    // console display
-    // warning alarm
+    &satelliteComsTCB,
+    &consoleDisplayTCB,
+    &warningAlarmTCB,
     // blink LED? Maybe not a task
 };
 
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
+    fuelLow = false;
+    batteryLow = false;
+    solarPanelState = false;
+    batteryLevel = 100;
+    powerConsumption = 0;
+    powerGeneration = 0;
+
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
+    tft.fillScreen(BLACK);
 }
 
 void loop() {
-    // TODO maybe put all this in a dedicated schedule file
-
-    unsigned long startTimeMs = millis();
-
-    // run one major cycle
-    setCycleMode(CycleModeMajor);
-    runTasks(majorTasks, sizeof(majorTasks) / sizeof(TCB*));
-
-    // run minor cycles until 5 seconds have passed
-    setCycleMode(CycleModeMinor);
-    while (millis() - startTimeMs < MAJOR_CYCLE_DURATION_MS) {
-        runTasks(minorTasks, sizeof(minorTasks) / sizeof(TCB*));
-    }
-}
-
-void setCycleMode(CycleMode mode) {
-    if (mode == CycleModeMajor) {
-        // TODO
-        // set console display to info mode
-    } else {
-        // TODO
-        // set console display to annunciation mode
-    }
-}
-
-void runTasks(TCB **taskQueue, unsigned short size) {
-    for (unsigned short i = 0; i < size; i++) {
-        TCB *tcb = taskQueue[i];
-        tcb->task(tcb->data);
-    }
+#ifdef RUN_TESTS
+    aunit::TestRunner::run();
+#else
+    schedule(taskQueue, sizeof(taskQueue) / sizeof(TCB*));
+#endif  /* RUN_TESTS */
+    return;
 }
