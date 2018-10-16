@@ -2,10 +2,17 @@
 #include "tcb.h"
 
 
+/*
+ * Delay until an epoch has been reached, or do nothing if the current MET is
+ * after the epoch. The updates the MET.
+ */
+void delayUntil(unsigned long epochMs);
+
+
 unsigned long missionElapsedTime = 0;
 
 void schedule(TCB **taskQueue, unsigned short size) {
-    unsigned long majorStartTimeMs = millis();
+    unsigned long majorStartTime = millis();
 
     // it's okay if integer division rounds this down because we will delay for
     // the remaining time
@@ -33,17 +40,20 @@ void schedule(TCB **taskQueue, unsigned short size) {
         }
 
         // delay until the minor cycle is over
-        if (millis() - missionElapsedTime < MINOR_CYCLE_DURATION_MS) {
-            delay(MINOR_CYCLE_DURATION_MS - (millis() - missionElapsedTime));
-        }
+        delayUntil(majorStartTime + MINOR_CYCLE_DURATION_MS * (i + 1));
     }
 
     // delay until the major cycle is over
-    if (millis() - majorStartTimeMs < MAJOR_CYCLE_DURATION_MS) {
-        delay(MAJOR_CYCLE_DURATION_MS - (millis() - majorStartTimeMs));
-    }
+    delayUntil(majorStartTime + MAJOR_CYCLE_DURATION_MS);
 
     return;
+}
+
+void delayUntil(unsigned long epochMs) {
+    missionElapsedTime = millis();
+    if (missionElapsedTime < epochMs) {
+        delay(epochMs - missionElapsedTime);
+    }
 }
 
 unsigned long globalTimeBase() {

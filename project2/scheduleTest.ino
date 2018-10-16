@@ -37,14 +37,14 @@ test(schedule) {
     }
 
     // record the start time
-    unsigned long startTime = globalTimeBase();
+    unsigned long startTime = millis();
 
     // call schedule with the task queue
     schedule(taskQueue, sizeof(taskQueue) / sizeof(TCB *));
 
     // test that 5 seconds passed (give or take 10 ms)
-    assertTrue(globalTimeBase() > startTime);
-    assertNear((unsigned long) (globalTimeBase() - startTime),
+    assertTrue(millis() > startTime);
+    assertNear((unsigned long) (millis() - startTime),
             (unsigned long) MAJOR_CYCLE_DURATION_MS, errorThresholdMs);
 
     for (unsigned short i = 0; i < numTasks; i++) {
@@ -66,7 +66,7 @@ test(schedule) {
 void scheduleTestTask(void *scheduleTestData) {
     ScheduleTestData *data = (ScheduleTestData *) scheduleTestData;
     data->callCount++;
-    if (data->callCount >= SCHEDULE_TEST_MAX_CALLS) {
+    if (data->callCount > SCHEDULE_TEST_MAX_CALLS) {
         data->errored = true;
     } else {
         data->timeCalled[data->callCount - 1] = globalTimeBase();
