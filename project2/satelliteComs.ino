@@ -29,8 +29,10 @@
  * 
  * psuedocode:
  * 
- * if first bit is a 1, update thruster command 
- * else set thruster command to "invalid command" ~0
+ * if first bit is a 0
+ *  update thruster command to random command 
+ * else 
+ *  set thruster command to "invalid command" ~0
  * 
  * send status info back to earth
  * 
@@ -48,11 +50,12 @@ void satelliteComs(void* satelliteComsData) {
     }
     lastRunTime = globalTimeBase();
 
-    // rest of method
     SatelliteComsData* data = (SatelliteComsData*) satelliteComsData;
 
+    // 50/50 Chance for the command to be random or invalid
+    // Last bit 0: random, Last bit 1: Invalid
     *data->thrusterCommand = rand();
-    if(*data->thrusterCommand & 1) {
+    if (*data->thrusterCommand & 1) {
         *data->thrusterCommand = THRUSTER_CMD_NONE;
     }
 
@@ -81,7 +84,7 @@ void satelliteComs(void* satelliteComsData) {
 }
 
 void printBool(bool input) {
-    if(input) {
+    if (input) {
         Serial.print("true");
     } else {
         Serial.print("false");
