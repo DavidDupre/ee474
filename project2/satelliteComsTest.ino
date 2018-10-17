@@ -24,8 +24,10 @@ test(thrusterUpdate) {
         &thrusterCommand
     };
 
+    // Setting seed for psuedo random to 1, through testing, the next number produced will be 0x6b8b4567
+    srand(1);
     satelliteComs((void *) &data);
-    assertNotEqual(thrusterCommand, THRUSTER_CMD_NONE);
+    assertEqual(thrusterCommand, (unsigned int) 0x6b8b4567);
 
 }
 
