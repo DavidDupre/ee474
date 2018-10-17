@@ -24,11 +24,11 @@ test(thrusterUpdate) {
         &thrusterCommand
     };
 
-    // Setting seed for psuedo random to 1, through testing, the next number produced will be 0x6b8b4567
-    srand(1);
+    // Setting seed for psuedo random to 1, through testing, the next number produced will be 846
+    // Because this number is even, thruster command should be set to it
+    srand(2);
     satelliteComs((void *) &data);
-    assertEqual(thrusterCommand, (unsigned int) 0x6b8b4567);
-
+    assertEqual(thrusterCommand, (unsigned int) 846);
 }
 
 // Testing last bit is a 1: Setting Thruster Command to Invalid
@@ -53,6 +53,9 @@ test(thrusterInvalid) {
         &thrusterCommand
     };
 
+    // will force a 16807 to return from the next rand()
+    // Because the number is odd, thruster command should be set to none
+    srand(1);
     satelliteComs((void *) &data);
     assertEqual(thrusterCommand, THRUSTER_CMD_NONE);
 }
