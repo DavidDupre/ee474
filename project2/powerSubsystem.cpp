@@ -2,66 +2,63 @@
 #include <stdint.h>
 #include "schedule.h"
 
-#define HIGH_BATTERY 95
-#define BATTERY_LEVEL_MID 50
-#define BATTERY_LEVEL_LOW 45
-#define POWER_CONSUMPTION_UPPER 10
-#define POWER_CONSUMPTION_LOWER 5
-#define SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER 3
+
+unsigned short capAt100(unsigned short batteryLevel);
+
 
 /******************************************************************************
  * name: powerSubsystem
- * 
+ *
  * inputs:
  * powerSubsystemData (void*): must be of Type powerSubsystemData*.
  * powerSubsystemData holds pointers to the following variables:
- * 
+ *
  * solarPanelState: bool representing whether solar panel is deployed.
  * batteryLevel: unsigned short representing the percentage level of the battery level
  *               initally set to 100.
  * powerConsumption: unsigned short representing the power consumption initally set to 0.
  * powerGeneration: unsigned short representing the power generation.
- * 
+ *
  * outputs: void
- * 
+ *
  * description:
  *  powerSubsystem manages the satellite's power subsystem. The primary goal in managing the power
  *  subsystem is to ensure that the satellite has sufficient energy to continue operation. The power
  *  subsystem monitors the power consumption and power generation in order to properly deploy the solar
  *  panel to the most appropriate position.
- * 
- * 
- * 
+ *
+ *
+ *
  * pseudocode:
- * 
+ *
  * setPowerConsumption to increasing
  * set timesCalled to zero
  * if powerConsumption is increasing
  *  go up 2 on even, down 1 on odd
- * else 
+ * else
  *  go down 2 on even, up 1 on odd
- * 
+ *
  * check to see if powerConsumption should be switched
  * if powerConsumption is increasing and > 10
  *  switch to decreasing
- * 
+ *
  * if powerConsumption is decreasing and < 5
  *  switch to increasing
- * 
+ *
  * if solar panel is deployed and >95%
  *  retract solar panel
  * else if less than or equal to 50
  *  increase by 2 on even 1 on odd
  * if more than 50
  *  increase by 2 on even
- * 
- * if solar panel deployed 
+ *
+ * if solar panel deployed
  *  increment battery level by powerGeneration, deduct powerConsumption
- * else 
+ * else
  *  decrement by 3 times powerConsumption
- * 
+ *
  * author: Nick Orlov
-*****************************************************************************/ 
+*****************************************************************************/
 void powerSubsystem(void* powerSubsystemData) {
     // return early if less than 5 seconds have passed
     static unsigned long lastRunTime;
@@ -72,11 +69,11 @@ void powerSubsystem(void* powerSubsystemData) {
 
     // Casting pointer to proper data type
     PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
-    
-    // Initially the Power Consumption is increasing until it reaches 
+
+    // Initially the Power Consumption is increasing until it reaches
     // the upper limit of POWER_CONSUMPTION_UPPER
     static bool isIncreasing = true;
-    
+
     // Keeping track of the number of times the function has been called
     static int timesCalled = 0;
 
@@ -124,7 +121,7 @@ void powerSubsystem(void* powerSubsystemData) {
         *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
     } else {
         // Updating the battery level for solar panel not deployed
-        *data->batteryLevel = *data->batteryLevel - 
+        *data->batteryLevel = *data->batteryLevel -
         SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
     }
     // Incrementing times function has been called

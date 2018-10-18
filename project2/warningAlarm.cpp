@@ -1,6 +1,8 @@
 #include <stdint.h>
+#include <Arduino.h>
 #include "warningAlarm.h"
-#include "colors.h"
+#include "schedule.h"
+#include "tft.h"
 
 #define HALF_DEPLETED   50
 #define LOW_LEVEL       10

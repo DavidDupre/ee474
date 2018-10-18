@@ -54,4 +54,19 @@ void schedule(TCB **taskQueue, unsigned short size);
  *****************************************************************************/
 unsigned long globalTimeBase();
 
+/******************************************************************************
+ * name: setGlobalTimebase
+ *
+ * inputs:
+ *  epoch: the mission elapsed time in milliseconds to set to
+ *
+ * outputs: void
+ *
+ * description:
+ *  This sets the global time base. Do not use this outside of testing
+ *
+ * author: David Dupre
+ *****************************************************************************/
+void setGlobalTimeBase(unsigned long epoch);
+
 #endif  /* _SCHEDULE_H_ */

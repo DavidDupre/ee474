@@ -1,4 +1,6 @@
 #include "thrusterSubsystem.h"
+#include "schedule.h"
+#include "predefinedMacros.h"
 #include <stdint.h>
 
 /*
@@ -9,14 +11,6 @@
  *      * (100% throttle / (2^4 - 1) LSB) = 210240 s/fuel unit/LSB
  */
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
-
-// macros to extract data from the thruster command
-#define THRUSTER_CMD_LEFT(cmd)  ((bool) (cmd & (1 << 0)))
-#define THRUSTER_CMD_RIGHT(cmd) ((bool) ((cmd & (1 << 1)) >> 1))
-#define THRUSTER_CMD_UP(cmd)    ((bool) ((cmd & (1 << 2)) >> 2))
-#define THRUSTER_CMD_DOWN(cmd)  ((bool) ((cmd & (1 << 3)) >> 3))
-#define THRUSTER_CMD_MAG(cmd)   ((uint8_t) ((cmd & 0xF0) >> 4))
-#define THRUSTER_CMD_DUR(cmd)   ((uint8_t) ((cmd & 0xFF00) >> 8))
 
 
 /*
@@ -164,4 +158,11 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     cmd |= (magnitude << 4);
     cmd |= ((uint16_t) duration) << 8;
     return cmd;
+}
+
+void setMaxPartialFuel(uint32_t maxPartialFuel) {
+    if (RUN_TESTS) {
+        thrusterSubsystemFullFuel = maxPartialFuel;
+    }
+    return;
 }

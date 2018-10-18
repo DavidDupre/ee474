@@ -1,4 +1,5 @@
 #include "powerSubsystem.h"
+#include <AUnit.h>  // Test framework
 #include <stdint.h>
 
 /* The following testing was done on the MEGA after running the simulation for a "while" ~powerGeneration=100:

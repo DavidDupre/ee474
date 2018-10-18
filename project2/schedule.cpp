@@ -1,5 +1,7 @@
+#include "predefinedMacros.h"
 #include "schedule.h"
 #include "tcb.h"
+#include <Arduino.h>
 
 
 /*
@@ -58,4 +60,11 @@ void delayUntil(unsigned long epochMs) {
 
 unsigned long globalTimeBase() {
     return missionElapsedTime;
+}
+
+void setGlobalTimeBase(unsigned long epoch) {
+    if (RUN_TESTS) {
+        missionElapsedTime = epoch;
+    }
+    return;
 }

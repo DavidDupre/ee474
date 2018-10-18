@@ -1,3 +1,6 @@
+#include "schedule.h"
+#include <AUnit.h>  // Test framework
+
 #define SCHEDULE_TEST_MAX_CALLS 5
 
 

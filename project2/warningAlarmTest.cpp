@@ -1,5 +1,7 @@
 #include "warningAlarm.h"
+#include "schedule.h"
 #include <stdint.h>
+#include <AUnit.h>  // Test framework
 
 /*
  * Test consoleDisplay
@@ -19,13 +21,13 @@ test(warningAlarm) {
     };
 
     // send the new command
-    missionElapsedTime = 0;
+    setGlobalTimeBase(0);
     warningAlarm((void *) &data);
     assertFalse((bool) fuelLow);    // Fuel maxed
     assertFalse((bool) batteryLow); // Battery maxed
 
     // Next cycle
-    missionElapsedTime = 5000;
+    setGlobalTimeBase(5000);
 
     fuelLevel = 10;
     batteryLevel = 10;
@@ -38,7 +40,7 @@ test(warningAlarm) {
     assertTrue((bool) batteryLow);
 
     // Next cycle
-    missionElapsedTime = 10000;
+    setGlobalTimeBase(10000);
 
     fuelLevel = 40;
     batteryLevel = 40;
@@ -50,7 +52,7 @@ test(warningAlarm) {
     assertFalse((bool) batteryLow); // Battery medium
 
     // Next cycle
-    missionElapsedTime = 15000;
+    setGlobalTimeBase(15000);
 
     fuelLevel = 1;
     batteryLevel = 1;
@@ -62,7 +64,7 @@ test(warningAlarm) {
     assertTrue((bool) batteryLow);
 
     // Next cycle
-    missionElapsedTime = 20000;
+    setGlobalTimeBase(20000);
 
     fuelLevel = 80;
     batteryLevel = 80;
