@@ -1,5 +1,16 @@
+#include "predefinedMacros.h"
 #include "schedule.h"
 #include "tcb.h"
+#include <Arduino.h>
+
+// Timing test names
+char *taskNames[] = {
+    "Power Subsystem Task",
+    "Thruster Subsystem Task",
+    "Satellite Communication Task",
+    "Console Dipslay Task",
+    "Warning Alarm Task"
+};
 
 
 /*
@@ -58,4 +69,11 @@ void delayUntil(unsigned long epochMs) {
 
 unsigned long globalTimeBase() {
     return missionElapsedTime;
+}
+
+void setGlobalTimeBase(unsigned long epoch) {
+    #ifdef RUN_TESTS
+    missionElapsedTime = epoch;
+    #endif
+    return;
 }

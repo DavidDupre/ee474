@@ -1,6 +1,7 @@
 #include "satelliteComs.h"
 #include "thrusterSubsystem.h"
 #include <stdint.h>
+#include <AUnit.h>  // Test framework
 
 // Testing last bit is a 0: Updating Thruster Command
 test(thrusterUpdate) {

@@ -1,5 +1,7 @@
 #include "thrusterSubsystem.h"
+#include "schedule.h"
 #include <stdint.h>
+#include <AUnit.h>  // Test framework
 
 /*
  * Test the macros that parse a thruster command
@@ -50,15 +52,15 @@ test(thrusterSubsystem) {
     };
 
     // lower the full fuel so it drains much faster (1 fuel/second)
-    thrusterSubsystemFullFuel = 1000;
+    setMaxPartialFuel(1000);
 
     // send the new command
-    missionElapsedTime = 0;
+    setGlobalTimeBase(0);
     thrusterSubsystem((void *) &data);
     assertEqual(100, (int) fuelLevel);  // don't use any fuel yet
 
     // "wait" for command to finish
-    missionElapsedTime = 2000;
+    setGlobalTimeBase(2000);
 
     // call the function again to update the fuel level
     thrusterSubsystem((void *) &data);
@@ -69,7 +71,7 @@ test(thrusterSubsystem) {
     assertEqual(expectedFuelLevel, (int) fuelLevel);
 
     // make sure that the fuel doesn't decrease after the command ends
-    missionElapsedTime = 3000;
+    setGlobalTimeBase(3000);
     thrusterSubsystem((void *) &data);
     assertEqual(expectedFuelLevel, (int) fuelLevel);
 }

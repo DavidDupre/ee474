@@ -1,33 +1,14 @@
+#include "predefinedMacros.h"
 #include "thrusterSubsystem.h"
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
 #include "satelliteComs.h"
 #include "warningAlarm.h"
 #include "schedule.h"
-#include "colors.h"
 #include "tcb.h"
+#include "tft.h"
 
-#include <Elegoo_GFX.h>    // Core graphics library
-#include <Elegoo_TFTLCD.h> // Hardware-specific library
-#include <AUnit.h>         // Test framework
-
-#define LCD_CS A3 // Chip Select goes to Analog 3
-#define LCD_CD A2 // Command/Data goes to Analog 2
-#define LCD_WR A1 // LCD Write goes to Analog 1
-#define LCD_RD A0 // LCD Read goes to Analog 0
-
-#define LCD_RESET A4
-
-// include this to run tests instead of running normally
-// comment out to run normally
-//#define RUN_TESTS
-//#define GET_TIMES
-
-// Setup LCD display
-Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
-
-
-#define TFT_IDENTIFIER 0x9341
+#include <AUnit.h>  // Test framework
 
 
 unsigned int thrusterCommand;
@@ -111,14 +92,6 @@ TCB *taskQueue[] = {
     &consoleDisplayTCB,
     &warningAlarmTCB,
     // blink LED? Maybe not a task
-};
-
-char *taskNames[] = {
-    "Power Subsystem Task",
-    "Thruster Subsystem Task",
-    "Satellite Communication Task",
-    "Console Dipslay Task",
-    "Warning Alarm Task"
 };
 
 void setup() {
