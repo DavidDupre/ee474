@@ -94,14 +94,6 @@ TCB *taskQueue[] = {
     // blink LED? Maybe not a task
 };
 
-char *taskNames[] = {
-    "Power Subsystem Task",
-    "Thruster Subsystem Task",
-    "Satellite Communication Task",
-    "Console Dipslay Task",
-    "Warning Alarm Task"
-};
-
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;

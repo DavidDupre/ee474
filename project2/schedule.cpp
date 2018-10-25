@@ -3,6 +3,15 @@
 #include "tcb.h"
 #include <Arduino.h>
 
+// Timing test names
+char *taskNames[] = {
+    "Power Subsystem Task",
+    "Thruster Subsystem Task",
+    "Satellite Communication Task",
+    "Console Dipslay Task",
+    "Warning Alarm Task"
+};
+
 
 /*
  * Delay until an epoch has been reached, or do nothing if the current MET is
@@ -63,8 +72,8 @@ unsigned long globalTimeBase() {
 }
 
 void setGlobalTimeBase(unsigned long epoch) {
-    if (RUN_TESTS) {
-        missionElapsedTime = epoch;
-    }
+    #ifdef RUN_TESTS
+    missionElapsedTime = epoch;
+    #endif
     return;
 }
