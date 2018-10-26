@@ -5,7 +5,6 @@
 #include "satelliteComs.h"
 #include "warningAlarm.h"
 #include "schedule.h"
-#include "tcb.h"
 #include "tft.h"
 
 #include <AUnit.h>  // Test framework
@@ -62,36 +61,37 @@ WarningAlarmData warningAlarmData = {
 
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
-    powerSubsystem
+    powerSubsystem,
+    "Power Subsystem",
+    NULL, NULL
 };
 
 TCB thrusterSubsystemTCB = {
     &thrusterSubsystemData,
-    thrusterSubsystem
+    thrusterSubsystem,
+    "Thruster Subsystem",
+    NULL, NULL
 };
 
 TCB consoleDisplayTCB = {
     &consoleDisplayData,
-    consoleDisplay
+    consoleDisplay,
+    "Console Display",
+    NULL, NULL
 };
 
 TCB satelliteComsTCB = {
     &satelliteComsData,
-    satelliteComs
+    satelliteComs,
+    "Satellite Communications",
+    NULL, NULL
 };
 
 TCB warningAlarmTCB = {
     &warningAlarmData,
-    warningAlarm
-};
-
-TCB *taskQueue[] = {
-    &powerSubsystemTCB,
-    &thrusterSubsystemTCB,
-    &satelliteComsTCB,
-    &consoleDisplayTCB,
-    &warningAlarmTCB,
-    // blink LED? Maybe not a task
+    warningAlarm,
+    "Warning/Alarm",
+    NULL, NULL
 };
 
 void setup() {
@@ -104,6 +104,14 @@ void setup() {
     powerConsumption = 0;
     powerGeneration = 0;
 
+    // initialize the task queue
+#ifndef RUN_TESTS
+    taskQueueInsert(&powerSubsystemTCB);
+    taskQueueInsert(&thrusterSubsystemTCB);
+    taskQueueInsert(&consoleDisplayTCB);
+    taskQueueInsert(&satelliteComsTCB);
+    taskQueueInsert(&warningAlarmTCB);
+#endif
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
@@ -115,7 +123,7 @@ void loop() {
 #ifdef RUN_TESTS
     aunit::TestRunner::run();
 #else
-    schedule(taskQueue, sizeof(taskQueue) / sizeof(TCB*));
+    schedule();
 #endif  /* RUN_TESTS */
     return;
 }
