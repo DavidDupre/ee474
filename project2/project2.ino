@@ -3,6 +3,7 @@
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
 #include "satelliteComs.h"
+#include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "schedule.h"
 #include "tcb.h"
@@ -19,6 +20,8 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+char command;
+char response;
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -53,6 +56,11 @@ SatelliteComsData satelliteComsData = {
     &thrusterCommand
 };
 
+VehicleCommsData vehicleCommsData = {
+    &command,
+    &response
+};
+
 WarningAlarmData warningAlarmData = {
     &batteryLow,
     &fuelLow,
@@ -80,6 +88,11 @@ TCB satelliteComsTCB = {
     satelliteComs
 };
 
+TCB vehicleCommsTCB = {
+    &vehicleCommsData,
+    vehicleComms
+};
+
 TCB warningAlarmTCB = {
     &warningAlarmData,
     warningAlarm
@@ -91,6 +104,7 @@ TCB *taskQueue[] = {
     &satelliteComsTCB,
     &consoleDisplayTCB,
     &warningAlarmTCB,
+    &vehicleCommsTCB
     // blink LED? Maybe not a task
 };
 
