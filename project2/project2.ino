@@ -104,6 +104,7 @@ void setup() {
     powerConsumption = 0;
     powerGeneration = 0;
 
+    thrusterSubsystemInit();
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);

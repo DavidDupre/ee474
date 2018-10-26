@@ -2,6 +2,7 @@
 #include "schedule.h"
 #include "predefinedMacros.h"
 #include <stdint.h>
+#include <Arduino.h>
 
 /*
  * The number of milliseconds it would take a single thruster operating at
@@ -14,68 +15,23 @@
 
 
 /*
+ * Set the PWM output based on a command.
+ */
+void setThrusters(uint16_t command);
+
+
+/*
  * Holds the max value of a `partialFuel`. Should be changed only for testing.
  */
 uint32_t thrusterSubsystemFullFuel = MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
 
-/******************************************************************************
- * name: thrusterSubsystem
- *
- * inputs:
- *  thrusterSubsystemData (void*): must be of type ThrusterSubsystemData*. If
- *      thrusterCommand is not THRUSTER_CMD_NONE, this function will update the
- *      fuelLevel using that command. Otherwise, the last command will be used
- *      (or 0 if no command has been input yet).
- *
- * outputs: void
- *
- * description:
- *  thrusterSubsystem manages the satellite's fuel level based on the
- *  current thruster command. The current thrust command is always the last
- *  non-THRUSTER_CMD_NONE command entered to this function, or 0 if no command
- *  has been entered yet.
- *
- *  thrusterCommand is interpreted as follows:
- *
- *  +--------------------+--------------+--------+---------+
- *  |        Data        | Bit(s) first | Length |  Units  |
- *  |                    |   to last    | (bits) |         |
- *  +--------------------+--------------+--------+---------+
- *  | Left thruster on?  | 0            | 1      | -       |
- *  | Right thruster on? | 1            | 1      | -       |
- *  | Up thruster on?    | 2            | 1      | -       |
- *  | Down thruster on?  | 3            | 1      | -       |
- *  | Magnitude          | 4-7          | 4      | -       |
- *  | Duration           | 8-15         | 8      | seconds |
- *  +--------------------+--------------+--------+---------+
- *
- *  If there is not enough fuel left to execute the last command, the fuel will
- *  drop to zero. This function must be called at least once per second to
- *  to guarantee a 1-second duration resolution. Assuming an initial fuel level
- *  of 100, one thruster running at 5% magnitude will consume all fuel after 6
- *  months. In other words, fuel is expended at
- *  4.756e-6 LSB * fuel units / second, where LSB is the least significant bit
- *  of the magnitude (i.e. a magnitude of 1).
- *
- * pseudocode:
- *  magnitude = getMagnitude(currentCommand)
- *  numThrustersInUse = getNumThrusters(currentCommand)
- *  timePassed = globalTimeBase - lastGlobalTimeBase
- *  lastGlobalTimeBase = globalTimeBase
- *
- *  fuelExpended = numThrustersInUse * magnitude * timePassed
- *  if fuelExpended >= fuelLevel then
- *      fuelLevel = 0
- *  else
- *      fuelLevel = fuelLevel - fuelExpended
- *
- *  if inputCommand != THRUSTER_CMD_NONE then
- *      currentCommand = inputCommand
- *  else if timePassed >= getDuration(currentCommand) then
- *      currentCommand = 0
- *
- * author: David Dupre
- *****************************************************************************/
+void thrusterSubsystemInit() {
+    pinMode(THRUSTER_PIN_LEFT, OUTPUT);
+    pinMode(THRUSTER_PIN_RIGHT, OUTPUT);
+    pinMode(THRUSTER_PIN_UP, OUTPUT);
+    pinMode(THRUSTER_PIN_DOWN, OUTPUT);
+}
+
 void thrusterSubsystem(void *thrusterSubsystemData) {
     /*
      * partialFuel represents the number of milliseconds it would take one
@@ -136,7 +92,26 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
         command = 0;
     }
 
+    // update the thrusters to use the new current command
+    setThrusters(command);
+
     return;
+}
+
+void setThrusters(uint16_t command) {
+    // PWM ranges from 0 to 255, magnitude ranges from 0 to 15.
+    // Convert magnitude to a PWM signal by multiplying by 16.
+    uint8_t pwm = THRUSTER_CMD_MAG(command) << 4;
+
+    uint8_t left = THRUSTER_CMD_LEFT(command) ? pwm : 0;
+    uint8_t right = THRUSTER_CMD_RIGHT(command) ? pwm : 0;
+    uint8_t up = THRUSTER_CMD_UP(command) ? pwm : 0;
+    uint8_t down = THRUSTER_CMD_DOWN(command) ? pwm : 0;
+
+    analogWrite(THRUSTER_PIN_LEFT, left);
+    analogWrite(THRUSTER_PIN_RIGHT, right);
+    analogWrite(THRUSTER_PIN_UP, up);
+    analogWrite(THRUSTER_PIN_DOWN, down);
 }
 
 uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
