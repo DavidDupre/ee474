@@ -161,8 +161,8 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
 }
 
 void setMaxPartialFuel(uint32_t maxPartialFuel) {
-    #ifdef RUN_TASKS
-        thrusterSubsystemFullFuel = maxPartialFuel;
-    #endif
+#ifdef RUN_TESTS
+    thrusterSubsystemFullFuel = maxPartialFuel;
+#endif
     return;
 }
