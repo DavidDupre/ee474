@@ -8,11 +8,13 @@ void setup() {
 }
 
 void loop() {
-    char comm = Serial.read();
-    
-    if(comm != '\0') {
+    char comm;
+    if (Serial.available()) {
+        comm = Serial.read();
+        if(comm != '\0') {
         Serial.println(comm);
-    }
+        }
+    }    
     // TODO: Figure out what the timeline of the UNO needs to be
 }
 
