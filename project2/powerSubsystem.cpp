@@ -1,9 +1,11 @@
 #include "powerSubsystem.h"
 #include <stdint.h>
 #include "schedule.h"
+#include <Arduino.h>
 
 
 unsigned short capAt100(unsigned short batteryLevel);
+unsigned short normBattery(unsigned short input);
 
 
 /******************************************************************************
@@ -116,14 +118,10 @@ void powerSubsystem(void* powerSubsystemData) {
         }
     }
 
-    if(*data->solarPanelState) {
-        // Updating the battery level for the case of solar panel deployed
-        *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
-    } else {
-        // Updating the battery level for solar panel not deployed
-        *data->batteryLevel = *data->batteryLevel -
-        SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
-    }
+    // Update battery level
+    unsigned short analogLevel = analogRead(POWER_PIN);
+    *data->batteryLevel = normBattery(analogLevel);
+
     // Incrementing times function has been called
     timesCalled+= 1;
 }
@@ -136,3 +134,8 @@ unsigned short capAt100(unsigned short batteryLevel) {
     }
 }
 
+unsigned short normBattery(unsigned short input) {
+    double output = (((BATTERY_MAX - BATTERY_MIN)*
+        (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
+    return (unsigned short) output;
+}

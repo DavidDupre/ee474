@@ -8,6 +8,12 @@
 #define POWER_CONSUMPTION_LOWER 5
 #define SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER 3
 
+#define ANALOG_MIN 0
+#define ANALOG_MAX 1023
+#define BATTERY_MIN 0
+#define BATTERY_MAX 36
+
+#define POWER_PIN A13
 
 typedef struct {
     bool *solarPanelState;
