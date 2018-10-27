@@ -5,6 +5,7 @@
 #include "satelliteComs.h"
 #include "warningAlarm.h"
 #include "schedule.h"
+#include "consoleKeypad.h"
 #include "tcb.h"
 #include "tft.h"
 
@@ -19,6 +20,8 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+bool driveMotorSpeedInc;
+bool driveMotorSpeedDec;
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -60,6 +63,11 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
+ConsoleKeypadData consoleKeypadData = {
+    &driveMotorSpeedInc,
+    &driveMotorSpeedDec
+};
+
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
     powerSubsystem
@@ -85,13 +93,18 @@ TCB warningAlarmTCB = {
     warningAlarm
 };
 
+TCB consoleKeypadTCB = {
+    &consoleKeypadData,
+    consoleKeypad
+};
+
 TCB *taskQueue[] = {
     &powerSubsystemTCB,
     &thrusterSubsystemTCB,
     &satelliteComsTCB,
     &consoleDisplayTCB,
     &warningAlarmTCB,
-    // blink LED? Maybe not a task
+    &consoleKeypadTCB,
 };
 
 void setup() {
@@ -104,6 +117,7 @@ void setup() {
     powerConsumption = 0;
     powerGeneration = 0;
 
+    consoleKeypadInit();
 
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
