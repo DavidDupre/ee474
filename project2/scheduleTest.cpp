@@ -22,7 +22,6 @@ test(schedule) {
     // build a task queue for the test functions
     ScheduleTestData data[numTasks];
     TCB tcbs[numTasks];
-    TCB *taskQueue[numTasks];
     for (unsigned short i = 0; i < numTasks; i++) {
         // initialize the task data
         data[i].callCount = 0;
@@ -34,16 +33,19 @@ test(schedule) {
         // initialize the TCBs
         tcbs[i].data = &data[i];
         tcbs[i].task = scheduleTestTask;
+        tcbs[i].name = "";
+        tcbs[i].next = NULL;
+        tcbs[i].prev = NULL;
 
         // build the task queue
-        taskQueue[i] = &tcbs[i];
+        taskQueueInsert(&tcbs[i]);
     }
 
     // record the start time
     unsigned long startTime = millis();
 
-    // call schedule with the task queue
-    schedule(taskQueue, sizeof(taskQueue) / sizeof(TCB *));
+    // call schedule to do a major cycle
+    schedule();
 
     // test that 5 seconds passed (give or take 10 ms)
     assertTrue(millis() > startTime);

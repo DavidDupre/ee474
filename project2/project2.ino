@@ -4,9 +4,8 @@
 #include "consoleDisplay.h"
 #include "satelliteComs.h"
 #include "warningAlarm.h"
-#include "schedule.h"
 #include "consoleKeypad.h"
-#include "tcb.h"
+#include "schedule.h"
 #include "tft.h"
 
 #include <AUnit.h>  // Test framework
@@ -70,41 +69,44 @@ ConsoleKeypadData consoleKeypadData = {
 
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
-    powerSubsystem
+    powerSubsystem,
+    "Power Subsystem",
+    NULL, NULL
 };
 
 TCB thrusterSubsystemTCB = {
     &thrusterSubsystemData,
-    thrusterSubsystem
+    thrusterSubsystem,
+    "Thruster Subsystem",
+    NULL, NULL
 };
 
 TCB consoleDisplayTCB = {
     &consoleDisplayData,
-    consoleDisplay
+    consoleDisplay,
+    "Console Display",
+    NULL, NULL
 };
 
 TCB satelliteComsTCB = {
     &satelliteComsData,
-    satelliteComs
+    satelliteComs,
+    "Satellite Communications",
+    NULL, NULL
 };
 
 TCB warningAlarmTCB = {
     &warningAlarmData,
-    warningAlarm
+    warningAlarm,
+    "Warning/Alarm",
+    NULL, NULL
 };
 
 TCB consoleKeypadTCB = {
     &consoleKeypadData,
-    consoleKeypad
-};
-
-TCB *taskQueue[] = {
-    &powerSubsystemTCB,
-    &thrusterSubsystemTCB,
-    &satelliteComsTCB,
-    &consoleDisplayTCB,
-    &warningAlarmTCB,
-    &consoleKeypadTCB,
+    consoleKeypad,
+    "Console Keypad",
+    NULL, NULL
 };
 
 void setup() {
@@ -119,6 +121,16 @@ void setup() {
 
     consoleKeypadInit();
 
+    // initialize the task queue
+#ifndef RUN_TESTS
+    taskQueueInsert(&powerSubsystemTCB);
+    taskQueueInsert(&thrusterSubsystemTCB);
+    taskQueueInsert(&consoleDisplayTCB);
+    taskQueueInsert(&satelliteComsTCB);
+    taskQueueInsert(&warningAlarmTCB);
+    taskQueueInsert(&consoleKeypadTCB);
+#endif
+
     Serial.begin(9600);
     tft.begin(TFT_IDENTIFIER);
     tft.setRotation(1);
@@ -129,7 +141,7 @@ void loop() {
 #ifdef RUN_TESTS
     aunit::TestRunner::run();
 #else
-    schedule(taskQueue, sizeof(taskQueue) / sizeof(TCB*));
+    schedule();
 #endif  /* RUN_TESTS */
     return;
 }
