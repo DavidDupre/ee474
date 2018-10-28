@@ -19,33 +19,33 @@ void consoleDisplay(void *consoleDisplayData) {
     tft.setTextColor(WHITE);
     // Clear bottom part of screen without warnings
     tft.fillRect(0,50,300,500,BLACK);
-    tft.print("Solar panel: ");
+    tft.print(F("Solar panel: "));
     tft.setTextColor(YELLOW);
     if (*(data->solarPanelState)) {
-        tft.println("deployed");
+        tft.println(F("deployed"));
     } else {
-        tft.println("not deployed");
+        tft.println(F("not deployed"));
     }
 
     tft.setTextColor(WHITE);
-    tft.print("Battery Level: ");
+    tft.print(F("Battery Level: "));
     tft.setTextColor(YELLOW);
     tft.print(*(data->batteryLevel));
-    tft.println("/100");
+    tft.println(F("/100"));
 
     tft.setTextColor(WHITE);
-    tft.print("Fuel Level: ");
+    tft.print(F("Fuel Level: "));
     tft.setTextColor(YELLOW);
     tft.print(*(data->fuelLevel));
-    tft.println("/100");
+    tft.println(F("/100"));
 
     tft.setTextColor(WHITE);
-    tft.print("Power Consumption: ");
+    tft.print(F("Power Consumption: "));
     tft.setTextColor(YELLOW);
     tft.println(*(data->powerConsumption));
 
     tft.setTextColor(WHITE);
-    tft.print("Power Generation: ");
+    tft.print(F("Power Generation: "));
     tft.setTextColor(YELLOW);
     tft.println(*(data->powerGeneration));
 }

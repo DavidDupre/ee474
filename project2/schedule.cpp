@@ -38,9 +38,9 @@ void schedule() {
             unsigned long taskEnd = micros();
             if (0 == i) {
                 Serial.print(tcb->name);
-                Serial.print(" Task took: ");
+                Serial.print(F(" Task took: "));
                 Serial.print(taskEnd - taskStart);
-                Serial.println(" us to complete");
+                Serial.println(F(" us to complete"));
             }
 #endif  /* GET_TIMES */
             tcb = tcb->next;

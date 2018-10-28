@@ -113,7 +113,7 @@ void setup() {
     taskQueueInsert(&warningAlarmTCB);
 #endif
 
-    Serial.begin(9600);
+    Serial.begin(614400);
     tft.begin(TFT_IDENTIFIER);
     tft.setRotation(1);
     tft.fillScreen(BLACK);

@@ -64,33 +64,33 @@ void satelliteComs(void* satelliteComsData) {
     }
 
     // Transferring data back to earth
-    Serial.print("Fuel Low status is: ");
+    Serial.print(F("Fuel Low status is: "));
     printBool(*data->fuelLow);
     Serial.println();
-    Serial.print("Battery Low status is: ");
+    Serial.print(F("Battery Low status is: "));
     printBool(*data->batteryLow);
     Serial.println();
-    Serial.print("Solar Panel state is: ");
+    Serial.print(F("Solar Panel state is: "));
     printBool(*data->solarPanelState);
     Serial.println();
-    Serial.print("Battery Level is: ");
+    Serial.print(F("Battery Level is: "));
     Serial.print(*data->batteryLevel);
     Serial.println();
-    Serial.print("Fuel Level is: ");
+    Serial.print(F("Fuel Level is: "));
     Serial.print(*data->fuelLevel);
     Serial.println();
-    Serial.print("Power Consumption is: ");
+    Serial.print(F("Power Consumption is: "));
     Serial.print(*data->powerConsumption);
     Serial.println();
-    Serial.print("Power Generation is: ");
+    Serial.print(F("Power Generation is: "));
     Serial.print(*data->powerGeneration);
     Serial.println();
 }
 
 void printBool(bool input) {
     if (input) {
-        Serial.print("true");
+        Serial.print(F("true"));
     } else {
-        Serial.print("false");
+        Serial.print(F("false"));
     }
 }
