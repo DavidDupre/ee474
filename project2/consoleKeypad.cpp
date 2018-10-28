@@ -19,14 +19,15 @@ TouchScreen touchScreen = TouchScreen(XP, YP, XM, YM, 300);
 void consoleKeypadInit() {
     buttonInc.initButton(&tft, 90, 200, 50, 50, 2, RED, WHITE, "+", 4);
     buttonDec.initButton(&tft, 30, 200, 50, 50, 2, RED, WHITE, "-", 4);
+
+    // draw the buttons once
+    // this only works if the screen is never cleared again
+    buttonInc.drawButton();
+    buttonDec.drawButton();
 }
 
 void consoleKeypad(void *consoleKeypadData) {
     ConsoleKeypadData *data = (ConsoleKeypadData *) consoleKeypadData;
-
-    // draw the buttons
-    buttonInc.drawButton();
-    buttonDec.drawButton();
 
     // update the buttons' pressed state based on the touchscreen
     TSPoint point = touchScreen.getPoint();
