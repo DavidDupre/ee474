@@ -18,7 +18,7 @@ void consoleDisplay(void *consoleDisplayData) {
     tft.setTextSize(2);
     tft.setTextColor(WHITE);
     // Clear bottom part of screen without warnings
-    tft.fillRect(0,50,300,500,BLACK);
+    tft.fillRect(0,50,300,100,BLACK);
     tft.print("Solar panel: ");
     tft.setTextColor(YELLOW);
     if (*(data->solarPanelState)) {

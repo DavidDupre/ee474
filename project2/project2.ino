@@ -119,6 +119,12 @@ void setup() {
     powerConsumption = 0;
     powerGeneration = 0;
 
+    Serial.begin(9600);
+    tft.reset();
+    tft.begin(tft.readID());
+    tft.setRotation(1);
+    tft.fillScreen(BLACK);
+
     consoleKeypadInit();
 
     // initialize the task queue
@@ -130,11 +136,6 @@ void setup() {
     taskQueueInsert(&warningAlarmTCB);
     taskQueueInsert(&consoleKeypadTCB);
 #endif
-
-    Serial.begin(9600);
-    tft.begin(TFT_IDENTIFIER);
-    tft.setRotation(1);
-    tft.fillScreen(BLACK);
 }
 
 void loop() {

@@ -1,6 +1,7 @@
 #ifndef _TFT_H_
 #define _TFT_H_
 
+#include <TouchScreen.h>
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 
@@ -15,9 +16,14 @@
 #define WHITE   0xFFFF
 #define ORANGE  0xFFA5
 
-#define TFT_IDENTIFIER 0x9341
+// pins for the shield
+#define YP A3
+#define XM A2
+#define YM 9
+#define XP 8
 
 
+extern TouchScreen touchScreen;
 extern Elegoo_TFTLCD tft;
 
 

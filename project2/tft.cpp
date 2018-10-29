@@ -8,4 +8,5 @@
 #define LCD_RESET A4
 
 
+TouchScreen touchScreen = TouchScreen(XP, YP, XM, YM, 300);
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);

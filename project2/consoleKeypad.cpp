@@ -2,19 +2,13 @@
 #include "tft.h"
 #include <Elegoo_GFX.h>
 #include <TouchScreen.h>
-
-// pins for the shield
-#define YP A1
-#define XM A2
-#define YM 7
-#define XP 6
+#include <Arduino.h>
 
 #define MINPRESSURE 10
 #define MAXPRESSURE 1000
 
 Elegoo_GFX_Button buttonInc = Elegoo_GFX_Button();
 Elegoo_GFX_Button buttonDec = Elegoo_GFX_Button();
-TouchScreen touchScreen = TouchScreen(XP, YP, XM, YM, 300);
 
 void consoleKeypadInit() {
     buttonInc.initButton(&tft, 90, 200, 50, 50, 2, RED, WHITE, "+", 4);
@@ -24,13 +18,27 @@ void consoleKeypadInit() {
     // this only works if the screen is never cleared again
     buttonInc.drawButton();
     buttonDec.drawButton();
+
+    pinMode(13, OUTPUT);
 }
 
 void consoleKeypad(void *consoleKeypadData) {
     ConsoleKeypadData *data = (ConsoleKeypadData *) consoleKeypadData;
 
-    // update the buttons' pressed state based on the touchscreen
+    pinMode(XM, INPUT);
+    pinMode(YP, INPUT);
+
+    digitalWrite(13, HIGH);
     TSPoint point = touchScreen.getPoint();
+    digitalWrite(13, LOW);
+
+    pinMode(XM, OUTPUT);
+    pinMode(YP, OUTPUT);
+
+    Serial.print(" ");
+    Serial.print(point.z);
+
+    // update the buttons' pressed state based on the touchscreen
     if (point.z > MINPRESSURE && point.z < MAXPRESSURE) {
         buttonInc.press(buttonInc.contains(point.x, point.y));
         buttonDec.press(buttonDec.contains(point.x, point.y));
