@@ -137,7 +137,6 @@ void setup() {
 
     Serial.begin(9600);
     Serial1.begin(9600);
-    tft.reset();
     tft.begin(tft.readID());
     tft.setRotation(1);
     tft.fillScreen(BLACK);
