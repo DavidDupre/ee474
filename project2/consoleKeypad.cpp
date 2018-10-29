@@ -1,4 +1,5 @@
 #include "consoleKeypad.h"
+#include "schedule.h"
 #include <Arduino.h>
 
 void consoleKeypadInit() {
@@ -7,6 +8,13 @@ void consoleKeypadInit() {
 }
 
 void consoleKeypad(void *consoleKeypadData) {
+    // return early if less than 2 seconds have passed
+    static unsigned long lastRunTime;
+    if (globalTimeBase() - lastRunTime < 2000) {
+        return;
+    }
+    lastRunTime = globalTimeBase();
+
     ConsoleKeypadData *data = (ConsoleKeypadData *) consoleKeypadData;
 
     // update the speed commands based on the buttons' pressed state
