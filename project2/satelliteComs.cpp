@@ -74,17 +74,15 @@ void satelliteComs(void* satelliteComsData) {
     printBool(*data->solarPanelState);
     Serial.println();
     Serial.print("Battery Level is: ");
-    Serial.print(*data->batteryLevel);
-    Serial.println();
+    Serial.println(*data->batteryLevel);
     Serial.print("Fuel Level is: ");
-    Serial.print(*data->fuelLevel);
-    Serial.println();
+    Serial.println(*data->fuelLevel);
     Serial.print("Power Consumption is: ");
-    Serial.print(*data->powerConsumption);
-    Serial.println();
+    Serial.println(*data->powerConsumption);
     Serial.print("Power Generation is: ");
-    Serial.print(*data->powerGeneration);
-    Serial.println();
+    Serial.println(*data->powerGeneration);
+    Serial.print("Vehicle Response: A ");
+    Serial.println(*data->vehicleResponse);
 }
 
 void printBool(bool input) {

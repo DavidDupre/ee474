@@ -19,8 +19,8 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
-char command;
-char response;
+char vehicleCommand;
+char vehicleResponse;
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -52,12 +52,13 @@ SatelliteComsData satelliteComsData = {
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
-    &thrusterCommand
+    &thrusterCommand,
+    &vehicleResponse
 };
 
 VehicleCommsData vehicleCommsData = {
-    &command,
-    &response
+    &vehicleCommand,
+    &vehicleResponse
 };
 
 WarningAlarmData warningAlarmData = {

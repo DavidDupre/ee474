@@ -4,8 +4,8 @@
 #define VCOMMS_TIMEOUT 500
 
 typedef struct {
-    char *command;
-    char *response;
+    char *vehicleCommand;
+    char *vehicleResponse;
 } VehicleCommsData;
 
 

@@ -10,6 +10,7 @@ typedef struct {
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
     unsigned int *thrusterCommand;
+    char *vehicleResponse;
 } SatelliteComsData;
 
 void satelliteComs(void* satelliteComsData);
