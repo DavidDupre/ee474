@@ -6,6 +6,7 @@
 #include "warningAlarm.h"
 #include "schedule.h"
 #include "tft.h"
+#include "butt.h"
 
 #include <AUnit.h>  // Test framework
 
@@ -59,6 +60,9 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
+ButtData buttData = {
+};
+
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
     powerSubsystem,
@@ -94,6 +98,13 @@ TCB warningAlarmTCB = {
     NULL, NULL
 };
 
+TCB buttTCB = {
+    &buttData,
+    butt,
+    "Butt",
+    NULL, NULL
+};
+
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
@@ -104,6 +115,8 @@ void setup() {
     powerConsumption = 0;
     powerGeneration = 0;
 
+    pinMode(13, OUTPUT);
+
     // initialize the task queue
 #ifndef RUN_TESTS
     taskQueueInsert(&powerSubsystemTCB);
@@ -111,6 +124,7 @@ void setup() {
     taskQueueInsert(&consoleDisplayTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
+    taskQueueInsert(&buttTCB);
 #endif
 
     Serial.begin(9600);

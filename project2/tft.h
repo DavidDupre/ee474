@@ -3,7 +3,7 @@
 
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
-
+#include <TouchScreen.h>
 
 #define BLACK   0x0000
 #define BLUE    0x001F
@@ -19,6 +19,7 @@
 
 
 extern Elegoo_TFTLCD tft;
+extern TouchScreen ts;
 
 
 #endif  /* _TFT_H_ */
