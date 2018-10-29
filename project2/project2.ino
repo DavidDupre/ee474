@@ -3,6 +3,7 @@
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
 #include "satelliteComs.h"
+#include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "schedule.h"
 #include "tft.h"
@@ -18,6 +19,8 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+char vehicleCommand;
+char vehicleResponse;
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -49,7 +52,13 @@ SatelliteComsData satelliteComsData = {
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
-    &thrusterCommand
+    &thrusterCommand,
+    &vehicleResponse
+};
+
+VehicleCommsData vehicleCommsData = {
+    &vehicleCommand,
+    &vehicleResponse
 };
 
 WarningAlarmData warningAlarmData = {
@@ -87,6 +96,13 @@ TCB satelliteComsTCB = {
     NULL, NULL
 };
 
+TCB vehicleCommsTCB = {
+    &vehicleCommsData,
+    vehicleComms,
+    "Vehicle Communications",
+    NULL, NULL
+};
+
 TCB warningAlarmTCB = {
     &warningAlarmData,
     warningAlarm,
@@ -111,9 +127,11 @@ void setup() {
     taskQueueInsert(&consoleDisplayTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
+    taskQueueInsert(&vehicleCommsTCB);
 #endif
 
     Serial.begin(9600);
+    Serial1.begin(9600);
     tft.begin(TFT_IDENTIFIER);
     tft.setRotation(1);
     tft.fillScreen(BLACK);
