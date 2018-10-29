@@ -1,16 +1,6 @@
 #include "predefinedMacros.h"
 #include "schedule.h"
-#include "tcb.h"
 #include <Arduino.h>
-
-// Timing test names
-char *taskNames[] = {
-    "Power Subsystem Task",
-    "Thruster Subsystem Task",
-    "Satellite Communication Task",
-    "Console Dipslay Task",
-    "Warning Alarm Task"
-};
 
 
 /*
@@ -21,8 +11,11 @@ void delayUntil(unsigned long epochMs);
 
 
 unsigned long missionElapsedTime = 0;
+TCB *taskQueueHead = NULL;
+TCB *taskQueueTail = NULL;
 
-void schedule(TCB **taskQueue, unsigned short size) {
+void schedule() {
+    unsigned short size = taskQueueLength();
     unsigned long majorStartTime = millis();
 
     // it's okay if integer division rounds this down because we will delay for
@@ -35,19 +28,22 @@ void schedule(TCB **taskQueue, unsigned short size) {
         missionElapsedTime = millis();
 
         // run through the task queue
-        for (unsigned short j = 0; j < size; j++) {
-            TCB *tcb = taskQueue[j];
-            unsigned long taskStart = micros(), taskEnd;
+        TCB *tcb = taskQueueHead;
+        while (tcb != NULL) {
+#ifdef GET_TIMES
+            unsigned long taskStart = micros();
+#endif  /* GET_TIMES */
             tcb->task(tcb->data);
-            taskEnd = micros();
-            #ifdef GET_TIMES
+#ifdef GET_TIMES
+            unsigned long taskEnd = micros();
             if (0 == i) {
-                Serial.print(taskNames[j]);
-                Serial.print(" took: ");
+                Serial.print(tcb->name);
+                Serial.print(" Task took: ");
                 Serial.print(taskEnd - taskStart);
                 Serial.println(" us to complete");
             }
-            #endif
+#endif  /* GET_TIMES */
+            tcb = tcb->next;
         }
 
         // delay until the minor cycle is over
@@ -72,8 +68,57 @@ unsigned long globalTimeBase() {
 }
 
 void setGlobalTimeBase(unsigned long epoch) {
-    #ifdef RUN_TESTS
+#ifdef RUN_TESTS
     missionElapsedTime = epoch;
-    #endif
+#endif
     return;
+}
+
+void taskQueueInsert(TCB *node) {
+    if (taskQueueHead == NULL) {
+        taskQueueHead = node;
+        taskQueueTail = node;
+    } else {
+        taskQueueTail->next = node;
+        node->prev = taskQueueTail;
+        taskQueueTail = node;
+    }
+    return;
+}
+
+void taskQueueDelete(TCB *node) {
+    if (taskQueueHead == NULL) {
+        // the queue is empty and there is nothing to delete
+        return;
+    } else if (taskQueueHead == taskQueueTail) {
+        // there is only one item in the queue
+        taskQueueHead = NULL;
+        taskQueueTail = NULL;
+    } else if (taskQueueHead == node) {
+        // delete the head
+        taskQueueHead = taskQueueHead->next;
+    } else if (taskQueueTail == node) {
+        // delete the tail
+        taskQueueTail = taskQueueTail->prev;
+    } else {
+        // update the surrounding nodes to point to each other (if they exist)
+        if (node->prev != NULL) {
+            node->prev->next = node->next;
+        }
+        if (node->next != NULL) {
+            node->next->prev = node->prev;
+        }
+    }
+    node->prev = NULL;
+    node->next = NULL;
+}
+
+unsigned short taskQueueLength() {
+    unsigned short length = 0;
+    TCB *node = taskQueueHead;
+    while (node != NULL) {
+        length++;
+        node = node->next;
+    }
+    return length;
 }

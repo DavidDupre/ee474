@@ -1,19 +1,23 @@
 #ifndef _SCHEDULE_H_
 #define _SCHEDULE_H_
 
-#include "tcb.h"
-
 #define MAJOR_CYCLE_DURATION_MS 5000
 #define MINOR_CYCLE_DURATION_MS 1000
 
 
+typedef struct _tcb {
+    void *data;
+    void (*task)(void *data);
+    const char *name;
+    struct _tcb *next;
+    struct _tcb *prev;
+} TCB;
+
+
 /******************************************************************************
- *
  * name: schedule
  *
- * inputs:
- *  taskQueue: an array of TCB pointers to call
- *  size: the length of the taskQueue
+ * inputs: void
  *
  * outputs: void
  *
@@ -36,7 +40,7 @@
  * author: David Dupre
  *
  *****************************************************************************/
-void schedule(TCB **taskQueue, unsigned short size);
+void schedule();
 
 /******************************************************************************
  * name: globalTimebase
@@ -68,5 +72,50 @@ unsigned long globalTimeBase();
  * author: David Dupre
  *****************************************************************************/
 void setGlobalTimeBase(unsigned long epoch);
+
+/******************************************************************************
+ * name: taskQueueInsert
+ *
+ * inputs:
+ *  node: the task control block to add
+ *
+ * outputs: void
+ *
+ * description:
+ *  Add a task to the end of the queue
+ *
+ * author: David Dupre
+ *****************************************************************************/
+void taskQueueInsert(TCB *node);
+
+/******************************************************************************
+ * name: taskQueueDelete
+ *
+ * inputs:
+ *  node: the task to remove
+ *
+ * outputs: void
+ *
+ * description:
+ *  Remove a task from the queue. If there is only one task in the queue, it
+ *  will be deleted even if it does not match the input node.
+ *
+ * author: David Dupre
+ *****************************************************************************/
+void taskQueueDelete(TCB *node);
+
+/******************************************************************************
+ * name: taskQueueLength
+ *
+ * inputs: void
+ *
+ * outputs: the length of the task queue
+ *
+ * description:
+ *  get the length of the task queue
+ *
+ * author: David Dupre
+ *****************************************************************************/
+unsigned short taskQueueLength();
 
 #endif  /* _SCHEDULE_H_ */
