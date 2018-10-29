@@ -3,6 +3,41 @@
 #include "tft.h"
 #include "schedule.h"
 
+#define TEXT_SIZE         2
+#define TEXT_HEIGHT       8  // in multiples of TEXT_SIZE
+#define TEXT_WIDTH        6  // in multiples of TEXT_SIZE
+#define HEIGHT            50 // where the display starts
+#define MAX_VALUE_STR_LEN 20
+
+
+const char *labels[] = {
+    "Solar panel: ",
+    "Battery Level: ",
+    "Fuel Level: ",
+    "Power Consumption: ",
+    "Power Generation: "
+};
+
+void consoleDisplayInit() {
+    tft.setCursor(0, HEIGHT);
+    tft.setTextSize(TEXT_SIZE);
+    tft.setTextColor(WHITE);
+    for (unsigned short i = 0; i < sizeof(labels) / sizeof(const char *); i++) {
+        tft.println(labels[i]);
+    }
+}
+
+void printLabel(const char *label, uint8_t lineNum) {
+    int16_t x = strlen(label) * TEXT_WIDTH * TEXT_SIZE;
+    int16_t y = HEIGHT + lineNum * TEXT_HEIGHT * TEXT_SIZE;
+
+    // clear the line
+    tft.fillRect(x, y, TEXT_WIDTH * TEXT_SIZE * MAX_VALUE_STR_LEN,
+            TEXT_HEIGHT * TEXT_SIZE, BLACK);
+
+    // move to the part after the label
+    tft.setCursor(x, y);
+}
 
 void consoleDisplay(void *consoleDisplayData) {
     // return early if less than 5 seconds have passed
@@ -14,38 +49,35 @@ void consoleDisplay(void *consoleDisplayData) {
 
     // Cast from void to correct type
     ConsoleDisplayData *data = (ConsoleDisplayData *) consoleDisplayData;
-    tft.setCursor(0,50);
-    tft.setTextSize(2);
-    tft.setTextColor(WHITE);
-    // Clear bottom part of screen without warnings
-    tft.fillRect(0,50,300,500,BLACK);
-    tft.print(F("Solar panel: "));
+
+    tft.setTextSize(TEXT_SIZE);
     tft.setTextColor(YELLOW);
+
+    uint8_t lineNum = 0;
+
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
     if (*(data->solarPanelState)) {
-        tft.println(F("deployed"));
+        tft.print(F("deployed"));
     } else {
-        tft.println(F("not deployed"));
+        tft.print(F("not deployed"));
     }
 
-    tft.setTextColor(WHITE);
-    tft.print(F("Battery Level: "));
-    tft.setTextColor(YELLOW);
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
     tft.print(*(data->batteryLevel));
-    tft.println(F("/100"));
+    tft.print(F("/100"));
 
-    tft.setTextColor(WHITE);
-    tft.print(F("Fuel Level: "));
-    tft.setTextColor(YELLOW);
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
     tft.print(*(data->fuelLevel));
-    tft.println(F("/100"));
+    tft.print(F("/100"));
 
-    tft.setTextColor(WHITE);
-    tft.print(F("Power Consumption: "));
-    tft.setTextColor(YELLOW);
-    tft.println(*(data->powerConsumption));
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
+    tft.print(*(data->powerConsumption));
 
-    tft.setTextColor(WHITE);
-    tft.print(F("Power Generation: "));
-    tft.setTextColor(YELLOW);
-    tft.println(*(data->powerGeneration));
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
+    tft.print(*(data->powerGeneration));
 }

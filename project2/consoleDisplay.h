@@ -14,6 +14,8 @@ typedef struct {
 } ConsoleDisplayData;
 
 
+void consoleDisplayInit();
+
 void consoleDisplay(void *consoleDisplayData);
 
 #endif  /* _CONSOLE_DISPLAY_H_ */
