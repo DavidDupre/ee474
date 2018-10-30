@@ -15,8 +15,6 @@
 #define WHITE   0xFFFF
 #define ORANGE  0xFFA5
 
-#define TFT_IDENTIFIER 0x9341
-
 
 extern Elegoo_TFTLCD tft;
 
