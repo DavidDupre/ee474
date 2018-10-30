@@ -1,10 +1,12 @@
 #include "predefinedMacros.h"
+#include "sharedVariables.h"
 #include "thrusterSubsystem.h"
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
 #include "satelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
+#include "consoleKeypad.h"
 #include "schedule.h"
 #include "tft.h"
 
@@ -19,6 +21,8 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+bool driveMotorSpeedInc;
+bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
 
@@ -68,6 +72,11 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
+ConsoleKeypadData consoleKeypadData = {
+    &driveMotorSpeedInc,
+    &driveMotorSpeedDec
+};
+
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
     powerSubsystem,
@@ -110,6 +119,13 @@ TCB warningAlarmTCB = {
     NULL, NULL
 };
 
+TCB consoleKeypadTCB = {
+    &consoleKeypadData,
+    consoleKeypad,
+    "Console Keypad",
+    NULL, NULL
+};
+
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
@@ -122,11 +138,12 @@ void setup() {
 
     Serial.begin(250000);
     Serial1.begin(9600);
-    tft.begin(TFT_IDENTIFIER);
+    tft.begin(tft.readID());
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
     consoleDisplayInit();
+    consoleKeypadInit();
 
     // initialize the task queue
 #ifndef RUN_TESTS
@@ -135,6 +152,7 @@ void setup() {
     taskQueueInsert(&consoleDisplayTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
+    taskQueueInsert(&consoleKeypadTCB);
     taskQueueInsert(&vehicleCommsTCB);
 #endif
 }

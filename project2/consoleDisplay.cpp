@@ -49,7 +49,6 @@ void consoleDisplay(void *consoleDisplayData) {
 
     // Cast from void to correct type
     ConsoleDisplayData *data = (ConsoleDisplayData *) consoleDisplayData;
-
     tft.setTextSize(TEXT_SIZE);
     tft.setTextColor(YELLOW);
 

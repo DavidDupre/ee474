@@ -39,23 +39,16 @@ void vehicleComms(void *vehicleCommsData) {
 
     // Cast from void to correct type
     VehicleCommsData *data = (VehicleCommsData *) vehicleCommsData;
-
-    char comm = *data->vehicleCommand;
     
     // Print command to Serial1 for the Uno to pick up
     // Do not print if there is no command
-    if (comm != '\0') {
-        Serial1.println(comm);
+    if (*data->vehicleCommand != '\0') {
+        Serial1.println(*data->vehicleCommand);
         *data->vehicleCommand = '\0';
     }
 
-    // If the command is \0 there is no command and do nothing
+    // Set response if serial is available
     if (Serial1.available()) {
         *data->vehicleResponse = Serial1.read();
     }
-
-    /* TODO: Not sure if this is the proper way to show a response
-    * Spec had a longer looking response but it also specifies the
-    * type as a char
-    */
 }
