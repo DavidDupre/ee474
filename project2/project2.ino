@@ -1,4 +1,5 @@
 #include "predefinedMacros.h"
+#include "sharedVariables.h"
 #include "thrusterSubsystem.h"
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
