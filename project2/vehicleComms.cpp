@@ -43,7 +43,7 @@ void vehicleComms(void *vehicleCommsData) {
     // Print command to Serial1 for the Uno to pick up
     // Do not print if there is no command
     if (*data->vehicleCommand != '\0') {
-        Serial1.println(comm);
+        Serial1.println(*data->vehicleCommand);
         *data->vehicleCommand = '\0';
     }
 
