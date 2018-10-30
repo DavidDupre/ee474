@@ -49,13 +49,8 @@ void vehicleComms(void *vehicleCommsData) {
         *data->vehicleCommand = '\0';
     }
 
-    // If the command is \0 there is no command and do nothing
+    // Set response if serial is available
     if (Serial1.available()) {
         *data->vehicleResponse = Serial1.read();
     }
-
-    /* TODO: Not sure if this is the proper way to show a response
-    * Spec had a longer looking response but it also specifies the
-    * type as a char
-    */
 }
