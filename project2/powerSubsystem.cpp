@@ -1,6 +1,8 @@
 #include "powerSubsystem.h"
 #include <stdint.h>
 #include "schedule.h"
+#include "sharedVariables.h"
+#include <Arduino.h>
 
 
 unsigned short capAt100(unsigned short batteryLevel);
@@ -30,10 +32,18 @@ unsigned short capAt100(unsigned short batteryLevel);
  *
  *
  * pseudocode:
+ * 
  * init
- *  create 16 element circular linked list full of null data
- *  attach interrupt to battery pin
- *
+ *  attach interrupt to EXTERNAL_MEASUREMENT_EVENT_PIN
+ * 
+ * interrupt:
+ *  delay 600 microseconds
+ *  make measurement and update buffer:
+ *  for every measurement in indices 0-14 (first 15 measurements)
+ *  move them to the next index (indices 1-15)
+ *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
+ *   
+ * powerSubsystem:
  * setPowerConsumption to increasing
  * set timesCalled to zero
  * if powerConsumption is increasing
@@ -55,34 +65,29 @@ unsigned short capAt100(unsigned short batteryLevel);
  * if more than 50
  *  increase by 2 on even
  *
- * interrupt:
- * delay 600 delayMicroseconds
- * update buffer to reflect most recent measurements:
- *  head = head.next
- *  head = new data (head will alawys be most recent data)
- * 
- * 
- * 
- * deprecated:
- * if solar panel deployed
- *  increment battery level by powerGeneration, deduct powerConsumption
- * else
- *  decrement by 3 times powerConsumption
- *
  * author: Nick Orlov
 *****************************************************************************/
 
-struct Measurement measurements[16];
-
 void powerSubsystemInit() {
-    for(int i = 0; i < 15; i++) {
-        //measurements[i].data = NULL;
-        measurements[i].next = &measurements[i+1];
+    // Attaching interrupt
+    attachInterrupt(digitalPinToInterrupt(EXTERNAL_MEASUREMENT_EVENT_PIN),
+     measurementExternalInterruptISR, RISING);
+}
+
+// batteryLevelPtr points to a pointer which points to an array of the 16
+// most recent battery level measurements
+void measurementExternalInterruptISR() {
+    // Waiting 600 microseconds for the battery level to stab
+    delayMicroseconds(600);
+
+    // Moving up the first 15 measurements, overwriting the 16th measurement
+    for(int i = 14; i >= 0; i--) {
+        batteryLevelPtr[i] = batteryLevelPtr[i+1];
     }
-    //measurements[15].data = null;
-    measurements[15].next = &measurements[0];
-    // There are elements so far so it doesn't matter
-    batteryHead = &measurements[0];
+
+    // Taking the most recent measurement from the external event interrupt pin
+    batteryLevelPtr[0] = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
+
 }
 
 void powerSubsystem(void* powerSubsystemData) {
@@ -127,43 +132,36 @@ void powerSubsystem(void* powerSubsystemData) {
     // Checking if the solar panel should be up for power generation
     if(*data->solarPanelState) {
         // If the battery level is above the threshold, retract the solar panel
-        if(*data->batteryLevel > HIGH_BATTERY) {
+        if((*data->batteryLevelPtr)[0] > HIGH_BATTERY) {
             *data->solarPanelState = !*data->solarPanelState;
         } else if(timesCalled % 2 == 0) {
             // Incrementing logic for the battery level from the solar panel
             *data->powerGeneration += 2;
-        } else if (*data->batteryLevel <= BATTERY_LEVEL_MID) {
+        } else if ((*data->batteryLevelPtr)[0] <= BATTERY_LEVEL_MID) {
             *data->powerGeneration += 1;
         }
     } else {
         // Checking to see if the battery level is low, and if solar panel needs to be deployed
-        if(*data->batteryLevel <= BATTERY_LEVEL_LOW) {
+        if((*data->batteryLevelPtr)[0] <= BATTERY_LEVEL_LOW) {
             *data->solarPanelState = !*data->solarPanelState;
         }
     }
 
-    // analogRead(A13);
-    // delayMicroseconds(600);
-
-
-
-    
-
-
-
     // The following portion is deprecated from Assignment 2.
+
     // if(*data->solarPanelState) {
     //     // Updating the battery level for the case of solar panel deployed
-    //     *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
+    //     (*data->batteryLevelPtr)[0] = capAt100((*data->batteryLevelPtr)[0] - *data->powerConsumption + *data->powerGeneration);
     // } else {
     //     // Updating the battery level for solar panel not deployed
-    //     *data->batteryLevel = *data->batteryLevel -
+    //     (*data->batteryLevelPtr)[0] = (*data->batteryLevelPtr)[0] -
     //     SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
     // }
     // // Incrementing times function has been called
     // timesCalled+= 1;
 }
 
+// Caps input: batteryLevel at 100
 unsigned short capAt100(unsigned short batteryLevel) {
     if(batteryLevel > 100) {
         return 100;

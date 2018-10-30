@@ -20,7 +20,7 @@ unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
-unsigned int* batteryLevelPtr;
+unsigned int batteryLevelPtr[16];
 bool solarPanelDeploy;
 bool solarPanelRetract;
 
@@ -55,7 +55,7 @@ SatelliteComsData satelliteComsData = {
     &fuelLow,
     &batteryLow,
     &solarPanelState,
-    &batteryLevel,
+    &batteryLevelPtr,
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
@@ -71,7 +71,7 @@ VehicleCommsData vehicleCommsData = {
 WarningAlarmData warningAlarmData = {
     &batteryLow,
     &fuelLow,
-    &batteryLevel,
+    &batteryLevelPtr,
     &fuelLevel
 };
 
@@ -123,6 +123,8 @@ void setup() {
     fuelLow = false;
     batteryLow = false;
     solarPanelState = false;
+    // void * memset ( void * ptr, int value, size_t num );
+    memSet(batteryLevelPtr, 0, 16);
     // Deprecated from part 2
     // batteryLevel = 100;
     powerConsumption = 0;

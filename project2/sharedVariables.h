@@ -12,7 +12,9 @@
 extern unsigned int thrusterCommand;
 extern unsigned short fuelLevel;
 extern bool solarPanelState;
-extern unsigned short batteryLevel;
+extern bool solarPanelDeploy;
+extern bool solarPanelRetract;
+extern volatile unsigned int batteryLevelPtr[16];
 extern unsigned short powerConsumption;
 extern unsigned short powerGeneration;
 extern bool batteryLow;
