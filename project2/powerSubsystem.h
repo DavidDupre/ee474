@@ -11,10 +11,21 @@
 
 typedef struct {
     bool *solarPanelState;
-    unsigned short *batteryLevel;
+    bool *solarPanelDeploy;
+    bool *solarPanelRetract;
+    unsigned short *batteryLevelPtr;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
 } PowerSubsystemData;
+
+struct Measurement {
+    volatile unsigned short data;
+    volatile struct Measurement* next;
+};
+
+extern struct Measurement* head;
+
+void powerSubsystemInit();
 
 void powerSubsystem(void* powerSubsystemData);
 

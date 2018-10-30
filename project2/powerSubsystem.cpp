@@ -30,6 +30,9 @@ unsigned short capAt100(unsigned short batteryLevel);
  *
  *
  * pseudocode:
+ * init
+ *  create 16 element circular linked list full of null data
+ *  attach interrupt to battery pin
  *
  * setPowerConsumption to increasing
  * set timesCalled to zero
@@ -52,6 +55,15 @@ unsigned short capAt100(unsigned short batteryLevel);
  * if more than 50
  *  increase by 2 on even
  *
+ * interrupt:
+ * delay 600 delayMicroseconds
+ * update buffer to reflect most recent measurements:
+ *  head = head.next
+ *  head = new data (head will alawys be most recent data)
+ * 
+ * 
+ * 
+ * deprecated:
  * if solar panel deployed
  *  increment battery level by powerGeneration, deduct powerConsumption
  * else
@@ -59,6 +71,20 @@ unsigned short capAt100(unsigned short batteryLevel);
  *
  * author: Nick Orlov
 *****************************************************************************/
+
+struct Measurement measurements[16];
+
+void powerSubsystemInit() {
+    for(int i = 0; i < 15; i++) {
+        //measurements[i].data = NULL;
+        measurements[i].next = &measurements[i+1];
+    }
+    //measurements[15].data = null;
+    measurements[15].next = &measurements[0];
+    // There are elements so far so it doesn't matter
+    batteryHead = &measurements[0];
+}
+
 void powerSubsystem(void* powerSubsystemData) {
     // return early if less than 5 seconds have passed
     static unsigned long lastRunTime;
@@ -116,16 +142,26 @@ void powerSubsystem(void* powerSubsystemData) {
         }
     }
 
-    if(*data->solarPanelState) {
-        // Updating the battery level for the case of solar panel deployed
-        *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
-    } else {
-        // Updating the battery level for solar panel not deployed
-        *data->batteryLevel = *data->batteryLevel -
-        SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
-    }
-    // Incrementing times function has been called
-    timesCalled+= 1;
+    // analogRead(A13);
+    // delayMicroseconds(600);
+
+
+
+    
+
+
+
+    // The following portion is deprecated from Assignment 2.
+    // if(*data->solarPanelState) {
+    //     // Updating the battery level for the case of solar panel deployed
+    //     *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
+    // } else {
+    //     // Updating the battery level for solar panel not deployed
+    //     *data->batteryLevel = *data->batteryLevel -
+    //     SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
+    // }
+    // // Incrementing times function has been called
+    // timesCalled+= 1;
 }
 
 unsigned short capAt100(unsigned short batteryLevel) {

@@ -13,11 +13,15 @@
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 bool solarPanelState;
-unsigned short batteryLevel;
+//unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+unsigned int* batteryLevelPtr;
+bool solarPanelDeploy;
+bool solarPanelRetract;
+
 
 ThrusterSubsystemData thrusterSubsystemData = {
     &thrusterCommand,
@@ -26,7 +30,9 @@ ThrusterSubsystemData thrusterSubsystemData = {
 
 PowerSubsystemData powerSubsystemData = {
     &solarPanelState,
-    &batteryLevel,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    &batteryLevelPtr,
     &powerConsumption,
     &powerGeneration
 };
@@ -100,9 +106,13 @@ void setup() {
     fuelLow = false;
     batteryLow = false;
     solarPanelState = false;
-    batteryLevel = 100;
+    // Deprecated from part 2
+    // batteryLevel = 100;
     powerConsumption = 0;
     powerGeneration = 0;
+    // batteryLevelPtr = initalized to a 16 reading measurement
+    solarPanelDeploy = false;
+    solarPanelRetract = false;
 
     // initialize the task queue
 #ifndef RUN_TESTS
