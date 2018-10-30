@@ -41,7 +41,7 @@ void warningAlarm(void *warningAlarmData) {
                 tft.fillRect(0,0,300,30,BLACK);
                 batteryFlashed = false;
             } else {
-                tft.print("BATTERY");
+                tft.print(F("BATTERY"));
                 batteryFlashed = true;
             }
             // Update last time
@@ -50,7 +50,7 @@ void warningAlarm(void *warningAlarmData) {
 
     } else {
         tft.setTextColor(GREEN);
-        tft.print("BATTERY");
+        tft.print(F("BATTERY"));
         batteryFlashed = false;
         *(data->batteryLow) = false;
         // Last update time doesn't change if status is GREEN
@@ -75,7 +75,7 @@ void warningAlarm(void *warningAlarmData) {
                 tft.fillRect(200,0,300,30,BLACK);
                 fuelFlashed = false;
             } else {
-                tft.print("FUEL");
+                tft.print(F("FUEL"));
                 fuelFlashed = true;
             }
             // Update last time
@@ -84,7 +84,7 @@ void warningAlarm(void *warningAlarmData) {
 
     } else {
         tft.setTextColor(GREEN);
-        tft.print("FUEL");
+        tft.print(F("FUEL"));
         fuelFlashed = false;
         *(data->fuelLow) = false;
         // Last update time doesn't change if status is GREEN
