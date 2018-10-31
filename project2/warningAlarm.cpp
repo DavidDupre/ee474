@@ -26,11 +26,11 @@ void warningAlarm(void *warningAlarmData) {
     // Update battery status
     tft.setTextSize(4);
     tft.setCursor(0,0);
-    if (*(data->batteryLevel) <= HALF_DEPLETED) {
+    if (data->batteryLevelPtr[0] <= HALF_DEPLETED) {
         // Only update flash if the last update time was over a second ago
         if (timePassedMsBattery >= BATTERY_RATE) {
             // Draw black over batter portion
-            if (*(data->batteryLevel) <= LOW_LEVEL) {
+            if (data->batteryLevelPtr[0] <= LOW_LEVEL) {
                 tft.setTextColor(RED);
                 *(data->batteryLow) = true;
             } else {

@@ -1,6 +1,9 @@
 #ifndef _SHARED_VARIABLES_H_
 #define _SHARED_VARIABLES_H_
 
+#define BATTERY_LEVEL_BUFFER_LENGTH 16
+
+
 /*
  * These variables must have global scope.
  *
@@ -14,7 +17,7 @@ extern unsigned short fuelLevel;
 extern bool solarPanelState;
 extern bool solarPanelDeploy;
 extern bool solarPanelRetract;
-extern volatile unsigned int batteryLevelPtr[16];
+extern volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
 extern unsigned short powerConsumption;
 extern unsigned short powerGeneration;
 extern bool batteryLow;

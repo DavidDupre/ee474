@@ -14,7 +14,7 @@ typedef struct {
     bool *solarPanelState;
     bool *solarPanelDeploy;
     bool *solarPanelRetract;
-    unsigned int **batteryLevelPtr;
+    volatile unsigned int *batteryLevelPtr;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
 } PowerSubsystemData;

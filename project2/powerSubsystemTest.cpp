@@ -1,4 +1,5 @@
 #include "powerSubsystem.h"
+#include "sharedVariables.h"
 #include <AUnit.h>  // Test framework
 #include <stdint.h>
 
@@ -14,13 +15,18 @@
 // Testing to make sure solar panel deploys upon battery falling below BATTERY_LEVEL_LOW
 test(solarPanelOperation) {
     bool solarPanelState = false;
-    unsigned short batteryLevel = BATTERY_LEVEL_LOW - 1;
+    volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH]
+        = { BATTERY_LEVEL_LOW - 1 };
     unsigned short powerConsumption = 6;
     unsigned short powerGeneration = 0;
+    bool solarPanelDeploy = false;
+    bool solarPanelRetract = false;
 
     PowerSubsystemData data = {
         &solarPanelState,
-        &batteryLevel,
+        &solarPanelDeploy,
+        &solarPanelRetract,
+        batteryLevelPtr,
         &powerConsumption,
         &powerGeneration
     };

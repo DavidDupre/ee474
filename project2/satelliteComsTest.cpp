@@ -8,21 +8,23 @@ test(thrusterUpdate) {
     bool fuelLow = false;
     bool batteryLow = false;
     bool solarPanelState = false;
-    unsigned short batteryLevel = 90;
+    volatile unsigned int batteryLevelPtr[1] = { 90 };
     unsigned short fuelLevel = 90;
     unsigned short powerConsumption = 10;
     unsigned short powerGeneration = 8;
     unsigned int thrusterCommand = 0b0000001001000100;
+    char vehicleResponse = 'B';
 
     SatelliteComsData data = {
         &fuelLow,
         &batteryLow,
         &solarPanelState,
-        &batteryLevel,
+        batteryLevelPtr,
         &fuelLevel,
         &powerConsumption,
         &powerGeneration,
-        &thrusterCommand
+        &thrusterCommand,
+        &vehicleResponse
     };
 
     // Setting seed for psuedo random to 1, through testing, the next number produced will be 846
@@ -37,21 +39,23 @@ test(thrusterInvalid) {
     bool fuelLow = false;
     bool batteryLow = false;
     bool solarPanelState = false;
-    unsigned short batteryLevel = 90;
+    volatile unsigned int batteryLevelPtr[1] = { 90 };
     unsigned short fuelLevel = 90;
     unsigned short powerConsumption = 10;
     unsigned short powerGeneration = 8;
     unsigned int thrusterCommand = 0b0000001001000101;
+    char vehicleResponse = 'C';
 
     SatelliteComsData data = {
         &fuelLow,
         &batteryLow,
         &solarPanelState,
-        &batteryLevel,
+        batteryLevelPtr,
         &fuelLevel,
         &powerConsumption,
         &powerGeneration,
-        &thrusterCommand
+        &thrusterCommand,
+        &vehicleResponse
     };
 
     // will force a 16807 to return from the next rand()

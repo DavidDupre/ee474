@@ -15,12 +15,11 @@
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 bool solarPanelState;
-//unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
-unsigned int batteryLevelPtr[16];
+volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
 bool solarPanelDeploy;
 bool solarPanelRetract;
 
@@ -36,14 +35,14 @@ PowerSubsystemData powerSubsystemData = {
     &solarPanelState,
     &solarPanelDeploy,
     &solarPanelRetract,
-    &batteryLevelPtr,
+    batteryLevelPtr,
     &powerConsumption,
     &powerGeneration
 };
 
 ConsoleDisplayData consoleDisplayData = {
     &solarPanelState,
-    &batteryLevel,
+    batteryLevelPtr,
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
@@ -55,7 +54,7 @@ SatelliteComsData satelliteComsData = {
     &fuelLow,
     &batteryLow,
     &solarPanelState,
-    &batteryLevelPtr,
+    batteryLevelPtr,
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
@@ -71,7 +70,7 @@ VehicleCommsData vehicleCommsData = {
 WarningAlarmData warningAlarmData = {
     &batteryLow,
     &fuelLow,
-    &batteryLevelPtr,
+    batteryLevelPtr,
     &fuelLevel
 };
 
@@ -123,13 +122,9 @@ void setup() {
     fuelLow = false;
     batteryLow = false;
     solarPanelState = false;
-    // void * memset ( void * ptr, int value, size_t num );
-    memSet(batteryLevelPtr, 0, 16);
-    // Deprecated from part 2
-    // batteryLevel = 100;
+    memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
     powerConsumption = 0;
     powerGeneration = 0;
-    // batteryLevelPtr = initalized to a 16 reading measurement
     solarPanelDeploy = false;
     solarPanelRetract = false;
 
