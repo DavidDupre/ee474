@@ -97,12 +97,25 @@ void taskQueueInsert(TCB *node);
  * outputs: void
  *
  * description:
- *  Remove a task from the queue. If there is only one task in the queue, it
- *  will be deleted even if it does not match the input node.
+ *  Remove a task from the queue if it is in the queue.
  *
  * author: David Dupre
  *****************************************************************************/
 void taskQueueDelete(TCB *node);
+
+/******************************************************************************
+ * name: taskQueueIncludes
+ *
+ * inputs: a node
+ *
+ * outputs: true iff the input node is in the task queue
+ *
+ * description:
+ *  check if the task queue contains a specific node
+ *
+ * author: David Dupre
+ *****************************************************************************/
+bool taskQueueIncludes(TCB *node);
 
 /******************************************************************************
  * name: taskQueueLength

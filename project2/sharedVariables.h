@@ -12,11 +12,15 @@
 extern unsigned int thrusterCommand;
 extern unsigned short fuelLevel;
 extern bool solarPanelState;
+extern bool solarPanelDeploy;
+extern bool solarPanelRetract;
 extern unsigned short batteryLevel;
 extern unsigned short powerConsumption;
 extern unsigned short powerGeneration;
 extern bool batteryLow;
 extern bool fuelLow;
+extern bool driveMotorSpeedInc;
+extern bool driveMotorSpeedDec;
 extern char vehicleCommand;
 extern char vehicleResponse;
 
