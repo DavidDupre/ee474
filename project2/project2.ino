@@ -6,7 +6,7 @@
 #include "satelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
-#include "consoleKeypad.h"
+#include "solarPanel.h"
 #include "schedule.h"
 #include "tft.h"
 
@@ -16,6 +16,8 @@
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 bool solarPanelState;
+bool solarPanelDeploy;
+bool solarPanelRetract;
 unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
@@ -72,7 +74,10 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
-ConsoleKeypadData consoleKeypadData = {
+SolarPanelControlData solarPanelControlData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
     &driveMotorSpeedInc,
     &driveMotorSpeedDec
 };
@@ -119,22 +124,26 @@ TCB warningAlarmTCB = {
     NULL, NULL
 };
 
-TCB consoleKeypadTCB = {
-    &consoleKeypadData,
-    consoleKeypad,
-    "Console Keypad",
+TCB solarPanelControlTCB = {
+    &solarPanelControlData,
+    solarPanelControl,
+    "Solar Panel Control",
     NULL, NULL
 };
 
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
-    fuelLow = false;
-    batteryLow = false;
     solarPanelState = false;
+    solarPanelDeploy = false;
+    solarPanelRetract = false;
     batteryLevel = 100;
     powerConsumption = 0;
     powerGeneration = 0;
+    batteryLow = false;
+    fuelLow = false;
+    vehicleCommand = '\0';
+    vehicleResponse = '\0';
 
     Serial.begin(250000);
     Serial1.begin(9600);
@@ -143,7 +152,7 @@ void setup() {
     tft.fillScreen(BLACK);
 
     consoleDisplayInit();
-    consoleKeypadInit();
+    solarPanelControlInit();
 
     // initialize the task queue
 #ifndef RUN_TESTS
@@ -152,7 +161,6 @@ void setup() {
     taskQueueInsert(&consoleDisplayTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
-    taskQueueInsert(&consoleKeypadTCB);
     taskQueueInsert(&vehicleCommsTCB);
 #endif
 }
