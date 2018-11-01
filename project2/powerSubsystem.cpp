@@ -68,16 +68,19 @@ unsigned int normBattery(unsigned int input);
  * author: Nick Orlov
 *****************************************************************************/
 
-// Measure battery on timer interrupt
-ISR(TIMER5_COMPA_vect) {
-    measurementExternalInterruptISR();
+void powerSubsystemInit() {
+    // Attaching interrupt
+    attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
+     measurementExternalInterruptISR, RISING);
+}
+
+void measurementExternalInterruptISR() {
+    
 }
 
 // batteryLevelPtr points to a pointer which points to an array of the 16
 // most recent battery level measurements
-void measurementExternalInterruptISR() {
-    // Waiting 600 microseconds for the battery level to stab
-    delayMicroseconds(600);
+void measureBattery() {
 
     // Moving up the first 15 measurements, overwriting the 16th measurement
     for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
