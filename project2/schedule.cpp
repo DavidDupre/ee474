@@ -75,6 +75,11 @@ void setGlobalTimeBase(unsigned long epoch) {
 }
 
 void taskQueueInsert(TCB *node) {
+    // don't add a node that's already on the queue
+    if (taskQueueIncludes(node)) {
+        return;
+    }
+
     if (taskQueueHead == NULL) {
         taskQueueHead = node;
         taskQueueTail = node;
