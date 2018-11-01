@@ -6,6 +6,7 @@
 #include "satelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
+#include "solarPanel.h"
 #include "schedule.h"
 #include "tft.h"
 
@@ -15,6 +16,9 @@
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
 bool solarPanelState;
+bool solarPanelDeploy;
+bool solarPanelRetract;
+unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
@@ -23,6 +27,8 @@ volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
 bool solarPanelDeploy;
 bool solarPanelRetract;
 
+bool driveMotorSpeedInc;
+bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
 
@@ -74,6 +80,14 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
+SolarPanelControlData solarPanelControlData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    &driveMotorSpeedInc,
+    &driveMotorSpeedDec
+};
+
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
     powerSubsystem,
@@ -116,17 +130,36 @@ TCB warningAlarmTCB = {
     NULL, NULL
 };
 
+TCB solarPanelControlTCB = {
+    &solarPanelControlData,
+    solarPanelControl,
+    "Solar Panel Control",
+    NULL, NULL
+};
+
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
-    fuelLow = false;
-    batteryLow = false;
     solarPanelState = false;
     memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
-    powerConsumption = 0;
-    powerGeneration = 0;
     solarPanelDeploy = false;
     solarPanelRetract = false;
+    batteryLevel = 100;
+    powerConsumption = 0;
+    powerGeneration = 0;
+    batteryLow = false;
+    fuelLow = false;
+    vehicleCommand = '\0';
+    vehicleResponse = '\0';
+
+    Serial.begin(250000);
+    Serial1.begin(9600);
+    tft.begin(tft.readID());
+    tft.setRotation(1);
+    tft.fillScreen(BLACK);
+
+    consoleDisplayInit();
+    solarPanelControlInit();
 
     // initialize the task queue
 #ifndef RUN_TESTS

@@ -22,6 +22,8 @@ extern unsigned short powerConsumption;
 extern unsigned short powerGeneration;
 extern bool batteryLow;
 extern bool fuelLow;
+extern bool driveMotorSpeedInc;
+extern bool driveMotorSpeedDec;
 extern char vehicleCommand;
 extern char vehicleResponse;
 

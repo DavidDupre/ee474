@@ -38,9 +38,9 @@ void schedule() {
             unsigned long taskEnd = micros();
             if (0 == i) {
                 Serial.print(tcb->name);
-                Serial.print(" Task took: ");
+                Serial.print(F(" Task took: "));
                 Serial.print(taskEnd - taskStart);
-                Serial.println(" us to complete");
+                Serial.println(F(" us to complete"));
             }
 #endif  /* GET_TIMES */
             tcb = tcb->next;
@@ -75,6 +75,11 @@ void setGlobalTimeBase(unsigned long epoch) {
 }
 
 void taskQueueInsert(TCB *node) {
+    // don't add a node that's already on the queue
+    if (taskQueueIncludes(node)) {
+        return;
+    }
+
     if (taskQueueHead == NULL) {
         taskQueueHead = node;
         taskQueueTail = node;
@@ -86,31 +91,48 @@ void taskQueueInsert(TCB *node) {
     return;
 }
 
-void taskQueueDelete(TCB *node) {
-    if (taskQueueHead == NULL) {
-        // the queue is empty and there is nothing to delete
-        return;
-    } else if (taskQueueHead == taskQueueTail) {
-        // there is only one item in the queue
-        taskQueueHead = NULL;
-        taskQueueTail = NULL;
-    } else if (taskQueueHead == node) {
-        // delete the head
-        taskQueueHead = taskQueueHead->next;
-    } else if (taskQueueTail == node) {
-        // delete the tail
-        taskQueueTail = taskQueueTail->prev;
-    } else {
-        // update the surrounding nodes to point to each other (if they exist)
-        if (node->prev != NULL) {
-            node->prev->next = node->next;
+bool taskQueueIncludes(TCB *node) {
+    TCB *i = taskQueueHead;
+    while (i) {
+        if (i == node) {
+            return true;
         }
-        if (node->next != NULL) {
-            node->next->prev = node->prev;
-        }
+        i = i->next;
     }
-    node->prev = NULL;
+    return false;
+}
+
+void taskQueueDelete(TCB *node) {
+    // don't delete it if it's not in the queue
+    if (!taskQueueIncludes(node)) {
+        return;
+    }
+
+    // update surrounding nodes' links
+    if (node->prev) {
+        node->prev->next = node->next;
+    }
+    if (node->next) {
+        node->next->prev = node->prev;
+    }
+
+    if (node == taskQueueHead) {
+        if (node == taskQueueTail) {
+            // if this is the only node, clear head and tail
+            taskQueueHead = NULL;
+            taskQueueTail = NULL;
+        } else {
+            // if this is just the head, move the head to the next item
+            taskQueueHead = node->next;
+        }
+    } else if (node == taskQueueTail) {
+        // if this is just the tail, move the tail to the previous item
+        taskQueueTail = node->prev;
+    }
+
+    // clear this node's links
     node->next = NULL;
+    node->prev = NULL;
 }
 
 unsigned short taskQueueLength() {

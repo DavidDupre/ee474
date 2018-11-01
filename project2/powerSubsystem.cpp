@@ -132,7 +132,7 @@ void powerSubsystem(void* powerSubsystemData) {
     if(*data->solarPanelState) {
         // If the battery level is above the threshold, retract the solar panel
         if(data->batteryLevelPtr[0] > HIGH_BATTERY) {
-            *data->solarPanelState = !*data->solarPanelState;
+            *data->solarPanelRetract = true;
         } else if(timesCalled % 2 == 0) {
             // Incrementing logic for the battery level from the solar panel
             *data->powerGeneration += 2;
@@ -142,7 +142,7 @@ void powerSubsystem(void* powerSubsystemData) {
     } else {
         // Checking to see if the battery level is low, and if solar panel needs to be deployed
         if(data->batteryLevelPtr[0] <= BATTERY_LEVEL_LOW) {
-            *data->solarPanelState = !*data->solarPanelState;
+            *data->solarPanelDeploy = false;
         }
     }
 
