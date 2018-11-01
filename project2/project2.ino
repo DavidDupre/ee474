@@ -186,7 +186,7 @@ void setup() {
     TCNT5  = 0;               // Timer/Counter Register 1
 
 
-    OCR5A = 1040;            // compare match register 16MHz/256/60Hz  Output Compare Register
+    OCR5A = 31250;            // compare match register 16MHz/256/60Hz  Output Compare Register
 
     TCCR5B |= (1 << WGM12);   // CTC mode
 
