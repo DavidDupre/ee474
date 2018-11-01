@@ -31,7 +31,7 @@ void consoleDisplay(void *consoleDisplayData) {
     tft.print("Battery Level: ");
     tft.setTextColor(YELLOW);
     tft.print(data->batteryLevelPtr[0]);
-    tft.println("/100");
+    tft.println("/36");
 
     tft.setTextColor(WHITE);
     tft.print("Fuel Level: ");

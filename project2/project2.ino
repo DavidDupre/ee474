@@ -143,6 +143,25 @@ void setup() {
     tft.begin(TFT_IDENTIFIER);
     tft.setRotation(1);
     tft.fillScreen(BLACK);
+
+    noInterrupts();           // disable all interrupts
+
+    TCCR5A = 0;               // Timer/Counter Control Register 1 output compare register A
+
+    TCCR5B = 0;               // Timer/Counter Control Register 1 output compare register B
+
+    TCNT5  = 0;               // Timer/Counter Register 1
+
+
+    OCR5A = 1040;            // compare match register 16MHz/256/60Hz  Output Compare Register
+
+    TCCR5B |= (1 << WGM12);   // CTC mode
+
+    TCCR5B |= (1 << CS12);    // 256 prescaler 
+
+    TIMSK5 |= (1 << OCIE5A);  // enable timer compare interrupt   Timer/Counter Interrupt Mask Register
+
+    interrupts();
 }
 
 void loop() {

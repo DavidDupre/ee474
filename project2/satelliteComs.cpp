@@ -74,7 +74,8 @@ void satelliteComs(void* satelliteComsData) {
     printBool(*data->solarPanelState);
     Serial.println();
     Serial.print("Battery Level is: ");
-    Serial.println(data->batteryLevelPtr[0]);
+    Serial.print(data->batteryLevelPtr[0]);
+    Serial.println("V");
     Serial.print("Fuel Level is: ");
     Serial.println(*data->fuelLevel);
     Serial.print("Power Consumption is: ");

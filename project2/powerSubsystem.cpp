@@ -5,7 +5,7 @@
 #include <Arduino.h>
 
 
-unsigned short capAt100(unsigned short batteryLevel);
+unsigned int normBattery(unsigned int input);
 
 
 /******************************************************************************
@@ -68,10 +68,9 @@ unsigned short capAt100(unsigned short batteryLevel);
  * author: Nick Orlov
 *****************************************************************************/
 
-void powerSubsystemInit() {
-    // Attaching interrupt
-    attachInterrupt(digitalPinToInterrupt(EXTERNAL_MEASUREMENT_EVENT_PIN),
-     measurementExternalInterruptISR, RISING);
+// Measure battery on timer interrupt
+ISR(TIMER5_COMPA_vect) {
+    measurementExternalInterruptISR();
 }
 
 // batteryLevelPtr points to a pointer which points to an array of the 16
@@ -86,8 +85,8 @@ void measurementExternalInterruptISR() {
     }
 
     // Taking the most recent measurement from the external event interrupt pin
-    batteryLevelPtr[0] = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
-
+    unsigned int analogBatteryLvl = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
+    batteryLevelPtr[0] = normBattery(analogBatteryLvl);
 }
 
 void powerSubsystem(void* powerSubsystemData) {
@@ -161,12 +160,8 @@ void powerSubsystem(void* powerSubsystemData) {
     // timesCalled+= 1;
 }
 
-// Caps input: batteryLevel at 100
-unsigned short capAt100(unsigned short batteryLevel) {
-    if(batteryLevel > 100) {
-        return 100;
-    } else {
-        return batteryLevel;
-    }
+unsigned int normBattery(unsigned int input) {
+    unsigned int output = (((BATTERY_MAX - BATTERY_MIN)*
+        (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
+    return output;
 }
-
