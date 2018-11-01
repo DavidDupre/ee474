@@ -6,6 +6,10 @@
 
 
 unsigned int normBattery(unsigned int input);
+// Flags
+// volatile bool readyToMeasure;
+volatile unsigned long batteryInitializationTime;
+
 
 
 /******************************************************************************
@@ -69,13 +73,21 @@ unsigned int normBattery(unsigned int input);
 *****************************************************************************/
 
 void powerSubsystemInit() {
+    // setting the battery initialization to unsigned long max value
+    // in order to make sure task never measures as it checks to see
+    // if the mission elapsed time is greater than it
+    batteryInitializationTime = UNSIGNED_LONG_MAX;
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
-     measurementExternalInterruptISR, RISING);
+    measurementExternalInterruptISR, RISING);
 }
 
 void measurementExternalInterruptISR() {
-    
+    // set bool for measurement - dont need if set initial batteryInitializationTime
+    // to UNSIGNED_LONG_MAX
+    // bool readyToMeasure = true;
+    // set integer time
+    unsigned long batteryInitializationTime = globalTimeBase();
 }
 
 // batteryLevelPtr points to a pointer which points to an array of the 16
@@ -99,6 +111,14 @@ void powerSubsystem(void* powerSubsystemData) {
         return;
     }
     lastRunTime = globalTimeBase();
+
+    // This if condition will be satisfied if it is greater by 1 which would measurement
+    // it is 1 millisecond (1000 microseconds) more which is more than 600 microseconds
+    // and would not measure if the interrupt hasn't happen because that is the max value
+    // of the mission elapsed time (around 50 days)
+    if(globalTimeBase() > batteryInitializationTime) {
+        measureBattery;
+    }
 
     // Casting pointer to proper data type
     PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
