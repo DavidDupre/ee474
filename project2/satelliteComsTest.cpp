@@ -7,7 +7,7 @@
 test(thrusterUpdate) {
     bool fuelLow = false;
     bool batteryLow = false;
-    bool solarPanelState = false;
+    SolarPanelState solarPanelState = SOLAR_PANEL_RETRACTED;
     volatile unsigned int batteryLevelPtr[1] = { 90 };
     unsigned short fuelLevel = 90;
     unsigned short powerConsumption = 10;
@@ -38,7 +38,7 @@ test(thrusterUpdate) {
 test(thrusterInvalid) {
     bool fuelLow = false;
     bool batteryLow = false;
-    bool solarPanelState = false;
+    SolarPanelState solarPanelState = SOLAR_PANEL_RETRACTED;
     volatile unsigned int batteryLevelPtr[1] = { 90 };
     unsigned short fuelLevel = 90;
     unsigned short powerConsumption = 10;

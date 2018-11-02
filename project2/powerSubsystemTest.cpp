@@ -14,7 +14,7 @@
 
 // Testing to make sure solar panel deploys upon battery falling below BATTERY_LEVEL_LOW
 test(solarPanelOperation) {
-    bool solarPanelState = false;
+    SolarPanelState solarPanelState = SOLAR_PANEL_RETRACTED;
     volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH]
         = { BATTERY_LEVEL_LOW - 1 };
     unsigned short powerConsumption = 6;

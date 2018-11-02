@@ -3,6 +3,8 @@
 
 #define BATTERY_LEVEL_BUFFER_LENGTH 16
 
+#include "solarPanel.h"
+
 
 /*
  * These variables must have global scope.
@@ -14,7 +16,7 @@
 
 extern unsigned int thrusterCommand;
 extern unsigned short fuelLevel;
-extern bool solarPanelState;
+extern SolarPanelState solarPanelState;
 extern bool solarPanelDeploy;
 extern bool solarPanelRetract;
 extern volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];

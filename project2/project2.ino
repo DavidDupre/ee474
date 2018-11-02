@@ -15,7 +15,7 @@
 
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
-bool solarPanelState;
+SolarPanelState solarPanelState;
 bool solarPanelDeploy;
 bool solarPanelRetract;
 unsigned short batteryLevel;
@@ -127,7 +127,7 @@ TCB warningAlarmTCB = {
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
-    solarPanelState = false;
+    solarPanelState = SOLAR_PANEL_RETRACTED;
     memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
     solarPanelDeploy = false;
     solarPanelRetract = false;
@@ -158,8 +158,6 @@ void setup() {
     taskQueueInsert(&warningAlarmTCB);
     taskQueueInsert(&vehicleCommsTCB);
 #endif
-
-    
 }
 
 void loop() {

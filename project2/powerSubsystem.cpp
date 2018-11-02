@@ -57,21 +57,21 @@ TCB solarPanelControlTCB = {
  *  attach interrupt to EXTERNAL_MEASUREMENT_EVENT_PIN
  *
  * interrupt:
- *  set initalization to current time from globalTimeBase 
- * 
- *  
- * 
+ *  set initalization to current time from globalTimeBase
+ *
+ *
+ *
  *  measure and update buffer:
  *  for every measurement in indices 0-14 (first 15 measurements)
  *  move them to the next index (indices 1-15)
  *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
  *
- * 
+ *
  * powerSubsystem:
- * 
+ *
  * If we are passed the time that we have stored for the global time globalTimeBase
  * AKA. we have delayed 600 microseconds, then measure and update buffer
- * 
+ *
  * setPowerConsumption to increasing
  * set timesCalled to zero
  * if powerConsumption is increasing
@@ -176,9 +176,9 @@ void powerSubsystem(void* powerSubsystemData) {
     }
 
     // Checking if the solar panel should be up for power generation
-    if(*data->solarPanelState) {
+    if(*data->solarPanelState != SOLAR_PANEL_RETRACTED) {
         // If the battery level is above the threshold, retract the solar panel
-        if(data->batteryLevelPtr[0] > HIGH_BATTERY) {
+        if(data->batteryLevelPtr[0] > BATTERY_LEVEL_HIGH) {
             *data->solarPanelRetract = true;
             taskQueueInsert(&solarPanelControlTCB);
         } else if(timesCalled % 2 == 0) {

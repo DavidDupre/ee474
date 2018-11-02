@@ -1,24 +1,29 @@
 #ifndef _POWER_SUBSYSTEM_H_
 #define _POWER_SUBSYSTEM_H_
 
-#define HIGH_BATTERY 95
-#define BATTERY_LEVEL_MID 50
-#define BATTERY_LEVEL_LOW 45
-#define POWER_CONSUMPTION_UPPER 10
-#define POWER_CONSUMPTION_LOWER 5
-#define SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER 3
-#define EXTERNAL_MEASUREMENT_EVENT_PIN A13
-#define MEAUSURE_INTERRUPT_PIN 19
-#define MEASURE_DELAY_MS 1
+#include "solarPanel.h"
 
 #define ANALOG_MIN 0
 #define ANALOG_MAX 1023
 #define BATTERY_MIN 0
 #define BATTERY_MAX 36
 
+#define BATTERY_PERCENT_TO_VOLTS(P) (((P) * BATTERY_MAX) / 100 - BATTERY_MIN)
+
+#define BATTERY_LEVEL_HIGH BATTERY_PERCENT_TO_VOLTS(95)
+#define BATTERY_LEVEL_MID  BATTERY_PERCENT_TO_VOLTS(50)
+#define BATTERY_LEVEL_LOW  BATTERY_PERCENT_TO_VOLTS(10)
+
+#define POWER_CONSUMPTION_UPPER 10
+#define POWER_CONSUMPTION_LOWER 5
+#define SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER 3
+#define EXTERNAL_MEASUREMENT_EVENT_PIN A13
+#define MEAUSURE_INTERRUPT_PIN 20
+#define MEASURE_DELAY_MS 1
+
 
 typedef struct {
-    bool *solarPanelState;
+    SolarPanelState *solarPanelState;
     bool *solarPanelDeploy;
     bool *solarPanelRetract;
     volatile unsigned int *batteryLevelPtr;
