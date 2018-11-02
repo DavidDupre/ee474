@@ -2,10 +2,13 @@
 #include <stdint.h>
 #include <Arduino.h>
 #include "thrusterSubsystem.h"
+#include "solarPanel.h"
 #include "schedule.h"
 
 
 void printBool(bool input);
+
+void printSolarPanelState(SolarPanelState state);
 
 /******************************************************************************
  * name : satelliteComs
@@ -71,7 +74,7 @@ void satelliteComs(void* satelliteComsData) {
     printBool(*data->batteryLow);
     Serial.println();
     Serial.print(F("Solar Panel state is: "));
-    printBool(*data->solarPanelState);
+    printSolarPanelState(*data->solarPanelState);
     Serial.println();
     Serial.print(F("Battery Level is: "));
     Serial.print(data->batteryLevelPtr[0]);
@@ -91,5 +94,22 @@ void printBool(bool input) {
         Serial.print(F("true"));
     } else {
         Serial.print(F("false"));
+    }
+}
+
+void printSolarPanelState(SolarPanelState state) {
+    switch(state) {
+        case SOLAR_PANEL_DEPLOYED:
+            Serial.print(F("deployed"));
+            break;
+        case SOLAR_PANEL_DEPLOYING:
+            Serial.print(F("deploying"));
+            break;
+        case SOLAR_PANEL_RETRACTING:
+            Serial.print(F("retracting"));
+            break;
+        case SOLAR_PANEL_RETRACTED:
+            Serial.print(F("retracted"));
+            break;
     }
 }
