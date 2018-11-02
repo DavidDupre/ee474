@@ -82,8 +82,16 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerConsumption);
     Serial.print(F("Power Generation is: "));
     Serial.println(*data->powerGeneration);
-    Serial.print(F("Vehicle Response: A "));
-    Serial.println(*data->vehicleResponse);
+    if (*data->vehicleResponse == 'F' || 
+    *data->vehicleResponse == 'B' || 
+    *data->vehicleResponse == 'L' || 
+    *data->vehicleResponse == 'R' || 
+    *data->vehicleResponse == 'D' || 
+    *data->vehicleResponse == 'H') {
+        Serial.print(F("Vehicle Response: A "));
+        Serial.println(*data->vehicleResponse);
+        *data->vehicleResponse = '\0';
+    }
 }
 
 void printBool(bool input) {

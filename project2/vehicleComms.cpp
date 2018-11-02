@@ -39,11 +39,11 @@ void vehicleComms(void *vehicleCommsData) {
 
     // Cast from void to correct type
     VehicleCommsData *data = (VehicleCommsData *) vehicleCommsData;
-    
+
     // Print command to Serial1 for the Uno to pick up
     // Do not print if there is no command
     if (*data->vehicleCommand != '\0') {
-        Serial1.println(*data->vehicleCommand);
+        Serial1.print(*data->vehicleCommand);
         *data->vehicleCommand = '\0';
     }
 
