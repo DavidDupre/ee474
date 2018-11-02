@@ -18,13 +18,11 @@ unsigned short fuelLevel;
 SolarPanelState solarPanelState;
 bool solarPanelDeploy;
 bool solarPanelRetract;
-unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
 volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
-
 bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
@@ -131,7 +129,6 @@ void setup() {
     memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
     solarPanelDeploy = false;
     solarPanelRetract = false;
-    batteryLevel = 100;
     powerConsumption = 0;
     powerGeneration = 0;
     batteryLow = false;
@@ -153,10 +150,10 @@ void setup() {
 #ifndef RUN_TESTS
     taskQueueInsert(&powerSubsystemTCB);
     taskQueueInsert(&thrusterSubsystemTCB);
-    taskQueueInsert(&consoleDisplayTCB);
+    taskQueueInsert(&vehicleCommsTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
-    taskQueueInsert(&vehicleCommsTCB);
+    taskQueueInsert(&consoleDisplayTCB);
 #endif
 }
 

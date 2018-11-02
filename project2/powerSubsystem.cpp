@@ -195,19 +195,6 @@ void powerSubsystem(void* powerSubsystemData) {
             taskQueueInsert(&solarPanelControlTCB);
         }
     }
-
-    // The following portion is deprecated from Assignment 2.
-
-    // if(*data->solarPanelState) {
-    //     // Updating the battery level for the case of solar panel deployed
-    //     (*data->batteryLevelPtr)[0] = capAt100((*data->batteryLevelPtr)[0] - *data->powerConsumption + *data->powerGeneration);
-    // } else {
-    //     // Updating the battery level for solar panel not deployed
-    //     (*data->batteryLevelPtr)[0] = (*data->batteryLevelPtr)[0] -
-    //     SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
-    // }
-    // // Incrementing times function has been called
-    // timesCalled+= 1;
 }
 
 unsigned int normBattery(unsigned int input) {

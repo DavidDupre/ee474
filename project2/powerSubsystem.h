@@ -31,13 +31,6 @@ typedef struct {
     unsigned short *powerGeneration;
 } PowerSubsystemData;
 
-// struct Measurement {
-//     volatile unsigned short data;
-//     volatile struct Measurement* next;
-// };
-
-//extern struct Measurement* batteryHead;
-
 void powerSubsystemInit();
 
 void measurementExternalInterruptISR();
