@@ -1,10 +1,12 @@
 #ifndef _CONSOLE_DISPLAY_H_
 #define _CONSOLE_DISPLAY_H_
 
+#include "solarPanel.h"
+
 
 typedef struct {
-    bool *solarPanelState;
-    unsigned short *batteryLevel;
+    SolarPanelState *solarPanelState;
+    volatile unsigned int *batteryLevelPtr;
     unsigned short *fuelLevel;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;

@@ -8,7 +8,7 @@
  */
 test(warningAlarm) {
     unsigned short fuelLevel = 100;
-    unsigned short batteryLevel = 100;
+    volatile unsigned int batteryLevelPtr[1] = { 100 };
     bool batteryLow = false;
     bool fuelLow = false;
 
@@ -16,7 +16,7 @@ test(warningAlarm) {
     WarningAlarmData data = {
         &batteryLow,
         &fuelLow,
-        &batteryLevel,
+        batteryLevelPtr,
         &fuelLevel
     };
 
@@ -30,7 +30,7 @@ test(warningAlarm) {
     setGlobalTimeBase(5000);
 
     fuelLevel = 10;
-    batteryLevel = 10;
+    batteryLevelPtr[0] = 10;
 
     // call the function again to update the warnings
     warningAlarm((void *) &data);
@@ -43,7 +43,7 @@ test(warningAlarm) {
     setGlobalTimeBase(10000);
 
     fuelLevel = 40;
-    batteryLevel = 40;
+    batteryLevelPtr[0] = 40;
 
     // call the function again to update the warnings
     warningAlarm((void *) &data);
@@ -55,7 +55,7 @@ test(warningAlarm) {
     setGlobalTimeBase(15000);
 
     fuelLevel = 1;
-    batteryLevel = 1;
+    batteryLevelPtr[0] = 1;
 
     // call the function again to update the warnings
     warningAlarm((void *) &data);
@@ -67,7 +67,7 @@ test(warningAlarm) {
     setGlobalTimeBase(20000);
 
     fuelLevel = 80;
-    batteryLevel = 80;
+    batteryLevelPtr[0] = 80;
 
     // call the function again to update the warnings
     warningAlarm((void *) &data);

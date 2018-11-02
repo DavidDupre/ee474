@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "consoleDisplay.h"
 #include "tft.h"
+#include "solarPanel.h"
 #include "schedule.h"
 
 #define TEXT_SIZE         2
@@ -56,16 +57,25 @@ void consoleDisplay(void *consoleDisplayData) {
 
     printLabel(labels[lineNum], lineNum);
     lineNum++;
-    if (*(data->solarPanelState)) {
-        tft.print(F("deployed"));
-    } else {
-        tft.print(F("not deployed"));
+    switch(*(data->solarPanelState)) {
+        case SOLAR_PANEL_DEPLOYED:
+            tft.print(F("deployed"));
+            break;
+        case SOLAR_PANEL_DEPLOYING:
+            tft.print(F("deploying"));
+            break;
+        case SOLAR_PANEL_RETRACTING:
+            tft.print(F("retracting"));
+            break;
+        case SOLAR_PANEL_RETRACTED:
+            tft.print(F("retracted"));
+            break;
     }
 
     printLabel(labels[lineNum], lineNum);
     lineNum++;
-    tft.print(*(data->batteryLevel));
-    tft.print(F("/100"));
+    tft.print(data->batteryLevelPtr[0]);
+    tft.print(F("/36"));
 
     printLabel(labels[lineNum], lineNum);
     lineNum++;

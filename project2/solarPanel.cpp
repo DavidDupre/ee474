@@ -17,8 +17,7 @@
 #define SOLAR_PANEL_DUTY_CYCLE_RANGE   100
 
 
-void solarPanelSetDeployed();
-void solarPanelSetRetracted();
+void solarPanelStop();
 
 
 ConsoleKeypadData consoleKeypadData = {
@@ -38,12 +37,9 @@ unsigned short solarPanelSpeed;
 void solarPanelControlInit() {
     solarPanelSpeed = 0;
     pinMode(PIN_SOLAR_PANEL_OUTPUT, OUTPUT);
-    pinMode(PIN_SOLAR_PANEL_DEPLOYED, INPUT_PULLUP);
-    pinMode(PIN_SOLAR_PANEL_RETRACTED, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_DEPLOYED),
-        solarPanelSetDeployed, RISING);
-    attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_RETRACTED),
-        solarPanelSetRetracted, RISING);
+    pinMode(PIN_SOLAR_PANEL_STOPPED, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_STOPPED),
+        solarPanelStop, RISING);
     consoleKeypadInit();
 }
 
@@ -62,44 +58,50 @@ void solarPanelControl(void *solarPanelControlData) {
     }
 
     // handle commands based on current state
-    if (*data->solarPanelDeploy && !*data->solarPanelState) {
-        // start deploy
-        *data->solarPanelDeploy = false;
+    if (*data->solarPanelDeploy
+            && *data->solarPanelState != SOLAR_PANEL_DEPLOYED
+            && *data->solarPanelState != SOLAR_PANEL_DEPLOYING) {
+        // start deploying
+        *data->solarPanelState = SOLAR_PANEL_DEPLOYING;
         taskQueueInsert(&consoleKeypadTCB);
         solarPanelSpeed = SOLAR_PANEL_MAX_SPEED / 2;
-    } else if (*data->solarPanelRetract && *data->solarPanelState) {
+    } else if (*data->solarPanelRetract
+            && *data->solarPanelState != SOLAR_PANEL_RETRACTED
+            && *data->solarPanelState != SOLAR_PANEL_RETRACTING) {
         // start retract
-        *data->solarPanelRetract = false;
+        *data->solarPanelState = SOLAR_PANEL_RETRACTING;
         taskQueueInsert(&consoleKeypadTCB);
         solarPanelSpeed = SOLAR_PANEL_MAX_SPEED / 2;
     }
+
+    // after handling commands above, we can clear the flags again
+    *data->solarPanelDeploy = false;
+    *data->solarPanelRetract = false;
 
     // set PWM based on speed
     // this doesn't use a 500 ms period
     unsigned short dutyCycle;
     unsigned short dutyCycleOffset = solarPanelSpeed
         * SOLAR_PANEL_DUTY_CYCLE_RANGE / SOLAR_PANEL_MAX_SPEED;
-    if (*data->solarPanelState) {
+    if (*data->solarPanelState == SOLAR_PANEL_RETRACTING) {
         // retracting
         dutyCycle = SOLAR_PANEL_DUTY_CYCLE_STOPPED - dutyCycleOffset;
-    } else {
+    } else if (*data->solarPanelState == SOLAR_PANEL_DEPLOYING) {
         // deploying
         dutyCycle = SOLAR_PANEL_DUTY_CYCLE_STOPPED + dutyCycleOffset;
+    } else {
+        // stopped
+        dutyCycle = SOLAR_PANEL_DUTY_CYCLE_STOPPED;
     }
     analogWrite(PIN_SOLAR_PANEL_OUTPUT, dutyCycle);
 }
 
 void solarPanelStop() {
     solarPanelSpeed = 0;
+    if (solarPanelState == SOLAR_PANEL_DEPLOYING) {
+        solarPanelState = SOLAR_PANEL_DEPLOYED;
+    } else if (solarPanelState == SOLAR_PANEL_RETRACTING) {
+        solarPanelState = SOLAR_PANEL_RETRACTED;
+    }
     taskQueueDelete(&consoleKeypadTCB);
-}
-
-void solarPanelSetDeployed() {
-    solarPanelState = true;
-    solarPanelStop();
-}
-
-void solarPanelSetRetracted() {
-    solarPanelState = false;
-    solarPanelStop();
 }

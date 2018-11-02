@@ -1,6 +1,11 @@
 #ifndef _SHARED_VARIABLES_H_
 #define _SHARED_VARIABLES_H_
 
+#define BATTERY_LEVEL_BUFFER_LENGTH 16
+
+#include "solarPanel.h"
+
+
 /*
  * These variables must have global scope.
  *
@@ -11,10 +16,10 @@
 
 extern unsigned int thrusterCommand;
 extern unsigned short fuelLevel;
-extern bool solarPanelState;
+extern SolarPanelState solarPanelState;
 extern bool solarPanelDeploy;
 extern bool solarPanelRetract;
-extern unsigned short batteryLevel;
+extern volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
 extern unsigned short powerConsumption;
 extern unsigned short powerGeneration;
 extern bool batteryLow;

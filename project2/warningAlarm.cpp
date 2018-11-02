@@ -4,8 +4,10 @@
 #include "schedule.h"
 #include "tft.h"
 
-#define HALF_DEPLETED   50
-#define LOW_LEVEL       10
+#define HALF_FUEL       50
+#define LOW_FUEL        10
+#define LOW_BATTERY     10
+#define HALF_BATTERY    18
 #define BATTERY_RATE    1000
 #define FUEL_RATE       2000
 
@@ -26,11 +28,11 @@ void warningAlarm(void *warningAlarmData) {
     // Update battery status
     tft.setTextSize(4);
     tft.setCursor(0,0);
-    if (*(data->batteryLevel) <= HALF_DEPLETED) {
+    if (data->batteryLevelPtr[0] <= HALF_BATTERY) {
         // Only update flash if the last update time was over a second ago
         if (timePassedMsBattery >= BATTERY_RATE) {
             // Draw black over batter portion
-            if (*(data->batteryLevel) <= LOW_LEVEL) {
+            if (data->batteryLevelPtr[0] <= LOW_BATTERY) {
                 tft.setTextColor(RED);
                 *(data->batteryLow) = true;
             } else {
@@ -60,11 +62,11 @@ void warningAlarm(void *warningAlarmData) {
 
     // Update fuel status
     tft.setCursor(200,0);
-    if (*(data->fuelLevel) <= HALF_DEPLETED) {
+    if (*(data->fuelLevel) <= HALF_FUEL) {
         // Only update flash if the last update time was over two seconds ago
         if (timePassedMsFuel >= FUEL_RATE) {
             // Draw black over batter portion
-            if (*(data->fuelLevel) <= LOW_LEVEL) {
+            if (*(data->fuelLevel) <= LOW_FUEL) {
                 tft.setTextColor(RED);
                 *(data->fuelLow) = true;
             } else {

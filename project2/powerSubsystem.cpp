@@ -1,10 +1,31 @@
 #include "powerSubsystem.h"
 #include <stdint.h>
 #include "schedule.h"
+#include "sharedVariables.h"
+#include <Arduino.h>
+#include <limits.h>
+#include "solarPanel.h"
 
 
-unsigned short capAt100(unsigned short batteryLevel);
+unsigned int normBattery(unsigned int input);
+// Flags
+// volatile bool readyToMeasure;
+volatile unsigned long batteryInitializationTime;
 
+SolarPanelControlData solarPanelControlData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    &driveMotorSpeedInc,
+    &driveMotorSpeedDec
+};
+
+TCB solarPanelControlTCB = {
+    &solarPanelControlData,
+    solarPanelControl,
+    "Solar Panel Control",
+    NULL, NULL
+};
 
 /******************************************************************************
  * name: powerSubsystem
@@ -31,6 +52,26 @@ unsigned short capAt100(unsigned short batteryLevel);
  *
  * pseudocode:
  *
+ * init
+ *  set initalization time to 0
+ *  attach interrupt to EXTERNAL_MEASUREMENT_EVENT_PIN
+ *
+ * interrupt:
+ *  set initalization to current time from globalTimeBase
+ *
+ *
+ *
+ *  measure and update buffer:
+ *  for every measurement in indices 0-14 (first 15 measurements)
+ *  move them to the next index (indices 1-15)
+ *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
+ *
+ *
+ * powerSubsystem:
+ *
+ * If we are passed the time that we have stored for the global time globalTimeBase
+ * AKA. we have delayed 600 microseconds, then measure and update buffer
+ *
  * setPowerConsumption to increasing
  * set timesCalled to zero
  * if powerConsumption is increasing
@@ -52,13 +93,41 @@ unsigned short capAt100(unsigned short batteryLevel);
  * if more than 50
  *  increase by 2 on even
  *
- * if solar panel deployed
- *  increment battery level by powerGeneration, deduct powerConsumption
- * else
- *  decrement by 3 times powerConsumption
- *
  * author: Nick Orlov
 *****************************************************************************/
+
+void powerSubsystemInit() {
+    // setting the battery initialization to unsigned long max value
+    // in order to make sure task never measures as it checks to see
+    // if the mission elapsed time is greater than it
+    batteryInitializationTime = 0;
+    // Attaching interrupt
+    attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
+    measurementExternalInterruptISR, RISING);
+}
+
+void measurementExternalInterruptISR() {
+    // set bool for measurement - dont need if set initial batteryInitializationTime
+    // to UNSIGNED_LONG_MAX
+    // bool readyToMeasure = true;
+    // set integer time
+    batteryInitializationTime = globalTimeBase();
+}
+
+// batteryLevelPtr points to a pointer which points to an array of the 16
+// most recent battery level measurements
+void measureBattery() {
+
+    // Moving up the first 15 measurements, overwriting the 16th measurement
+    for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
+        batteryLevelPtr[i] = batteryLevelPtr[i+1];
+    }
+
+    // Taking the most recent measurement from the external event interrupt pin
+    unsigned int analogBatteryLvl = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
+    batteryLevelPtr[0] = normBattery(analogBatteryLvl);
+}
+
 void powerSubsystem(void* powerSubsystemData) {
     // return early if less than 5 seconds have passed
     static unsigned long lastRunTime;
@@ -66,6 +135,14 @@ void powerSubsystem(void* powerSubsystemData) {
         return;
     }
     lastRunTime = globalTimeBase();
+
+    // This if condition will be satisfied if it is greater by 1 which would measurement
+    // it is 1 millisecond (1000 microseconds) more which is more than 600 microseconds
+    // and would not measure if the interrupt hasn't happen because that is the max value
+    // of the mission elapsed time (around 50 days)
+    if(globalTimeBase() >= batteryInitializationTime + MEASURE_DELAY_MS) {
+        measureBattery();
+    }
 
     // Casting pointer to proper data type
     PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
@@ -99,40 +176,29 @@ void powerSubsystem(void* powerSubsystemData) {
     }
 
     // Checking if the solar panel should be up for power generation
-    if(*data->solarPanelState) {
+    if(*data->solarPanelState != SOLAR_PANEL_RETRACTED) {
         // If the battery level is above the threshold, retract the solar panel
-        if(*data->batteryLevel > HIGH_BATTERY) {
-            *data->solarPanelState = !*data->solarPanelState;
+        if(data->batteryLevelPtr[0] > BATTERY_LEVEL_HIGH) {
+            *data->solarPanelRetract = true;
+            taskQueueInsert(&solarPanelControlTCB);
         } else if(timesCalled % 2 == 0) {
             // Incrementing logic for the battery level from the solar panel
             *data->powerGeneration += 2;
-        } else if (*data->batteryLevel <= BATTERY_LEVEL_MID) {
+        } else if (data->batteryLevelPtr[0] <= BATTERY_LEVEL_MID) {
             *data->powerGeneration += 1;
         }
     } else {
         // Checking to see if the battery level is low, and if solar panel needs to be deployed
-        if(*data->batteryLevel <= BATTERY_LEVEL_LOW) {
-            *data->solarPanelState = !*data->solarPanelState;
+        if(data->batteryLevelPtr[0] <= BATTERY_LEVEL_LOW) {
+            // Deploy solar panel
+            *data->solarPanelDeploy = true;
+            taskQueueInsert(&solarPanelControlTCB);
         }
     }
-
-    if(*data->solarPanelState) {
-        // Updating the battery level for the case of solar panel deployed
-        *data->batteryLevel = capAt100(*data->batteryLevel - *data->powerConsumption + *data->powerGeneration);
-    } else {
-        // Updating the battery level for solar panel not deployed
-        *data->batteryLevel = *data->batteryLevel -
-        SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER * *data->powerConsumption;
-    }
-    // Incrementing times function has been called
-    timesCalled+= 1;
 }
 
-unsigned short capAt100(unsigned short batteryLevel) {
-    if(batteryLevel > 100) {
-        return 100;
-    } else {
-        return batteryLevel;
-    }
+unsigned int normBattery(unsigned int input) {
+    unsigned int output = (((BATTERY_MAX - BATTERY_MIN)*
+        (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
+    return output;
 }
-

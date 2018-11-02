@@ -15,14 +15,14 @@
 
 unsigned int thrusterCommand;
 unsigned short fuelLevel;
-bool solarPanelState;
+SolarPanelState solarPanelState;
 bool solarPanelDeploy;
 bool solarPanelRetract;
-unsigned short batteryLevel;
 unsigned short powerConsumption;
 unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
+volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
 bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
@@ -35,14 +35,16 @@ ThrusterSubsystemData thrusterSubsystemData = {
 
 PowerSubsystemData powerSubsystemData = {
     &solarPanelState,
-    &batteryLevel,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    batteryLevelPtr,
     &powerConsumption,
     &powerGeneration
 };
 
 ConsoleDisplayData consoleDisplayData = {
     &solarPanelState,
-    &batteryLevel,
+    batteryLevelPtr,
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
@@ -54,7 +56,7 @@ SatelliteComsData satelliteComsData = {
     &fuelLow,
     &batteryLow,
     &solarPanelState,
-    &batteryLevel,
+    batteryLevelPtr,
     &fuelLevel,
     &powerConsumption,
     &powerGeneration,
@@ -70,17 +72,11 @@ VehicleCommsData vehicleCommsData = {
 WarningAlarmData warningAlarmData = {
     &batteryLow,
     &fuelLow,
-    &batteryLevel,
+    batteryLevelPtr,
     &fuelLevel
 };
 
-SolarPanelControlData solarPanelControlData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    &driveMotorSpeedInc,
-    &driveMotorSpeedDec
-};
+
 
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
@@ -124,20 +120,15 @@ TCB warningAlarmTCB = {
     NULL, NULL
 };
 
-TCB solarPanelControlTCB = {
-    &solarPanelControlData,
-    solarPanelControl,
-    "Solar Panel Control",
-    NULL, NULL
-};
+
 
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
-    solarPanelState = false;
+    solarPanelState = SOLAR_PANEL_RETRACTED;
+    memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
     solarPanelDeploy = false;
     solarPanelRetract = false;
-    batteryLevel = 100;
     powerConsumption = 0;
     powerGeneration = 0;
     batteryLow = false;
@@ -153,15 +144,16 @@ void setup() {
 
     consoleDisplayInit();
     solarPanelControlInit();
+    powerSubsystemInit();
 
     // initialize the task queue
 #ifndef RUN_TESTS
     taskQueueInsert(&powerSubsystemTCB);
     taskQueueInsert(&thrusterSubsystemTCB);
-    taskQueueInsert(&consoleDisplayTCB);
+    taskQueueInsert(&vehicleCommsTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
-    taskQueueInsert(&vehicleCommsTCB);
+    taskQueueInsert(&consoleDisplayTCB);
 #endif
 }
 
