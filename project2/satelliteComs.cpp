@@ -75,7 +75,7 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println();
     Serial.print(F("Battery Level is: "));
     Serial.print(data->batteryLevelPtr[0]);
-    Serial.println(F("V");
+    Serial.println(F("V"));
     Serial.print("Fuel Level is: ");
 
     Serial.println(*data->fuelLevel);

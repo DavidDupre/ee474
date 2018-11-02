@@ -3,6 +3,8 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include <Arduino.h>
+#include <limits.h>
+#include "solarPanel.h"
 
 
 unsigned int normBattery(unsigned int input);
@@ -10,7 +12,20 @@ unsigned int normBattery(unsigned int input);
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
 
+SolarPanelControlData solarPanelControlData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    &driveMotorSpeedInc,
+    &driveMotorSpeedDec
+};
 
+TCB solarPanelControlTCB = {
+    &solarPanelControlData,
+    solarPanelControl,
+    "Solar Panel Control",
+    NULL, NULL
+};
 
 /******************************************************************************
  * name: powerSubsystem
@@ -38,16 +53,25 @@ volatile unsigned long batteryInitializationTime;
  * pseudocode:
  *
  * init
+ *  set initalization time to 0
  *  attach interrupt to EXTERNAL_MEASUREMENT_EVENT_PIN
  *
  * interrupt:
- *  delay 600 microseconds
- *  make measurement and update buffer:
+ *  set initalization to current time from globalTimeBase 
+ * 
+ *  
+ * 
+ *  measure and update buffer:
  *  for every measurement in indices 0-14 (first 15 measurements)
  *  move them to the next index (indices 1-15)
  *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
  *
+ * 
  * powerSubsystem:
+ * 
+ * If we are passed the time that we have stored for the global time globalTimeBase
+ * AKA. we have delayed 600 microseconds, then measure and update buffer
+ * 
  * setPowerConsumption to increasing
  * set timesCalled to zero
  * if powerConsumption is increasing
@@ -76,7 +100,7 @@ void powerSubsystemInit() {
     // setting the battery initialization to unsigned long max value
     // in order to make sure task never measures as it checks to see
     // if the mission elapsed time is greater than it
-    batteryInitializationTime = UNSIGNED_LONG_MAX;
+    batteryInitializationTime = 0;
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);
@@ -87,7 +111,7 @@ void measurementExternalInterruptISR() {
     // to UNSIGNED_LONG_MAX
     // bool readyToMeasure = true;
     // set integer time
-    unsigned long batteryInitializationTime = globalTimeBase();
+    batteryInitializationTime = globalTimeBase();
 }
 
 // batteryLevelPtr points to a pointer which points to an array of the 16
@@ -116,8 +140,8 @@ void powerSubsystem(void* powerSubsystemData) {
     // it is 1 millisecond (1000 microseconds) more which is more than 600 microseconds
     // and would not measure if the interrupt hasn't happen because that is the max value
     // of the mission elapsed time (around 50 days)
-    if(globalTimeBase() > batteryInitializationTime) {
-        measureBattery;
+    if(globalTimeBase() >= batteryInitializationTime + MEASURE_DELAY_MS) {
+        measureBattery();
     }
 
     // Casting pointer to proper data type
@@ -156,6 +180,7 @@ void powerSubsystem(void* powerSubsystemData) {
         // If the battery level is above the threshold, retract the solar panel
         if(data->batteryLevelPtr[0] > HIGH_BATTERY) {
             *data->solarPanelRetract = true;
+            taskQueueInsert(&solarPanelControlTCB);
         } else if(timesCalled % 2 == 0) {
             // Incrementing logic for the battery level from the solar panel
             *data->powerGeneration += 2;
@@ -165,7 +190,9 @@ void powerSubsystem(void* powerSubsystemData) {
     } else {
         // Checking to see if the battery level is low, and if solar panel needs to be deployed
         if(data->batteryLevelPtr[0] <= BATTERY_LEVEL_LOW) {
-            *data->solarPanelDeploy = false;
+            // Deploy solar panel
+            *data->solarPanelDeploy = true;
+            taskQueueInsert(&solarPanelControlTCB);
         }
     }
 

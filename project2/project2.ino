@@ -24,8 +24,6 @@ unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
 volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
-bool solarPanelDeploy;
-bool solarPanelRetract;
 
 bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
@@ -80,13 +78,7 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
-SolarPanelControlData solarPanelControlData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    &driveMotorSpeedInc,
-    &driveMotorSpeedDec
-};
+
 
 TCB powerSubsystemTCB = {
     &powerSubsystemData,
@@ -130,12 +122,7 @@ TCB warningAlarmTCB = {
     NULL, NULL
 };
 
-TCB solarPanelControlTCB = {
-    &solarPanelControlData,
-    solarPanelControl,
-    "Solar Panel Control",
-    NULL, NULL
-};
+
 
 void setup() {
     thrusterCommand = 0;
@@ -160,6 +147,7 @@ void setup() {
 
     consoleDisplayInit();
     solarPanelControlInit();
+    powerSubsystemInit();
 
     // initialize the task queue
 #ifndef RUN_TESTS
@@ -171,11 +159,7 @@ void setup() {
     taskQueueInsert(&vehicleCommsTCB);
 #endif
 
-    Serial.begin(9600);
-    Serial1.begin(9600);
-    tft.begin(TFT_IDENTIFIER);
-    tft.setRotation(1);
-    tft.fillScreen(BLACK);
+    
 }
 
 void loop() {
