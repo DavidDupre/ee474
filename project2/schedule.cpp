@@ -14,6 +14,10 @@ unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;
 
+void scheduleInit() {
+    missionElapsedTime = millis();
+}
+
 void schedule() {
     unsigned short size = taskQueueLength();
     unsigned long majorStartTime = millis();

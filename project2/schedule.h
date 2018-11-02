@@ -15,6 +15,20 @@ typedef struct _tcb {
 
 
 /******************************************************************************
+ * name: scheduleInit
+ *
+ * inputs: void
+ *
+ * outputs: void
+ *
+ * description:
+ *  scheduleInit initializes the global time base.
+ *
+ * author: David Dupre
+ *****************************************************************************/
+void scheduleInit();
+
+/******************************************************************************
  * name: schedule
  *
  * inputs: void

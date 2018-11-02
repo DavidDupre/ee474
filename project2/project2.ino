@@ -142,6 +142,7 @@ void setup() {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
+    scheduleInit();
     consoleDisplayInit();
     solarPanelControlInit();
     powerSubsystemInit();
