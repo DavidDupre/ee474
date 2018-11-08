@@ -19,7 +19,6 @@ void scheduleInit() {
 }
 
 void schedule() {
-    unsigned short size = taskQueueLength();
     unsigned long majorStartTime = millis();
 
     // it's okay if integer division rounds this down because we will delay for
@@ -88,9 +87,23 @@ void taskQueueInsert(TCB *node) {
         taskQueueHead = node;
         taskQueueTail = node;
     } else {
-        taskQueueTail->next = node;
-        node->prev = taskQueueTail;
-        taskQueueTail = node;
+        // find the task to insert after (node before last node with lower
+        // priority)
+        TCB *other = taskQueueHead;
+        while (other->next != NULL
+                && other->next->priority <= node->priority) {
+            other = other->next;
+        }
+
+        // insert after "other"
+        if (other->next) {
+            other->next->prev = node;
+        } else {
+            taskQueueTail = node;
+        }
+        node->next = other->next;
+        node->prev = other;
+        other->next = node;
     }
     return;
 }
@@ -147,4 +160,14 @@ unsigned short taskQueueLength() {
         node = node->next;
     }
     return length;
+}
+
+void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
+       unsigned short priority) {
+    tcb->data = data;
+    tcb->task = task;
+    tcb->name = name;
+    tcb->priority = priority;
+    tcb->next = NULL;
+    tcb->prev = NULL;
 }

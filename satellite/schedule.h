@@ -4,13 +4,15 @@
 #define MAJOR_CYCLE_DURATION_MS 5000
 #define MINOR_CYCLE_DURATION_MS 1000
 
+typedef void (*tcb_task_fn)(void *data);
 
 typedef struct _tcb {
     void *data;
-    void (*task)(void *data);
+    tcb_task_fn task;
     const char *name;
     struct _tcb *next;
     struct _tcb *prev;
+    unsigned short priority;
 } TCB;
 
 
@@ -96,7 +98,8 @@ void setGlobalTimeBase(unsigned long epoch);
  * outputs: void
  *
  * description:
- *  Add a task to the end of the queue
+ *  Add a task to the queue before the first task of lower priority, or to the
+ *  end if no such task exists on the queue.
  *
  * author: David Dupre
  *****************************************************************************/
@@ -144,5 +147,26 @@ bool taskQueueIncludes(TCB *node);
  * author: David Dupre
  *****************************************************************************/
 unsigned short taskQueueLength();
+
+/******************************************************************************
+ * name: tcbInit
+ *
+ * inputs:
+ *  tcb: the output TCB
+ *  data: the shared data used by the task
+ *  task: the function called when this task is run
+ *  name: a string to identify this task in timing
+ *  priority: a priority from 1 to 5 (inclusive) where 1 is highest priority.
+ *      Higher priority tasks run before lower priority tasks.
+ *
+ * outputs: void
+ *
+ * description:
+ *  initialize a TCB
+ *
+ * author: David Dupre
+ *****************************************************************************/
+void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
+    unsigned short priority);
 
 #endif  /* _SCHEDULE_H_ */
