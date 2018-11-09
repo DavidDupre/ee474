@@ -46,10 +46,4 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
                                bool useDown, uint8_t magnitude,
                                uint8_t duration);
 
-/*
- * Set the max value of partialFuel. Decreasing this will simulate a faster
- * fuel consumption. Do not use this outside of testing.
- */
-void setMaxPartialFuel(uint32_t maxPartialFuel);
-
 #endif  /* _THRUSTER_SUBSYSTEM_H_ */

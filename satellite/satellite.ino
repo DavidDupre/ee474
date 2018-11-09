@@ -148,21 +148,15 @@ void setup() {
     powerSubsystemInit();
 
     // initialize the task queue
-#ifndef RUN_TESTS
     taskQueueInsert(&powerSubsystemTCB);
     taskQueueInsert(&thrusterSubsystemTCB);
     taskQueueInsert(&vehicleCommsTCB);
     taskQueueInsert(&satelliteComsTCB);
     taskQueueInsert(&warningAlarmTCB);
     taskQueueInsert(&consoleDisplayTCB);
-#endif
 }
 
 void loop() {
-#ifdef RUN_TESTS
-    aunit::TestRunner::run();
-#else
     schedule();
-#endif  /* RUN_TESTS */
     return;
 }
