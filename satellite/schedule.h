@@ -75,21 +75,6 @@ void schedule();
 unsigned long globalTimeBase();
 
 /******************************************************************************
- * name: setGlobalTimebase
- *
- * inputs:
- *  epoch: the mission elapsed time in milliseconds to set to
- *
- * outputs: void
- *
- * description:
- *  This sets the global time base. Do not use this outside of testing
- *
- * author: David Dupre
- *****************************************************************************/
-void setGlobalTimeBase(unsigned long epoch);
-
-/******************************************************************************
  * name: taskQueueInsert
  *
  * inputs:

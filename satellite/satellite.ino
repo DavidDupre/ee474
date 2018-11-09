@@ -166,10 +166,6 @@ void setup() {
 }
 
 void loop() {
-#ifdef RUN_TESTS
-    aunit::TestRunner::run();
-#else
     schedule();
-#endif  /* RUN_TESTS */
     return;
 }

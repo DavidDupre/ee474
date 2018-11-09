@@ -70,13 +70,6 @@ unsigned long globalTimeBase() {
     return missionElapsedTime;
 }
 
-void setGlobalTimeBase(unsigned long epoch) {
-#ifdef RUN_TESTS
-    missionElapsedTime = epoch;
-#endif
-    return;
-}
-
 void taskQueueInsert(TCB *node) {
     // don't add a node that's already on the queue
     if (taskQueueIncludes(node)) {
