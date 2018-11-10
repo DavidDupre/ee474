@@ -25,17 +25,21 @@ ConsoleKeypadData consoleKeypadData = {
     &driveMotorSpeedDec
 };
 
-TCB consoleKeypadTCB = {
-    &consoleKeypadData,
-    consoleKeypad,
-    "Console Keypad",
-    NULL, NULL
-};
+TCB consoleKeypadTCB;
 
 unsigned short solarPanelSpeed;
 
 void solarPanelControlInit() {
     solarPanelSpeed = 0;
+
+    tcbInit(
+        &consoleKeypadTCB,
+        &consoleKeypadData,
+        consoleKeypad,
+        "Console Keypad",
+        4
+    );
+
     pinMode(PIN_SOLAR_PANEL_OUTPUT, OUTPUT);
     pinMode(PIN_SOLAR_PANEL_STOPPED, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_STOPPED),

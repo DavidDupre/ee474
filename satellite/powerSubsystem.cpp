@@ -20,12 +20,7 @@ SolarPanelControlData solarPanelControlData = {
     &driveMotorSpeedDec
 };
 
-TCB solarPanelControlTCB = {
-    &solarPanelControlData,
-    solarPanelControl,
-    "Solar Panel Control",
-    NULL, NULL
-};
+TCB solarPanelControlTCB;
 
 /******************************************************************************
  * name: powerSubsystem
@@ -101,6 +96,15 @@ void powerSubsystemInit() {
     // in order to make sure task never measures as it checks to see
     // if the mission elapsed time is greater than it
     batteryInitializationTime = 0;
+
+    tcbInit(
+        &solarPanelControlTCB,
+        &solarPanelControlData,
+        solarPanelControl,
+        "Solar Panel Control",
+        1
+    );
+
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);

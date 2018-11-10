@@ -76,51 +76,8 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
-
-
-TCB powerSubsystemTCB = {
-    &powerSubsystemData,
-    powerSubsystem,
-    "Power Subsystem",
-    NULL, NULL
-};
-
-TCB thrusterSubsystemTCB = {
-    &thrusterSubsystemData,
-    thrusterSubsystem,
-    "Thruster Subsystem",
-    NULL, NULL
-};
-
-TCB consoleDisplayTCB = {
-    &consoleDisplayData,
-    consoleDisplay,
-    "Console Display",
-    NULL, NULL
-};
-
-TCB satelliteComsTCB = {
-    &satelliteComsData,
-    satelliteComs,
-    "Satellite Communications",
-    NULL, NULL
-};
-
-TCB vehicleCommsTCB = {
-    &vehicleCommsData,
-    vehicleComms,
-    "Vehicle Communications",
-    NULL, NULL
-};
-
-TCB warningAlarmTCB = {
-    &warningAlarmData,
-    warningAlarm,
-    "Warning/Alarm",
-    NULL, NULL
-};
-
-
+// static storage for TCBs inserted in setup
+TCB tcbs[8];
 
 void setup() {
     thrusterCommand = 0;
@@ -147,13 +104,65 @@ void setup() {
     solarPanelControlInit();
     powerSubsystemInit();
 
-    // initialize the task queue
-    taskQueueInsert(&powerSubsystemTCB);
-    taskQueueInsert(&thrusterSubsystemTCB);
-    taskQueueInsert(&vehicleCommsTCB);
-    taskQueueInsert(&satelliteComsTCB);
-    taskQueueInsert(&warningAlarmTCB);
-    taskQueueInsert(&consoleDisplayTCB);
+    // insert power
+    tcbInit(
+        &tcbs[0],
+        &powerSubsystemData,
+        powerSubsystem,
+        "Power Subsystem",  // TODO this will probably fall out of scope...
+        1
+    );
+    taskQueueInsert(&tcbs[0]);
+
+    // insert thruster
+    tcbInit(
+        &tcbs[1],
+        &thrusterSubsystemData,
+        thrusterSubsystem,
+        "Thruster Subsystem",
+        1
+    );
+    taskQueueInsert(&tcbs[1]);
+
+    // insert vehicle comms
+    tcbInit(
+        &tcbs[2],
+        &vehicleCommsData,
+        vehicleComms,
+        "Vehicle Communications",
+        4
+    );
+    taskQueueInsert(&tcbs[2]);
+
+    // insert satellite comms
+    tcbInit(
+        &tcbs[3],
+        &satelliteComsData,
+        satelliteComs,
+        "Satellite Communications",
+        4
+    );
+    taskQueueInsert(&tcbs[3]);
+
+    // insert warning/alarm
+    tcbInit(
+        &tcbs[4],
+        &warningAlarmData,
+        warningAlarm,
+        "Warning/Alarm",
+        4
+    );
+    taskQueueInsert(&tcbs[4]);
+
+    // insert console display
+    tcbInit(
+        &tcbs[5],
+        &consoleDisplayData,
+        consoleDisplay,
+        "Console Display",
+        4
+    );
+    taskQueueInsert(&tcbs[5]);
 }
 
 void loop() {
