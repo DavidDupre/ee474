@@ -112,4 +112,5 @@ void solarPanelStop() {
         solarPanelState = SOLAR_PANEL_RETRACTED;
     }
     taskQueueDeleteLater(&consoleKeypadTCB);
+    taskQueueDeleteLater(&solarPanelControlTCB);
 }
