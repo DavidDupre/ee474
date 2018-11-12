@@ -21,6 +21,8 @@
 #define MEAUSURE_INTERRUPT_PIN 20
 #define MEASURE_DELAY_MS 1
 
+#include "powerSubsystem.h"
+
 
 typedef struct {
     SolarPanelState *solarPanelState;
@@ -30,6 +32,9 @@ typedef struct {
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
 } PowerSubsystemData;
+
+
+extern TCB powerSubsystemTCB;
 
 void powerSubsystemInit();
 

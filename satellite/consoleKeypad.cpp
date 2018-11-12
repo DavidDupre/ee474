@@ -1,8 +1,27 @@
 #include "consoleKeypad.h"
 #include "schedule.h"
+#include "sharedVariables.h"
 #include <Arduino.h>
 
+
+TCB consoleKeypadTCB;
+
+ConsoleKeypadData consoleKeypadData = {
+    &driveMotorSpeedInc,
+    &driveMotorSpeedDec
+};
+
+const char* const taskName = "Console Keypad";
+
 void consoleKeypadInit() {
+    tcbInit(
+        &consoleKeypadTCB,
+        &consoleKeypadData,
+        consoleKeypad,
+        taskName,
+        1
+    );
+
     pinMode(PIN_DRIVE_MOTOR_SPEED_INC, INPUT);
     pinMode(PIN_DRIVE_MOTOR_SPEED_DEC, INPUT);
 }

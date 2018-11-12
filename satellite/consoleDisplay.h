@@ -2,6 +2,7 @@
 #define _CONSOLE_DISPLAY_H_
 
 #include "solarPanel.h"
+#include "schedule.h"
 
 
 typedef struct {
@@ -15,6 +16,8 @@ typedef struct {
     bool *fuelLow;
 } ConsoleDisplayData;
 
+
+extern TCB consoleDisplayTCB;
 
 void consoleDisplayInit();
 
