@@ -1,8 +1,16 @@
 #include "imageCapture.h"
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "fft.h"
 #include <string.h>
 #include <Arduino.h>
+
+
+// number of bits used to represent an analogRead result
+#define IMAGE_CAPTURE_RAW_SIZE  10
+
+// maximum voltage for an analogRead
+#define IMAGE_CAPTURE_MAX_VOLTS 5.0
 
 
 TCB imageCaptureTCB;
@@ -21,6 +29,9 @@ volatile unsigned int imageDataRawestIndex;
 void imageCaptureTimerInit();
 void imageCaptureTimerEnable();
 void imageCaptureTimerDisable();
+
+// convert a raw analogRead measurement to +-2.5V
+float imageCaptureRawToVolts(unsigned short raw);
 
 void imageCaptureInit() {
     tcbInit(
@@ -45,8 +56,9 @@ void imageCaptureInit() {
     pinMode(PIN_IMAGE_CAPTURE, INPUT);
 
     // initialize the ISR's buffer
-    memset(imageDataRawest, 0, sizeof(imageDataRawest[0])
-            * IMAGE_CAPTURE_RAW_BUFFER_LENGTH);
+    for (int i = 0; i < IMAGE_CAPTURE_RAW_BUFFER_LENGTH; i++) {
+        imageDataRawest[i] = 0;
+    }
     imageDataRawestIndex = 0;
 
     // initialize the timer0 interrupt at 7.5 kHz
@@ -90,25 +102,56 @@ void imageCaptureTimerDisable() {
     TIMSK0 &= ~(1 << OCIE0A);
 }
 
+float imageCaptureRawToVolts(unsigned short raw) {
+    int rawScale = 1 << IMAGE_CAPTURE_RAW_SIZE;
+    int offsetted = ((int) raw) - rawScale / 2;
+    return offsetted * IMAGE_CAPTURE_MAX_VOLTS / rawScale;
+}
+
 void imageCapture(void *imageCaptureData) {
     ImageCaptureData *data = (ImageCaptureData *) imageCaptureData;
+
+    int n = IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
 
     // copy the latest readings into a buffer while the timer is disabled
     // TODO what if the timer is disabled during the ISR? Should this use a mutex? What kind?
     imageCaptureTimerDisable();
-    for (unsigned int i = 0; i < IMAGE_CAPTURE_RAW_BUFFER_LENGTH; i++) {
-        unsigned int rawIdx = (imageDataRawestIndex + i)
-                % IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
+    for (int i = 0; i < n; i++) {
+        unsigned int rawIdx = (imageDataRawestIndex - i) % n;
         data->imageDataRaw[i] = imageDataRawest[rawIdx];
     }
     imageCaptureTimerEnable();
 
-    // TODO do the FFT
+    // TODO this is kind of a lot of memory.
+    // It could be easily optimized by removing the imageDataRaw buffer
+    Complex samples[n];
+    Complex tmp[n / 2];
+
+    // copy the samples into the real part of the fft input
+    for (int i = 0; i < n; i++) {
+        samples[i].real = imageCaptureRawToVolts(data->imageDataRaw[i]);
+    }
+
+    // perform the fft
+    fft(samples, tmp, n);
+    float frequency = fftFrequency(samples, IMAGE_CAPTURE_FREQ_HZ, n);
+
+    /*
+     * Add the frequency to the output buffer.
+     * This casts back from float to an int, but this is OK for the frequency
+     * range we're expecting (35 Hz - 3.75 kHz).
+     */
+    // TODO use shared addToBuffer function
+    for (int i = IMAGE_CAPTURE_FREQ_BUFFER_LENGTH - 1; i > 0; i--) {
+        data->imageData[i] = data->imageData[i - 1];
+    }
+    data->imageData[0] = frequency;
 }
 
-// timer0 interrupt at 256Hz
+// timer0 interrupt service routine
 ISR(TIMER0_COMPA_vect){
-    // Put the next reading into the next spot of the raw buffer
+    // put the next reading into the next spot of the circular raw buffer
     imageDataRawest[imageDataRawestIndex] = analogRead(PIN_IMAGE_CAPTURE);
-    imageDataRawestIndex = (imageDataRawestIndex + 1) % IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
+    imageDataRawestIndex = (imageDataRawestIndex + 1)
+            % IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
 }
