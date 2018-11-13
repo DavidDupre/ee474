@@ -1,9 +1,10 @@
 #ifndef _CONSOLE_KEYPAD_H_
 #define _CONSOLE_KEYPAD_H_
 
-
 #define PIN_DRIVE_MOTOR_SPEED_INC 50
 #define PIN_DRIVE_MOTOR_SPEED_DEC 51
+
+#include "schedule.h"
 
 
 typedef struct {
@@ -11,6 +12,8 @@ typedef struct {
     bool *driveMotorSpeedDec;
 } ConsoleKeypadData;
 
+
+extern TCB consoleKeypadTCB;
 
 /******************************************************************************
  * name: consoleKeypadInit

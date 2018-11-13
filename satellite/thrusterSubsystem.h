@@ -2,6 +2,7 @@
 #define _THRUSTER_SUBSYSTEM_H_
 
 #include <stdint.h>
+#include "schedule.h"
 
 /*
  * This is a special value of thrusterCommand that represents the absence
@@ -26,6 +27,10 @@ typedef struct {
     unsigned short *fuelLevel;
 } ThrusterSubsystemData;
 
+
+extern TCB thrusterSubsystemTCB;
+
+void thrusterSubsystemInit();
 
 void thrusterSubsystem(void *thrusterSubsystemData);
 

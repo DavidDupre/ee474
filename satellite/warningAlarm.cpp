@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "warningAlarm.h"
 #include "schedule.h"
+#include "sharedVariables.h"
 #include "tft.h"
 
 #define HALF_FUEL       50
@@ -10,6 +11,28 @@
 #define HALF_BATTERY    18
 #define BATTERY_RATE    1000
 #define FUEL_RATE       2000
+
+
+TCB warningAlarmTCB;
+
+WarningAlarmData warningAlarmData = {
+    &batteryLow,
+    &fuelLow,
+    batteryLevelPtr,
+    &fuelLevel
+};
+
+const char* const taskName = "Warning/Alarm";
+
+void warningAlarmInit() {
+    tcbInit(
+        &warningAlarmTCB,
+        &warningAlarmData,
+        warningAlarm,
+        taskName,
+        1
+    );
+}
 
 void warningAlarm(void *warningAlarmData) {
 

@@ -2,6 +2,8 @@
 #define _SATELLITE_COMS_H_
 
 #include "solarPanel.h"
+#include "schedule.h"
+
 
 typedef struct {
     bool *fuelLow;
@@ -14,6 +16,11 @@ typedef struct {
     unsigned int *thrusterCommand;
     char *vehicleResponse;
 } SatelliteComsData;
+
+
+extern TCB satelliteComsTCB;
+
+void satelliteComsInit();
 
 void satelliteComs(void* satelliteComsData);
 

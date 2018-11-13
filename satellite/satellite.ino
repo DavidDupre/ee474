@@ -3,6 +3,8 @@
 #include "thrusterSubsystem.h"
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
+#include "consoleKeypad.h"
+#include "solarPanel.h"
 #include "satelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
@@ -28,57 +30,6 @@ bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
 
-ThrusterSubsystemData thrusterSubsystemData = {
-    &thrusterCommand,
-    &fuelLevel
-};
-
-PowerSubsystemData powerSubsystemData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    batteryLevelPtr,
-    &powerConsumption,
-    &powerGeneration
-};
-
-ConsoleDisplayData consoleDisplayData = {
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &batteryLow,
-    &fuelLow
-};
-
-SatelliteComsData satelliteComsData = {
-    &fuelLow,
-    &batteryLow,
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &thrusterCommand,
-    &vehicleResponse
-};
-
-VehicleCommsData vehicleCommsData = {
-    &vehicleCommand,
-    &vehicleResponse
-};
-
-WarningAlarmData warningAlarmData = {
-    &batteryLow,
-    &fuelLow,
-    batteryLevelPtr,
-    &fuelLevel
-};
-
-// static storage for TCBs inserted in setup
-TCB tcbs[8];
-
 void setup() {
     thrusterCommand = 0;
     fuelLevel = 100;
@@ -99,70 +50,32 @@ void setup() {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
-    scheduleInit();
     consoleDisplayInit();
-    solarPanelControlInit();
+    consoleKeypadInit();
     powerSubsystemInit();
+    satelliteComsInit();
+    solarPanelControlInit();
+    thrusterSubsystemInit();
+    vehicleCommsInit();
+    warningAlarmInit();
 
-    // insert power
-    tcbInit(
-        &tcbs[0],
-        &powerSubsystemData,
-        powerSubsystem,
-        "Power Subsystem",  // TODO this will probably fall out of scope...
-        1
-    );
-    taskQueueInsert(&tcbs[0]);
+    powerSubsystemTCB.priority = 1;
+    taskQueueInsert(&powerSubsystemTCB);
 
-    // insert thruster
-    tcbInit(
-        &tcbs[1],
-        &thrusterSubsystemData,
-        thrusterSubsystem,
-        "Thruster Subsystem",
-        1
-    );
-    taskQueueInsert(&tcbs[1]);
+    thrusterSubsystemTCB.priority = 1;
+    taskQueueInsert(&thrusterSubsystemTCB);
 
-    // insert vehicle comms
-    tcbInit(
-        &tcbs[2],
-        &vehicleCommsData,
-        vehicleComms,
-        "Vehicle Communications",
-        4
-    );
-    taskQueueInsert(&tcbs[2]);
+    vehicleCommsTCB.priority = 4;
+    taskQueueInsert(&vehicleCommsTCB);
 
-    // insert satellite comms
-    tcbInit(
-        &tcbs[3],
-        &satelliteComsData,
-        satelliteComs,
-        "Satellite Communications",
-        4
-    );
-    taskQueueInsert(&tcbs[3]);
+    satelliteComsTCB.priority = 4;
+    taskQueueInsert(&satelliteComsTCB);
 
-    // insert warning/alarm
-    tcbInit(
-        &tcbs[4],
-        &warningAlarmData,
-        warningAlarm,
-        "Warning/Alarm",
-        4
-    );
-    taskQueueInsert(&tcbs[4]);
+    warningAlarmTCB.priority = 4;
+    taskQueueInsert(&warningAlarmTCB);
 
-    // insert console display
-    tcbInit(
-        &tcbs[5],
-        &consoleDisplayData,
-        consoleDisplay,
-        "Console Display",
-        4
-    );
-    taskQueueInsert(&tcbs[5]);
+    consoleDisplayTCB.priority = 4;
+    taskQueueInsert(&consoleDisplayTCB);
 }
 
 void loop() {

@@ -6,6 +6,11 @@
 
 typedef void (*tcb_task_fn)(void *data);
 
+typedef enum {
+    TCBStatusRunning, // the task should be run
+    TCBStatusDying,   // the task will be removed after this minor cycle
+} TCBStatus;
+
 typedef struct _tcb {
     void *data;
     tcb_task_fn task;
@@ -13,6 +18,7 @@ typedef struct _tcb {
     struct _tcb *next;
     struct _tcb *prev;
     unsigned short priority;
+    TCBStatus status;
 } TCB;
 
 
@@ -104,6 +110,22 @@ void taskQueueInsert(TCB *node);
  * author: David Dupre
  *****************************************************************************/
 void taskQueueDelete(TCB *node);
+
+/******************************************************************************
+ * name: taskQueueDeleteLater
+ *
+ * inputs:
+ *  node: the task to remove
+ *
+ * outputs: void
+ *
+ * description:
+ *  Schedule a task for deletion at the end of the next minor cycle. This is
+ *  safer than taskQueueDelete.
+ *
+ * author: David Dupre
+ *****************************************************************************/
+void taskQueueDeleteLater(TCB *node);
 
 /******************************************************************************
  * name: taskQueueIncludes
