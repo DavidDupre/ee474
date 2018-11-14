@@ -9,8 +9,8 @@
 // number of bits used to represent an analogRead result
 #define IMAGE_CAPTURE_RAW_SIZE  10
 
-// maximum voltage for an analogRead
-#define IMAGE_CAPTURE_MAX_VOLTS 5.0
+// maximum milli-volts for an analogRead
+#define IMAGE_CAPTURE_MAX_MVOLTS 5000.0
 
 
 TCB imageCaptureTCB;
@@ -105,7 +105,7 @@ void imageCaptureTimerDisable() {
 float imageCaptureRawToVolts(unsigned short raw) {
     int rawScale = 1 << IMAGE_CAPTURE_RAW_SIZE;
     int offsetted = ((int) raw) - rawScale / 2;
-    return offsetted * IMAGE_CAPTURE_MAX_VOLTS / rawScale;
+    return offsetted * IMAGE_CAPTURE_MAX_MVOLTS / rawScale;
 }
 
 void imageCapture(void *imageCaptureData) {

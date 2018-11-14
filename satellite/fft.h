@@ -48,6 +48,12 @@ class Complex {
  *
  * outputs: void
  *
+ * description:
+ *  This uses the Cooley-Tukey FFT algorithm. It is heavily inspired by the C++
+ *  example code found on Wikipedia:
+ *
+ *  https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm
+ *
  * author: David Dupre
  *****************************************************************************/
 void fft(Complex *samples, Complex *tmp, int n);
@@ -58,9 +64,15 @@ void fft(Complex *samples, Complex *tmp, int n);
  * inputs:
  *  fftResult:  the output of fft (array of length n/2)
  *  sampleFreq: the sample frequency
- *  n:          number of samples. Must be a power of 2.
+ *  n:          number of samples used in the original fft calculation
  *
  * outputs: the frequency
+ *
+ * description:
+ *  This find mIndex, the index which corresponds to the maximum magnitude of
+ *  the fft output, and applies this function to find the frequency:
+ *
+ *      freq = sampleFreq * mIndex / n
  *
  * author: David Dupre
  *****************************************************************************/

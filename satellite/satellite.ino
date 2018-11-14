@@ -70,6 +70,9 @@ void setup() {
     thrusterSubsystemTCB.priority = 1;
     taskQueueInsert(&thrusterSubsystemTCB);
 
+    imageCaptureTCB.priority = 1;
+    taskQueueInsert(&imageCaptureTCB);
+
     vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);
 

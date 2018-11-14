@@ -15,6 +15,7 @@ typedef struct {
     unsigned short *powerGeneration;
     unsigned int *thrusterCommand;
     char *vehicleResponse;
+    unsigned int *imageData;
 } SatelliteComsData;
 
 
