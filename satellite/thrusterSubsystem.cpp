@@ -2,6 +2,7 @@
 #include "schedule.h"
 #include "predefinedMacros.h"
 #include "sharedVariables.h"
+#include "satelliteComs.h"
 #include <stdint.h>
 
 /*
@@ -12,6 +13,15 @@
  *      * (100% throttle / (2^4 - 1) LSB) = 210240 s/fuel unit/LSB
  */
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
+
+
+/*
+ * This is a command handler to be registered with satellite coms.
+ * It processing a command destined for the thruster subsystem and modifies
+ * the output based on that.
+ */
+void thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data,
+    SatelliteComsData *output);
 
 
 TCB thrusterSubsystemTCB;
@@ -36,6 +46,9 @@ void thrusterSubsystemInit() {
         taskName,
         1
     );
+
+    satelliteComsRegisterCmdHandler(ENTITYID_THRUSTER,
+            thrusterSubsystemProcessCommand);
 }
 
 /******************************************************************************
@@ -178,4 +191,13 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     cmd |= (magnitude << 4);
     cmd |= ((uint16_t) duration) << 8;
     return cmd;
+}
+
+void thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data,
+        SatelliteComsData *output) {
+    if (opcode != CMDID_THRUSTER) {
+        return;
+    }
+    uint16_t command = *((uint16_t *) data);
+    output->thrusterCommand = command;
 }

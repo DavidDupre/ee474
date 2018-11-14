@@ -7,9 +7,28 @@
 #include "sharedVariables.h"
 
 
+#define MAX_COMMAND_HANDLERS 10
+#define COMMAND_SYNC_PATTERN 0xEE474DAB
+#define SERIAL_TIMEOUT_MS    100
+
+
+typedef struct {
+    uint8_t entityId;
+    cmd_handler_fn handle;
+} CommandHandler;
+
+
 void printBool(bool input);
 
 void printSolarPanelState(SolarPanelState state);
+
+void sendTelemetryPacket(void *data, size_t size, uint8_t tlmId);
+
+void processCommand();
+
+// returns true if it found the sync bytes
+// times out after 100 ms
+bool sync();
 
 
 TCB satelliteComsTCB;
@@ -28,6 +47,10 @@ SatelliteComsData satelliteComsData = {
 
 const char* const taskName = "Satellite Communications";
 
+CommandHandler commandHandlers[MAX_COMMAND_HANDLERS];
+uint8_t numCommandHandlers = 0;
+uint8_t syncBytes[4];
+
 void satelliteComsInit() {
     tcbInit(
         &satelliteComsTCB,
@@ -36,6 +59,8 @@ void satelliteComsInit() {
         taskName,
         1
     );
+
+    Serial.setTimeout(SERIAL_TIMEOUT_MS);
 }
 
 /******************************************************************************
@@ -94,6 +119,10 @@ void satelliteComs(void* satelliteComsData) {
         *data->thrusterCommand = THRUSTER_CMD_NONE;
     }
 
+    // send binary telemetry packets
+    sendTelemetryPacket(thrusterSubsystemTCB.data,
+        sizeof(ThrusterSubsystemData), TLMID_THRUSTER_DATA);
+
     // Transferring data back to earth
     Serial.print(F("Fuel Low status is: "));
     printBool(*data->fuelLow);
@@ -115,6 +144,11 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerGeneration);
     Serial.print(F("Vehicle Response: A "));
     Serial.println(*data->vehicleResponse);
+
+    // process commands
+    while (sync()) {
+        processCommand();
+    }
 }
 
 void printBool(bool input) {
@@ -140,4 +174,69 @@ void printSolarPanelState(SolarPanelState state) {
             Serial.print(F("retracted"));
             break;
     }
+}
+
+void sendTelemetryPacket(void *data, size_t size, uint8_t tlmId) {
+    // write the header, which is really just the telemetry ID
+    Serial.write(tlmId);
+
+    // write the data
+    Serial.write((uint8_t *) data, size);
+}
+
+void processCommand() {
+    // read the header
+    uint8_t length;
+    uint8_t entityId;
+    uint8_t opcode;
+    Serial.readBytes(&length, 1);
+    Serial.readBytes(&entityId, 1);
+    Serial.readBytes(&opcode, 1);
+
+    // read the body of the command
+    uint8_t data[256];
+    Serial.readBytes(data, length);
+
+    // dispatch to different entities
+    for (uint8_t i = 0; i < numCommandHandlers; i++) {
+        CommandHandler *h = &commandHandlers[i];
+        if (entityId == h->entityId) {
+            h->handle(opcode, data);
+            break;
+        }
+    }
+}
+
+bool sync() {
+    static uint8_t i = 0;
+    uint32_t pattern = COMMAND_SYNC_PATTERN;
+    uint8_t *p = (uint8_t *) pattern;
+    while (Serial.available()) {
+        uint8_t next = Serial.read();
+        if (next == p[i]) {
+            // if this byte matched, move onto the next byte in the pattern
+            i++;
+            if (i == 4) {
+                // if that was the last byte, it's synced
+                i = 0;
+                return true;
+            }
+        } else {
+            // if this byte didn't match the sync pattern, fall back to start
+            i = 0;
+        }
+    }
+    return false;
+}
+
+void satelliteComsRegisterCmdHandler(uint8_t entityId,
+        cmd_handler_fn handler) {
+    if (numCommandHandlers >= MAX_COMMAND_HANDLERS) {
+        Serial.println(F("ERROR! Too many command handlers!"));
+        return;
+    }
+    commandHandlers[numCommandHandlers++] = {
+        entityId,
+        handler
+    };
 }
