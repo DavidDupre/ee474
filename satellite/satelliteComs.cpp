@@ -4,11 +4,39 @@
 #include "thrusterSubsystem.h"
 #include "solarPanel.h"
 #include "schedule.h"
+#include "sharedVariables.h"
 
 
 void printBool(bool input);
 
 void printSolarPanelState(SolarPanelState state);
+
+
+TCB satelliteComsTCB;
+
+SatelliteComsData satelliteComsData = {
+    &fuelLow,
+    &batteryLow,
+    &solarPanelState,
+    batteryLevelPtr,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &thrusterCommand,
+    &vehicleResponse
+};
+
+const char* const taskName = "Satellite Communications";
+
+void satelliteComsInit() {
+    tcbInit(
+        &satelliteComsTCB,
+        &satelliteComsData,
+        satelliteComs,
+        taskName,
+        1
+    );
+}
 
 /******************************************************************************
  * name : satelliteComs

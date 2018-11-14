@@ -4,6 +4,8 @@
 #define PIN_SOLAR_PANEL_STOPPED 21
 #define PIN_SOLAR_PANEL_OUTPUT  44
 
+#include "schedule.h"
+
 
 typedef enum {
     SOLAR_PANEL_DEPLOYED = 0,
@@ -20,6 +22,8 @@ typedef struct {
     bool *driveMotorSpeedDec;
 } SolarPanelControlData;
 
+
+extern TCB solarPanelControlTCB;
 
 /******************************************************************************
  * name: solarPanelControlInit

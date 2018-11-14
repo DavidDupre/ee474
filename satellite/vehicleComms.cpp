@@ -2,6 +2,27 @@
 #include <Arduino.h>
 #include "vehicleComms.h"
 #include "schedule.h"
+#include "sharedVariables.h"
+
+
+TCB vehicleCommsTCB;
+
+VehicleCommsData vehicleCommsData = {
+    &vehicleCommand,
+    &vehicleResponse
+};
+
+const char* const taskName = "Vehicle Communications";
+
+void vehicleCommsInit() {
+    tcbInit(
+        &vehicleCommsTCB,
+        &vehicleCommsData,
+        vehicleComms,
+        taskName,
+        1
+    );
+}
 
 /******************************************************************************
  * name : vehicleComms
@@ -15,7 +36,7 @@
  *
  * description:
  *
- * vehicleComms sends commands to the minning vehicle (uno) over serial and 
+ * vehicleComms sends commands to the minning vehicle (uno) over serial and
  * and stores its response
  *
  *
@@ -39,7 +60,7 @@ void vehicleComms(void *vehicleCommsData) {
 
     // Cast from void to correct type
     VehicleCommsData *data = (VehicleCommsData *) vehicleCommsData;
-    
+
     // Print command to Serial1 for the Uno to pick up
     // Do not print if there is no command
     if (*data->vehicleCommand != '\0') {
