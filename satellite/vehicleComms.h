@@ -6,6 +6,7 @@ typedef struct {
     char *vehicleResponse;
 } VehicleCommsData;
 
+void vehicleCommsInit();
 
 void vehicleComms(void *vehicleCommsData);
 

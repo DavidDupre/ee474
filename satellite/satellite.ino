@@ -61,6 +61,7 @@ SatelliteComsData satelliteComsData = {
     &powerConsumption,
     &powerGeneration,
     &thrusterCommand,
+    &vehicleCommand,
     &vehicleResponse
 };
 
@@ -103,6 +104,7 @@ void setup() {
     consoleDisplayInit();
     solarPanelControlInit();
     powerSubsystemInit();
+    vehicleCommsInit();
 
     // insert power
     tcbInit(

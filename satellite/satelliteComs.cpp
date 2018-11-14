@@ -87,7 +87,13 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerGeneration);
     Serial.print(F("Vehicle Response: A "));
     Serial.println(*data->vehicleResponse);
+    *data->vehicleResponse = '\0';
+
+    if (Serial.available()) {
+        *data->vehicleCommand = Serial.read();
+    }
 }
+
 
 void printBool(bool input) {
     if (input) {
