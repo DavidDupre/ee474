@@ -39,7 +39,7 @@ ThrusterSubsystemData thrusterSubsystemData = {
 
 const char* const taskName = "Thruster Subsystem";
 
-ThrusterTlmPacket tlmPacket;
+static ThrusterTlmPacket tlmPacket;
 
 /*
  * Holds the max value of a `partialFuel`. Should be changed only for testing.

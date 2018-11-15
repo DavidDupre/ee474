@@ -4,11 +4,14 @@
 #include "schedule.h"
 
 // telemetry processing
-#define TLMID_META     0
-#define TLMID_THRUSTER 4
+#define TLMID_META        0
+#define TLMID_POWER       1
+#define TLMID_SOLAR_PANEL 2
+#define TLMID_THRUSTER    4
 
 // command dispatch
-#define ENTITYID_THRUSTER 1
+#define ENTITYID_SOLAR_PANEL 2
+#define ENTITYID_THRUSTER    4
 
 #define TLM_PACKET typedef struct __attribute__((__packed__))
 

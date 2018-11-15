@@ -1,6 +1,16 @@
+COMMAND SATELLITE INC_PANEL_SPEED LITTLE_ENDIAN "Increase panel speed"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 0, eid: 2, opc: 0 } %>
+
+
+COMMAND SATELLITE DEC_PANEL_SPEED LITTLE_ENDIAN "Decrease panel speed"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 0, eid: 2, opc: 1 } %>
+
+
 COMMAND SATELLITE THRUSTER LITTLE_ENDIAN "Send thruster command"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 2, eid: 1, opc: 0 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 2, eid: 4, opc: 0 } %>
   
   APPEND_PARAMETER DURATION 8 UINT 0 255 10 "Duration"
     UNITS Seconds s

@@ -2,6 +2,7 @@
 #include "consoleKeypad.h"
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "binarySatelliteComs.h"
 #include <Arduino.h>
 
 // the max value of the solar panel speed
@@ -16,8 +17,19 @@
 // the value added to the stopped duty cycle to achieve max speed
 #define SOLAR_PANEL_DUTY_CYCLE_RANGE   100
 
+// opcodes for commands over Serial
+#define SOLAR_PANEL_OPCODE_INC 0
+#define SOLAR_PANEL_OPCODE_DEC 1
+
+
+TLM_PACKET {
+    uint16_t speed;
+} SolarPanelTlmPacket;
+
 
 void solarPanelStop();
+
+bool solarPanelProcessCommand(uint8_t opcode, uint8_t *data);
 
 
 TCB solarPanelControlTCB;
@@ -34,6 +46,9 @@ const char* const taskName = "Solar Panel Control";
 
 unsigned short solarPanelSpeed;
 
+static SolarPanelTlmPacket tlmPacket;
+
+
 void solarPanelControlInit() {
     tcbInit(
         &solarPanelControlTCB,
@@ -48,7 +63,9 @@ void solarPanelControlInit() {
     pinMode(PIN_SOLAR_PANEL_STOPPED, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_STOPPED),
         solarPanelStop, RISING);
-    consoleKeypadInit();
+
+    bcRegisterTlmSender(TLMID_SOLAR_PANEL, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterCmdHandler(ENTITYID_SOLAR_PANEL, solarPanelProcessCommand);
 }
 
 void solarPanelControl(void *solarPanelControlData) {
@@ -102,6 +119,23 @@ void solarPanelControl(void *solarPanelControlData) {
         dutyCycle = SOLAR_PANEL_DUTY_CYCLE_STOPPED;
     }
     analogWrite(PIN_SOLAR_PANEL_OUTPUT, dutyCycle);
+
+    // send telemetry
+    tlmPacket.speed = solarPanelSpeed;
+    bcSend(TLMID_SOLAR_PANEL);
+}
+
+bool solarPanelProcessCommand(uint8_t opcode, uint8_t *data) {
+    switch(opcode) {
+        case SOLAR_PANEL_OPCODE_INC:
+            driveMotorSpeedInc = true;
+            return true;
+        case SOLAR_PANEL_OPCODE_DEC:
+            driveMotorSpeedDec = true;
+            return true;
+        default:
+            return false;
+    }
 }
 
 void solarPanelStop() {

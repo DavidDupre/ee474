@@ -2,9 +2,18 @@
 #include <stdint.h>
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "binarySatelliteComs.h"
 #include <Arduino.h>
 #include <limits.h>
 #include "solarPanel.h"
+
+
+TLM_PACKET {
+    uint32_t batteryLevel;
+    uint16_t consumption;
+    uint16_t generation;
+    SolarPanelState panelState;
+} PowerTlmPacket;
 
 
 TCB powerSubsystemTCB;
@@ -19,6 +28,8 @@ PowerSubsystemData powerSubsystemData = {
 };
 
 const char* const taskName = "Power Subsystem";
+
+static PowerTlmPacket tlmPacket;
 
 unsigned int normBattery(unsigned int input);
 // Flags
@@ -111,6 +122,9 @@ void powerSubsystemInit() {
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);
+
+    // register telemerty
+    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
 }
 
 void measurementExternalInterruptISR() {
@@ -202,6 +216,13 @@ void powerSubsystem(void* powerSubsystemData) {
             taskQueueInsert(&solarPanelControlTCB);
         }
     }
+
+    // send telemetry
+    tlmPacket.batteryLevel = data->batteryLevelPtr[0];
+    tlmPacket.consumption = *data->powerConsumption;
+    tlmPacket.generation = *data->powerGeneration;
+    tlmPacket.panelState = *data->solarPanelState;
+    bcSend(TLMID_POWER);
 }
 
 unsigned int normBattery(unsigned int input) {

@@ -1,3 +1,30 @@
+TELEMETRY SATELLITE META BIG_ENDIAN "Telemetry Status"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
+  
+  APPEND_ITEM NERRS 8 UINT "Number of errors"
+
+
+TELEMETRY SATELLITE POWER BIG_ENDIAN "Power Subsystem"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 1 } %>
+  
+  APPEND_ITEM BATT_LVL 32 UINT "Battery level"
+    UNITS Volts V
+    LIMITS DEFAULT 1 ENABLED 3 18 36 36
+  APPEND_ITEM CON 16 UINT "Power consumption"
+  APPEND_ITEM GEN 16 UINT "Power generation"
+  APPEND_ITEM PANEL_STATE 8 UINT "Solar panel state"
+    STATE DEPLOYED   0
+    STATE DEPLOYING  1
+    STATE RETRACTING 2
+    STATE RETRACTED  3
+
+    
+TELEMETRY SATELLITE SOLAR_PANEL BIG_ENDIAN "Solar panel"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 2 } %>
+  
+  APPEND_ITEM SPEED 16 UINT "Panel motor speed"
+
+
 TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 4 } %>
 
@@ -18,8 +45,3 @@ TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
     STATE ON  1
     STATE OFF 0
   APPEND_ITEM FUEL 16 UINT "Fuel level"
-
-TELEMETRY SATELLITE META BIG_ENDIAN "Telemetry Status"
-  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
-  
-  APPEND_ITEM NERRS 8 UINT "Number of errors"
