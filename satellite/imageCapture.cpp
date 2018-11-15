@@ -67,9 +67,9 @@ void imageCaptureInit() {
 
 void imageCaptureTimerInit() {
     // init timer registers
-    TCCR0A = 0;
-    TCCR0B = 0;
-    TCNT0 = 0;
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1 = 0;
 
     // set compare match register for 256Hz increments
     /*
@@ -82,24 +82,24 @@ void imageCaptureTimerInit() {
      *      = 15369 / 256
      *      ~ 60
      */
-    OCR0A = 60;
+    OCR1A = 60;
 
     // turn on CTC mode
-    TCCR0A |= (1 << WGM01);
+    TCCR1A |= (1 << WGM01);
 
     // set CS02 and CS00 bits for 1024 prescaler
-    TCCR0B |= (1 << CS02) | (1 << CS00);
+    TCCR1B |= (1 << CS02) | (1 << CS00);
 
     // enable timer compare interrupt
     imageCaptureTimerEnable();
 }
 
 void imageCaptureTimerEnable() {
-    TIMSK0 |= (1 << OCIE0A);
+    TIMSK1 |= (1 << OCIE1A);
 }
 
 void imageCaptureTimerDisable() {
-    TIMSK0 &= ~(1 << OCIE0A);
+    TIMSK1 &= ~(1 << OCIE1A);
 }
 
 float imageCaptureRawToVolts(unsigned short raw) {
@@ -148,8 +148,8 @@ void imageCapture(void *imageCaptureData) {
     data->imageData[0] = frequency;
 }
 
-// timer0 interrupt service routine
-ISR(TIMER0_COMPA_vect){
+// timer1 interrupt service routine
+ISR(TIMER1_COMPA_vect){
     // put the next reading into the next spot of the circular raw buffer
     imageDataRawest[imageDataRawestIndex] = analogRead(PIN_IMAGE_CAPTURE);
     imageDataRawestIndex = (imageDataRawestIndex + 1)
