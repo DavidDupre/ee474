@@ -1,5 +1,6 @@
-TELEMETRY THRUSTER DATA BIG_ENDIAN "Thruster Subsystem"
-  APPEND_ID_ITEM PKTID 8 UINT 4
+TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 4 } %>
+
   APPEND_ITEM PAD 16 UINT "Padding"
   APPEND_ITEM DURATION 8 UINT "Duration"
     UNITS Seconds s
@@ -17,3 +18,8 @@ TELEMETRY THRUSTER DATA BIG_ENDIAN "Thruster Subsystem"
     STATE ON  1
     STATE OFF 0
   APPEND_ITEM FUEL 16 UINT "Fuel level"
+
+TELEMETRY SATELLITE META BIG_ENDIAN "Telemetry Status"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
+  
+  APPEND_ITEM NERRS 8 UINT "Number of errors"

@@ -4,6 +4,7 @@
 #define BATTERY_LEVEL_BUFFER_LENGTH 16
 
 #include "solarPanel.h"
+#include <stdint.h>
 
 
 /*
@@ -28,5 +29,6 @@ extern bool driveMotorSpeedInc;
 extern bool driveMotorSpeedDec;
 extern char vehicleCommand;
 extern char vehicleResponse;
+extern uint8_t numTlmErrors;
 
 #endif /* _SHARED_VARIABLES_H_ */

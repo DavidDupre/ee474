@@ -6,6 +6,7 @@
 #include "consoleKeypad.h"
 #include "solarPanel.h"
 #include "satelliteComs.h"
+#include "binarySatelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
@@ -29,6 +30,7 @@ bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
+uint8_t numTlmErrors;
 
 void setup() {
     thrusterCommand = 0;
@@ -54,6 +56,7 @@ void setup() {
     consoleKeypadInit();
     powerSubsystemInit();
     satelliteComsInit();
+    bcInit();
     solarPanelControlInit();
     thrusterSubsystemInit();
     vehicleCommsInit();
@@ -68,8 +71,13 @@ void setup() {
     vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);
 
+#ifdef ENABLE_BINARY_COMS
+    bcTCB.priority = 4;
+    taskQueueInsert(&bcTCB);
+#else
     satelliteComsTCB.priority = 4;
     taskQueueInsert(&satelliteComsTCB);
+#endif /* ENABLE_BINARY_COMS */
 
     warningAlarmTCB.priority = 4;
     taskQueueInsert(&warningAlarmTCB);

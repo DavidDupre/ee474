@@ -1,6 +1,6 @@
-COMMAND THRUSTER COMMAND LITTLE_ENDIAN "Send thruster command"
+COMMAND SATELLITE THRUSTER LITTLE_ENDIAN "Send thruster command"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { eid: 1, opc: 0 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 2, eid: 1, opc: 0 } %>
   
   APPEND_PARAMETER DURATION 8 UINT 0 255 10 "Duration"
     UNITS Seconds s

@@ -21,10 +21,6 @@
 #define THRUSTER_CMD_MAG(cmd)   ((uint8_t) ((cmd & 0xF0) >> 4))
 #define THRUSTER_CMD_DUR(cmd)   ((uint8_t) ((cmd & 0xFF00) >> 8))
 
-#define TLMID_THRUSTER_DATA 4
-#define ENTITYID_THRUSTER   1
-#define CMDID_THRUSTER      0
-
 
 typedef struct {
     unsigned int *thrusterCommand;

@@ -2,7 +2,7 @@
 #include "schedule.h"
 #include "predefinedMacros.h"
 #include "sharedVariables.h"
-#include "satelliteComs.h"
+#include "binarySatelliteComs.h"
 #include <stdint.h>
 
 /*
@@ -14,14 +14,20 @@
  */
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
 
+#define CMDID_THRUSTER 0
+
+
+TLM_PACKET {
+    uint32_t command;
+    uint16_t fuel;
+} ThrusterTlmPacket;
+
 
 /*
- * This is a command handler to be registered with satellite coms.
- * It processing a command destined for the thruster subsystem and modifies
- * the output based on that.
+ * This is a command handler to be registered with binary satellite coms.
+ * It processing a command destined for the thruster subsystem.
  */
-void thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data,
-    SatelliteComsData *output);
+bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data);
 
 
 TCB thrusterSubsystemTCB;
@@ -32,6 +38,8 @@ ThrusterSubsystemData thrusterSubsystemData = {
 };
 
 const char* const taskName = "Thruster Subsystem";
+
+ThrusterTlmPacket tlmPacket;
 
 /*
  * Holds the max value of a `partialFuel`. Should be changed only for testing.
@@ -47,8 +55,8 @@ void thrusterSubsystemInit() {
         1
     );
 
-    satelliteComsRegisterCmdHandler(ENTITYID_THRUSTER,
-            thrusterSubsystemProcessCommand);
+    bcRegisterCmdHandler(ENTITYID_THRUSTER, thrusterSubsystemProcessCommand);
+    bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
 }
 
 /******************************************************************************
@@ -169,6 +177,11 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
         command = 0;
     }
 
+    // update the telemetry
+    tlmPacket.command = command;
+    tlmPacket.fuel = *data->fuelLevel;
+    bcSend(TLMID_THRUSTER);
+
     return;
 }
 
@@ -193,11 +206,11 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     return cmd;
 }
 
-void thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data,
-        SatelliteComsData *output) {
+bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data) {
     if (opcode != CMDID_THRUSTER) {
-        return;
+        return false;
     }
-    uint16_t command = *((uint16_t *) data);
-    output->thrusterCommand = command;
+    // TODO this seems to be broken somehow
+    thrusterCommand = *((uint16_t *) data);
+    return true;
 }
