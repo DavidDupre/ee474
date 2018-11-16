@@ -67,9 +67,9 @@ void imageCaptureInit() {
 
 void imageCaptureTimerInit() {
     // init timer registers
-    TCCR1A = 0;
-    TCCR1B = 0;
-    TCNT1 = 0;
+    TCCR5A = 0;
+    TCCR5B = 0;
+    TCNT5 = 0;
 
     // set compare match register for 256Hz increments
     /*
@@ -82,24 +82,24 @@ void imageCaptureTimerInit() {
      *      = 15369 / 256
      *      ~ 60
      */
-    OCR1A = 60;
+    OCR5A = 60;
 
     // turn on CTC mode
-    TCCR1A |= (1 << WGM01);
+    TCCR5A |= (1 << WGM01);
 
     // set CS02 and CS00 bits for 1024 prescaler
-    TCCR1B |= (1 << CS02) | (1 << CS00);
+    TCCR5B |= (1 << CS02) | (1 << CS00);
 
     // enable timer compare interrupt
     imageCaptureTimerEnable();
 }
 
 void imageCaptureTimerEnable() {
-    TIMSK1 |= (1 << OCIE1A);
+    TIMSK5 |= (1 << OCIE5A);
 }
 
 void imageCaptureTimerDisable() {
-    TIMSK1 &= ~(1 << OCIE1A);
+    TIMSK5 &= ~(1 << OCIE5A);
 }
 
 float imageCaptureRawToVolts(unsigned short raw) {
@@ -117,7 +117,7 @@ void imageCapture(void *imageCaptureData) {
     // TODO what if the timer is disabled during the ISR? Should this use a mutex? What kind?
     imageCaptureTimerDisable();
     for (int i = 0; i < n; i++) {
-        unsigned int rawIdx = (imageDataRawestIndex - i) % n;
+        unsigned int rawIdx = (imageDataRawestIndex + i) % n;
         data->imageDataRaw[i] = imageDataRawest[rawIdx];
     }
     imageCaptureTimerEnable();
@@ -148,8 +148,8 @@ void imageCapture(void *imageCaptureData) {
     data->imageData[0] = frequency;
 }
 
-// timer1 interrupt service routine
-ISR(TIMER1_COMPA_vect){
+// timer5 interrupt service routine
+ISR(TIMER5_COMPA_vect){
     // put the next reading into the next spot of the circular raw buffer
     imageDataRawest[imageDataRawestIndex] = analogRead(PIN_IMAGE_CAPTURE);
     imageDataRawestIndex = (imageDataRawestIndex + 1)
