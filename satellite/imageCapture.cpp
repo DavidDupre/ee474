@@ -77,18 +77,17 @@ void imageCaptureTimerInit() {
      * time the task is run. This rate means that the task can detect
      * frequencies up to 128 Hz (because of Nyquist theory).
      *
-     * OCRn = clockSpeed / prescaler / frequency - 1
-     *      = 16 MHz / 1024 / 256 - 1
-     *      = 15369 / 256
-     *      ~ 60
+     * OCRn = clockSpeed / prescaler / frequency
+     *      = 16 MHz / 8 / 256
+     *      = 7813
      */
-    OCR5A = 60;
+    OCR5A = 7813;
 
     // turn on CTC mode
-    TCCR5A |= (1 << WGM01);
+    TCCR5B |= (1 << WGM52);
 
-    // set CS02 and CS00 bits for 1024 prescaler
-    TCCR5B |= (1 << CS02) | (1 << CS00);
+    // set CS51 bit for 8 prescaler
+    TCCR5B |= (1 << CS51);
 
     // enable timer compare interrupt
     imageCaptureTimerEnable();
@@ -114,7 +113,6 @@ void imageCapture(void *imageCaptureData) {
     int n = IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
 
     // copy the latest readings into a buffer while the timer is disabled
-    // TODO what if the timer is disabled during the ISR? Should this use a mutex? What kind?
     imageCaptureTimerDisable();
     for (int i = 0; i < n; i++) {
         unsigned int rawIdx = (imageDataRawestIndex + i) % n;
@@ -122,7 +120,7 @@ void imageCapture(void *imageCaptureData) {
     }
     imageCaptureTimerEnable();
 
-    // TODO this is kind of a lot of memory.
+    // This is kind of a lot of memory.
     // It could be easily optimized by removing the imageDataRaw buffer
     Complex samples[n];
     Complex tmp[n / 2];
