@@ -42,8 +42,6 @@ SolarPanelControlData solarPanelControlData = {
     &driveMotorSpeedDec
 };
 
-const char* const taskName = "Solar Panel Control";
-
 unsigned short solarPanelSpeed;
 
 static SolarPanelTlmPacket tlmPacket;
@@ -54,7 +52,7 @@ void solarPanelControlInit() {
         &solarPanelControlTCB,
         &solarPanelControlData,
         solarPanelControl,
-        taskName,
+        TASKID_PANEL,
         1
     );
 
@@ -65,7 +63,7 @@ void solarPanelControlInit() {
         solarPanelStop, RISING);
 
     bcRegisterTlmSender(TLMID_SOLAR_PANEL, sizeof(tlmPacket), &tlmPacket);
-    bcRegisterCmdHandler(ENTITYID_SOLAR_PANEL, solarPanelProcessCommand);
+    bcRegisterCmdHandler(TASKID_PANEL, solarPanelProcessCommand);
 }
 
 void solarPanelControl(void *solarPanelControlData) {

@@ -1,6 +1,19 @@
 #include "predefinedMacros.h"
 #include "schedule.h"
+#include "binarySatelliteComs.h"
 #include <Arduino.h>
+
+
+TLM_PACKET {
+    // a bitset of which tasks are scheudled (by task ID)
+    uint16_t scheduledSet;
+} SchedulePacket;
+
+TLM_PACKET {
+    // the execution time of each task in microseconds
+    // indexed by task ID
+    uint32_t execTimeMicros[MAX_NUM_TASKS];
+} TimePacket;
 
 
 /*
@@ -14,13 +27,25 @@ void delayUntil(unsigned long epochMs);
  */
 void purgeTaskQueue();
 
+/*
+ * Get a bitset of which tasks are scheduled by task ID
+ */
+uint16_t getScheduledBitset();
+
 
 unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;
 
+SchedulePacket schedPacket;
+TimePacket timePacket;
+
+
 void scheduleInit() {
     missionElapsedTime = millis();
+
+    bcRegisterTlmSender(TLMID_SCHED, sizeof(schedPacket), &schedPacket);
+    bcRegisterTlmSender(TLMID_TIMES, sizeof(timePacket), &timePacket);
 }
 
 void schedule() {
@@ -43,16 +68,19 @@ void schedule() {
 #endif  /* GET_TIMES */
             tcb->task(tcb->data);
 #ifdef GET_TIMES
-            unsigned long taskEnd = micros();
-            if (0 == i) {
-                Serial.print(tcb->name);
-                Serial.print(F(" Task took: "));
-                Serial.print(taskEnd - taskStart);
-                Serial.println(F(" us to complete"));
-            }
+            timePacket.execTimeMicros[tcb->taskid] = micros() - taskStart;
 #endif  /* GET_TIMES */
             tcb = tcb->next;
         }
+
+        // send the scheduled bitset
+        schedPacket.scheduledSet = getScheduledBitset();
+        bcSend(TLMID_SCHED);
+
+#ifdef GET_TIMES
+        // send the execution times packet
+        bcSend(TLMID_TIMES);
+#endif /* GET_TIMES */
 
         // remove tasks marked for deletion
         purgeTaskQueue();
@@ -179,13 +207,23 @@ unsigned short taskQueueLength() {
     return length;
 }
 
-void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
+void tcbInit(TCB *tcb, void *data, tcb_task_fn task, TaskId taskId,
        unsigned short priority) {
     tcb->data = data;
     tcb->task = task;
-    tcb->name = name;
+    tcb->taskId = taskId;
     tcb->priority = priority;
     tcb->next = NULL;
     tcb->prev = NULL;
     tcb->status = TCBStatusRunning;
+}
+
+uint16_t getScheduledBitset() {
+    uint16_t scheduled = 0;
+    TCB *n = taskQueueHead;
+    while (n != NULL) {
+        scheduled |= n->taskId;
+        n = n->next;
+    }
+    return scheduled;
 }

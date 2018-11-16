@@ -4,6 +4,29 @@
 #define MAJOR_CYCLE_DURATION_MS 5000
 #define MINOR_CYCLE_DURATION_MS 1000
 
+#define MAX_NUM_TASKS 16
+
+
+/*
+ * Task IDs are used to identify tasks in telemetry.
+ * They must be unique and in the range of 0 through 15.
+ *
+ * They are used for command dipatch.
+ * These are NOT used as telemetry IDs.
+ */
+typedef enum {
+    TASKID_BINCOMS = 0,
+    TASKID_DISPLAY = 1,
+    TASKID_KEYPAD =  2,
+    TASKID_POWER =   3,
+    TASKID_SATCOMS = 4,
+    TASKID_SCHED =   5,
+    TASKID_PANEL =   6,
+    TASKID_THRUST =  7,
+    TASKID_VEHCOMS = 8,
+    TASKID_ALARM =   9,
+} TaskId;
+
 typedef void (*tcb_task_fn)(void *data);
 
 typedef enum {
@@ -14,7 +37,7 @@ typedef enum {
 typedef struct _tcb {
     void *data;
     tcb_task_fn task;
-    const char *name;
+    TaskId taskId;
     struct _tcb *next;
     struct _tcb *prev;
     unsigned short priority;
@@ -162,7 +185,7 @@ unsigned short taskQueueLength();
  *  tcb: the output TCB
  *  data: the shared data used by the task
  *  task: the function called when this task is run
- *  name: a string to identify this task in timing
+ *  taskId: a unique ID from schedule.h to identify this task in telemetry
  *  priority: a priority from 1 to 5 (inclusive) where 1 is highest priority.
  *      Higher priority tasks run before lower priority tasks.
  *
@@ -173,7 +196,7 @@ unsigned short taskQueueLength();
  *
  * author: David Dupre
  *****************************************************************************/
-void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
+void tcbInit(TCB *tcb, void *data, tcb_task_fn task, TaskId taskId,
     unsigned short priority);
 
 #endif  /* _SCHEDULE_H_ */

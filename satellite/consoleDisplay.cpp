@@ -24,8 +24,6 @@ ConsoleDisplayData consoleDisplayData = {
     &fuelLow
 };
 
-const char* const taskName = "Console Display";
-
 const char *labels[] = {
     "Solar panel: ",
     "Battery Level: ",
@@ -39,7 +37,7 @@ void consoleDisplayInit() {
         &consoleDisplayTCB,
         &consoleDisplayData,
         consoleDisplay,
-        taskName,
+        TASKID_DISPLAY,
         1
     );
 

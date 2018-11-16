@@ -12,14 +12,12 @@ VehicleCommsData vehicleCommsData = {
     &vehicleResponse
 };
 
-const char* const taskName = "Vehicle Communications";
-
 void vehicleCommsInit() {
     tcbInit(
         &vehicleCommsTCB,
         &vehicleCommsData,
         vehicleComms,
-        taskName,
+        TASKID_VEHCOMS,
         1
     );
 }

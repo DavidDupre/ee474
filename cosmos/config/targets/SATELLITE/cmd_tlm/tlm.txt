@@ -26,7 +26,7 @@ TELEMETRY SATELLITE SOLAR_PANEL BIG_ENDIAN "Solar panel"
 
 
 TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
-  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 4 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 3 } %>
 
   APPEND_ITEM PAD 16 UINT "Padding"
   APPEND_ITEM DURATION 8 UINT "Duration"
@@ -45,3 +45,54 @@ TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
     STATE ON  1
     STATE OFF 0
   APPEND_ITEM FUEL 16 UINT "Fuel level"
+
+
+TELEMETRY SATELLITE SCHED BIG_ENDIAN "Scheduled tasks"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 4 } %>
+  
+  APPEND_ITEM BINCOMS 1 UINT "Binary Satellite Coms"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM DISPLAY 1 UINT "Console Display"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM KEYPAD 1 UINT "Console Keypad"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM POWER 1 UINT "Power Subsystem"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM SATCOMS 1 UINT "Satellite Coms"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM SCHED 1 UINT "Scheduler"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM PANEL 1 UINT "Solar Panel"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM THRUST 1 UINT "Thrusters"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM VEHCOMS 1 UINT "Vehicle Coms"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM ALARM 1 UINT "Warning/Alarm"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM PAD 6 UINT
+
+TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 5 } %>
+  
+  <%= render "_exec_time.txt", locals: { tname: "BINCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "DISPLAY" } %>
+  <%= render "_exec_time.txt", locals: { tname: "KEYPAD" } %>
+  <%= render "_exec_time.txt", locals: { tname: "POWER" } %>
+  <%= render "_exec_time.txt", locals: { tname: "SATCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "SCHED" } %>
+  <%= render "_exec_time.txt", locals: { tname: "PANEL" } %>
+  <%= render "_exec_time.txt", locals: { tname: "THRUST" } %>
+  <%= render "_exec_time.txt", locals: { tname: "VEHCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
+  APPEND_ITEM PAD 24 UINT

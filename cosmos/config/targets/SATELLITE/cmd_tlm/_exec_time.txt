@@ -1,0 +1,2 @@
+  APPEND_ITEM TIME_<%= tname %> 32 UINT
+    UNITS microseconds us

@@ -22,14 +22,12 @@ WarningAlarmData warningAlarmData = {
     &fuelLevel
 };
 
-const char* const taskName = "Warning/Alarm";
-
 void warningAlarmInit() {
     tcbInit(
         &warningAlarmTCB,
         &warningAlarmData,
         warningAlarm,
-        taskName,
+        TASKID_ALARM,
         1
     );
 }

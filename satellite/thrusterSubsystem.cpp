@@ -37,8 +37,6 @@ ThrusterSubsystemData thrusterSubsystemData = {
     &fuelLevel
 };
 
-const char* const taskName = "Thruster Subsystem";
-
 static ThrusterTlmPacket tlmPacket;
 
 /*
@@ -51,11 +49,11 @@ void thrusterSubsystemInit() {
         &thrusterSubsystemTCB,
         &thrusterSubsystemData,
         thrusterSubsystem,
-        taskName,
+        TASKID_THRUST,
         1
     );
 
-    bcRegisterCmdHandler(ENTITYID_THRUSTER, thrusterSubsystemProcessCommand);
+    bcRegisterCmdHandler(TASKID_THRUST, thrusterSubsystemProcessCommand);
     bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
 }
 

@@ -26,14 +26,12 @@ SatelliteComsData satelliteComsData = {
     &vehicleResponse
 };
 
-const char* const taskName = "Satellite Communications";
-
 void satelliteComsInit() {
     tcbInit(
         &satelliteComsTCB,
         &satelliteComsData,
         satelliteComs,
-        taskName,
+        TASKID_SATCOMS,
         1
     );
 }

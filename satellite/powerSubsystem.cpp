@@ -27,8 +27,6 @@ PowerSubsystemData powerSubsystemData = {
     &powerGeneration
 };
 
-const char* const taskName = "Power Subsystem";
-
 static PowerTlmPacket tlmPacket;
 
 unsigned int normBattery(unsigned int input);
@@ -110,7 +108,7 @@ void powerSubsystemInit() {
         &powerSubsystemTCB,
         &powerSubsystemData,
         powerSubsystem,
-        taskName,
+        TASKID_POWER,
         1
     );
 
