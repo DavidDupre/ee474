@@ -52,11 +52,12 @@ void setup() {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
+    bcInit(); // must be called first
+    scheduleInit();
     consoleDisplayInit();
     consoleKeypadInit();
     powerSubsystemInit();
     satelliteComsInit();
-    bcInit();
     solarPanelControlInit();
     thrusterSubsystemInit();
     vehicleCommsInit();
@@ -72,10 +73,10 @@ void setup() {
     taskQueueInsert(&vehicleCommsTCB);
 
 #ifdef ENABLE_BINARY_COMS
-    bcTCB.priority = 4;
+    bcTCB.priority = 5;
     taskQueueInsert(&bcTCB);
 #else
-    satelliteComsTCB.priority = 4;
+    satelliteComsTCB.priority = 5;
     taskQueueInsert(&satelliteComsTCB);
 #endif /* ENABLE_BINARY_COMS */
 

@@ -79,6 +79,8 @@ void solarPanelControl(void *solarPanelControlData) {
             && solarPanelSpeed >= SOLAR_PANEL_SPEED_INCREMENT) {
         solarPanelSpeed -= SOLAR_PANEL_SPEED_INCREMENT;
     }
+    *data->driveMotorSpeedInc = false;
+    *data->driveMotorSpeedDec = false;
 
     // handle commands based on current state
     if (*data->solarPanelDeploy

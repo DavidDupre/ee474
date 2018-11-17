@@ -12,7 +12,7 @@ TLM_PACKET {
     uint32_t batteryLevel;
     uint16_t consumption;
     uint16_t generation;
-    SolarPanelState panelState;
+    uint8_t panelState;
 } PowerTlmPacket;
 
 

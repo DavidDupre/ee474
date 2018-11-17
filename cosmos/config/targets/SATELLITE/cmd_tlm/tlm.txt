@@ -1,15 +1,17 @@
-TELEMETRY SATELLITE META BIG_ENDIAN "Telemetry Status"
+TELEMETRY SATELLITE META LITTLE_ENDIAN "Telemetry Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
   
   APPEND_ITEM NERRS 8 UINT "Number of errors"
+  APPEND_ITEM NCMD 8 UINT "Number of command handlers"
+  APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
 
 
-TELEMETRY SATELLITE POWER BIG_ENDIAN "Power Subsystem"
+TELEMETRY SATELLITE POWER LITTLE_ENDIAN "Power Subsystem"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 1 } %>
   
   APPEND_ITEM BATT_LVL 32 UINT "Battery level"
     UNITS Volts V
-    LIMITS DEFAULT 1 ENABLED 3 18 36 36
+    LIMITS DEFAULT 1 ENABLED 3 3 18 36
   APPEND_ITEM CON 16 UINT "Power consumption"
   APPEND_ITEM GEN 16 UINT "Power generation"
   APPEND_ITEM PANEL_STATE 8 UINT "Solar panel state"
@@ -19,13 +21,13 @@ TELEMETRY SATELLITE POWER BIG_ENDIAN "Power Subsystem"
     STATE RETRACTED  3
 
     
-TELEMETRY SATELLITE SOLAR_PANEL BIG_ENDIAN "Solar panel"
+TELEMETRY SATELLITE SOLAR_PANEL LITTLE_ENDIAN "Solar panel"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 2 } %>
   
   APPEND_ITEM SPEED 16 UINT "Panel motor speed"
 
 
-TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
+TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 3 } %>
 
   APPEND_ITEM PAD 16 UINT "Padding"
@@ -47,41 +49,6 @@ TELEMETRY SATELLITE THRUSTER BIG_ENDIAN "Thruster Subsystem"
   APPEND_ITEM FUEL 16 UINT "Fuel level"
 
 
-TELEMETRY SATELLITE SCHED BIG_ENDIAN "Scheduled tasks"
-  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 4 } %>
-  
-  APPEND_ITEM BINCOMS 1 UINT "Binary Satellite Coms"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM DISPLAY 1 UINT "Console Display"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM KEYPAD 1 UINT "Console Keypad"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM POWER 1 UINT "Power Subsystem"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM SATCOMS 1 UINT "Satellite Coms"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM SCHED 1 UINT "Scheduler"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM PANEL 1 UINT "Solar Panel"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM THRUST 1 UINT "Thrusters"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM VEHCOMS 1 UINT "Vehicle Coms"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM ALARM 1 UINT "Warning/Alarm"
-    STATE ON  1
-    STATE OFF 0
-  APPEND_ITEM PAD 6 UINT
-
 TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 5 } %>
   
@@ -95,4 +62,4 @@ TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "_exec_time.txt", locals: { tname: "THRUST" } %>
   <%= render "_exec_time.txt", locals: { tname: "VEHCOMS" } %>
   <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
-  APPEND_ITEM PAD 24 UINT
+  APPEND_ITEM PAD 192 UINT

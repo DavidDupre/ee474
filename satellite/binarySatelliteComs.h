@@ -17,7 +17,6 @@ typedef enum {
     TLMID_POWER =       1,
     TLMID_SOLAR_PANEL = 2,
     TLMID_THRUSTER =    3,
-    TLMID_SCHED =       4,
     TLMID_TIMES =       5,
 } TlmId;
 
@@ -51,11 +50,5 @@ void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data);
  *  tlmId: The unique telemetry ID
  */
 void bcSend(TlmId tlmId);
-
-/**
- * Send a telemetry packet immediately. This should only be used for debugging,
- * as it kind of breaks the model of queuing packets to be sent to ground.
- */
-void bcSendNow(TlmId tlmId, uint8_t *data, uint8_t size);
 
 void bcRegisterCmdHandler(TaskId taskId, cmd_handler_fn handler);

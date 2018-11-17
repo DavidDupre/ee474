@@ -23,6 +23,8 @@ typedef struct {
 
 TLM_PACKET {
     uint8_t numErrors;
+    uint8_t numCmdHandlers;
+    uint8_t numTlmSenders;
 } MetaPacket;
 
 
@@ -85,6 +87,8 @@ void binarySatelliteComs(void *bcData) {
 
     // update meta packet
     metaPacket.numErrors = *data->numErrors;
+    metaPacket.numTlmSenders = numTlmSenders;
+    metaPacket.numCmdHandlers = numCommandHandlers;
     bcSend(TLMID_META);
 }
 

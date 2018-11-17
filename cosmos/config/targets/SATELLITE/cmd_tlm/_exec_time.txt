@@ -1,2 +1,2 @@
-  APPEND_ITEM TIME_<%= tname %> 32 UINT
+  APPEND_ITEM TIME_<%= tname %> 32 UINT "time" LITTLE_ENDIAN
     UNITS microseconds us

@@ -5,11 +5,6 @@
 
 
 TLM_PACKET {
-    // a bitset of which tasks are scheudled (by task ID)
-    uint16_t scheduledSet;
-} SchedulePacket;
-
-TLM_PACKET {
     // the execution time of each task in microseconds
     // indexed by task ID
     uint32_t execTimeMicros[MAX_NUM_TASKS];
@@ -27,24 +22,17 @@ void delayUntil(unsigned long epochMs);
  */
 void purgeTaskQueue();
 
-/*
- * Get a bitset of which tasks are scheduled by task ID
- */
-uint16_t getScheduledBitset();
-
 
 unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;
 
-SchedulePacket schedPacket;
 TimePacket timePacket;
 
 
 void scheduleInit() {
     missionElapsedTime = millis();
 
-    bcRegisterTlmSender(TLMID_SCHED, sizeof(schedPacket), &schedPacket);
     bcRegisterTlmSender(TLMID_TIMES, sizeof(timePacket), &timePacket);
 }
 
@@ -68,14 +56,10 @@ void schedule() {
 #endif  /* GET_TIMES */
             tcb->task(tcb->data);
 #ifdef GET_TIMES
-            timePacket.execTimeMicros[tcb->taskid] = micros() - taskStart;
+            timePacket.execTimeMicros[tcb->taskId] = micros() - taskStart;
 #endif  /* GET_TIMES */
             tcb = tcb->next;
         }
-
-        // send the scheduled bitset
-        schedPacket.scheduledSet = getScheduledBitset();
-        bcSend(TLMID_SCHED);
 
 #ifdef GET_TIMES
         // send the execution times packet
@@ -216,14 +200,4 @@ void tcbInit(TCB *tcb, void *data, tcb_task_fn task, TaskId taskId,
     tcb->next = NULL;
     tcb->prev = NULL;
     tcb->status = TCBStatusRunning;
-}
-
-uint16_t getScheduledBitset() {
-    uint16_t scheduled = 0;
-    TCB *n = taskQueueHead;
-    while (n != NULL) {
-        scheduled |= n->taskId;
-        n = n->next;
-    }
-    return scheduled;
 }
