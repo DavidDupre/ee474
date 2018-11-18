@@ -20,7 +20,6 @@ PowerSubsystemData powerSubsystemData = {
 
 const char* const taskName = "Power Subsystem";
 
-unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
