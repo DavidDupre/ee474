@@ -5,6 +5,7 @@
 
 #include "solarPanel.h"
 #include <stdint.h>
+#include "imageCapture.h"
 
 
 /*
@@ -30,5 +31,8 @@ extern bool driveMotorSpeedDec;
 extern char vehicleCommand;
 extern char vehicleResponse;
 extern uint8_t numTlmErrors;
+
+extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
+extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 #endif /* _SHARED_VARIABLES_H_ */
