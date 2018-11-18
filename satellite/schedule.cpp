@@ -9,7 +9,6 @@
  */
 void delayUntil(unsigned long epochMs);
 
-
 unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;

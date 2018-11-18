@@ -2,6 +2,7 @@
 #define _SHARED_VARIABLES_H_
 
 #define BATTERY_LEVEL_BUFFER_LENGTH 16
+#define BATTERY_TEMP_BUFFER_LENGTH 16
 
 #include "solarPanel.h"
 

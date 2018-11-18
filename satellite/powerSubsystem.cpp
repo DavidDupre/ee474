@@ -65,9 +65,27 @@ TCB solarPanelControlTCB = {
  *  for every measurement in indices 0-14 (first 15 measurements)
  *  move them to the next index (indices 1-15)
  *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
+ * 
+ * if solar panel is deployed
+ *  measure temperature
+ * 
+ * 
+ * measure temperature:
+ *  record measurement from analog read pins MEASURE_TEMP_PIN_1 and MEASURE_TEMP_PIN_2 in the range of 0-325mV
+ *  Calculating greatest recent measurement to compare new measurements against
+ *  if either of the two readings are 20% greater than the greater of the two previous readings
+ *   set batteryTempHigh flag to true
+ * 
+ *  call normalizing function to normalize readings to 0-3250mV (3.25V)
+ *  convert readings to celsius: 32*battTemp + 33
+ * 
+ *  store data and update buffer
+ *  for every measurement in indices 0-14 (first 15 measurements)
+ *  move them to the next index (indices 1-15)
+ *  add new measurements to index 0,1 via analogRead of 
  *
  *
- * powerSubsystem:
+ * power generation and consumption
  *
  * If we are passed the time that we have stored for the global time globalTimeBase
  * AKA. we have delayed 600 microseconds, then measure and update buffer
@@ -117,7 +135,6 @@ void measurementExternalInterruptISR() {
 // batteryLevelPtr points to a pointer which points to an array of the 16
 // most recent battery level measurements
 void measureBattery() {
-
     // Moving up the first 15 measurements, overwriting the 16th measurement
     for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
         batteryLevelPtr[i] = batteryLevelPtr[i+1];
@@ -128,6 +145,39 @@ void measureBattery() {
     batteryLevelPtr[0] = normBattery(analogBatteryLvl);
 }
 
+void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh) {
+    // record measurement from analog read pins 14,15
+    unsigned int analogTempLvlFirst = analogRead(MEASURE_TEMP_PIN_1);
+    unsigned int analogTempLvlSecond = analogRead(MEASURE_TEMP_PIN_2);
+    
+    // Calculating greatest recent measurement to compare new measurements against
+    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
+    ? batteryTempPtr[0] : batteryTempPtr[1];
+
+    // Checking to see if either of the two recent measurements are greater than than greater recent two
+    // previous measurements by 20%
+    if(analogTempLvlFirst > 1.2 * greaterRecentMeasurement || analogTempLvlSecond > 1.2 * greaterRecentMeasurement) {
+        // set flag for battery temperature being too high
+        *batteryTempHigh = true;
+    }
+    
+    // TODO: Change the normalization method to update the normalization logic for this lab
+    // Note the normalization should amplify the measured value to 0-3.25V
+    unsigned int tempCelsiusFirst = 33 + (32 * normBattery(analogTempLvlFirst));
+    unsigned int tempCelsiusSecond = 33 + (32 * normBattery(analogTempLvlSecond));
+
+    // Store data and update buffer
+    // Moving up the first 14 measurements, overwriting the 15th and 16th measurement
+    for(int i = BATTERY_TEMP_BUFFER_LENGTH - 1 - 2; i >= 0; i--) {
+        batteryTempPtr[i] = batteryTempPtr[i + 2];
+    }
+
+    // Updating the buffer with the most recent two measurements
+    batteryTempPtr[0] = tempCelsiusFirst;
+    batteryTempPtr[1] = tempCelsiusSecond;
+
+}
+
 void powerSubsystem(void* powerSubsystemData) {
     // return early if less than 5 seconds have passed
     static unsigned long lastRunTime;
@@ -135,6 +185,9 @@ void powerSubsystem(void* powerSubsystemData) {
         return;
     }
     lastRunTime = globalTimeBase();
+
+    // Casting pointer to proper data type
+    PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
 
     // This if condition will be satisfied if it is greater by 1 which would measurement
     // it is 1 millisecond (1000 microseconds) more which is more than 600 microseconds
@@ -144,8 +197,10 @@ void powerSubsystem(void* powerSubsystemData) {
         measureBattery();
     }
 
-    // Casting pointer to proper data type
-    PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
+    // If solar panel is deployed, measure the temperature of the battery
+    if(*data->solarPanelDeploy) {
+        measureTemperature(data->batteryTempPtr, data->batteryTempHigh);
+    }
 
     // Initially the Power Consumption is increasing until it reaches
     // the upper limit of POWER_CONSUMPTION_UPPER
