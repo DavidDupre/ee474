@@ -2,8 +2,28 @@
 #include <Arduino.h>
 #include "vehicleComms.h"
 #include "schedule.h"
-#include "transportDistance.h"
 #include "sharedVariables.h"
+#include "transportDistance.h"
+
+
+TCB vehicleCommsTCB;
+
+VehicleCommsData vehicleCommsData = {
+    &vehicleCommand,
+    &vehicleResponse
+};
+
+const char* const taskName = "Vehicle Communications";
+
+void vehicleCommsInit() {
+    tcbInit(
+        &vehicleCommsTCB,
+        &vehicleCommsData,
+        vehicleComms,
+        taskName,
+        1
+    );
+}
 
 /******************************************************************************
  * name : vehicleComms
@@ -17,7 +37,7 @@
  *
  * description:
  *
- * vehicleComms sends commands to the minning vehicle (uno) over serial and 
+ * vehicleComms sends commands to the minning vehicle (uno) over serial and
  * and stores its response
  *
  *
@@ -31,23 +51,6 @@
  *  author: Philip White
 *****************************************************************************/
 
-volatile double distanceBufferPtr[TRANSPORT_DISTANCE_BUFFER_LENGTH];
-
-TransportDistanceData transportDistanceData = {
-    distanceBufferPtr
-};
-
-TCB TransportDistanceTCB;
-
-void vehicleCommsInit() {
-    tcbInit(
-        &TransportDistanceTCB,
-        &transportDistanceData,
-        transportDistance,
-        "Transport Distance",
-        3
-    );
-}
 void vehicleComms(void *vehicleCommsData) {
 
     // Don't run if it has been less than a major cycle since last execution
@@ -64,15 +67,13 @@ void vehicleComms(void *vehicleCommsData) {
     if (Serial1.available()) {
         *data->vehicleResponse = Serial1.read();
 
-        switch (*data->vehicleResponse) {
-            case 'T':
-                *data->vehicleCommand = 'K';
-            case 'D':
-                *data->vehicleCommand = 'C';
-                taskQueueInsert(&TransportDistanceTCB);
-                Serial.println("----0----TASK INSERTED----0----");
-                break;
+        if (*data->vehicleResponse == 'D') {
+            taskQueueInsert(&transportDistanceTCB);
         }
+    }
+
+    if (*data->vehicleCommand == 'C') {
+        taskQueueDelete(&transportDistanceTCB);
     }
     
     // Print command to Serial1 for the Uno to pick up

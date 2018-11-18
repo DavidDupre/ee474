@@ -7,20 +7,23 @@
 #include "solarPanel.h"
 #include "udools.h"
 
+TCB powerSubsystemTCB;
+
+PowerSubsystemData powerSubsystemData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    batteryLevelPtr,
+    &powerConsumption,
+    &powerGeneration
+};
+
+const char* const taskName = "Power Subsystem";
+
 unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
-
-SolarPanelControlData solarPanelControlData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    &driveMotorSpeedInc,
-    &driveMotorSpeedDec
-};
-
-TCB solarPanelControlTCB;
 
 /******************************************************************************
  * name: powerSubsystem
@@ -92,18 +95,18 @@ TCB solarPanelControlTCB;
 *****************************************************************************/
 
 void powerSubsystemInit() {
+    tcbInit(
+        &powerSubsystemTCB,
+        &powerSubsystemData,
+        powerSubsystem,
+        taskName,
+        1
+    );
+
     // setting the battery initialization to unsigned long max value
     // in order to make sure task never measures as it checks to see
     // if the mission elapsed time is greater than it
     batteryInitializationTime = 0;
-
-    tcbInit(
-        &solarPanelControlTCB,
-        &solarPanelControlData,
-        solarPanelControl,
-        "Solar Panel Control",
-        1
-    );
 
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
@@ -123,16 +126,16 @@ void measurementExternalInterruptISR() {
 void measureBattery() {
 
     // Moving up the first 15 measurements, overwriting the 16th measurement
-    // TODO this is shifting the wrong direction
-    for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
-        batteryLevelPtr[i] = batteryLevelPtr[i+1];
-    }
+    // for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i > 0; i--) {
+    //     batteryLevelPtr[i] = batteryLevelPtr[i-1];
+    // }
 
     // Taking the most recent measurement from the external event interrupt pin
     unsigned int analogBatteryLvl = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
     // batteryLevelPtr[0] = normBattery(analogBatteryLvl);
-    batteryLevelPtr[0] = norm<unsigned int>(analogBatteryLvl, ANALOG_MIN, ANALOG_MAX, BATTERY_MIN, BATTERY_MAX);
-
+    // batteryLevelPtr[0] = norm<unsigned int>(analogBatteryLvl, ANALOG_MIN, ANALOG_MAX, BATTERY_MIN, BATTERY_MAX);
+    unsigned int newBatterLvl = norm<unsigned int>(analogBatteryLvl, ANALOG_MIN, ANALOG_MAX, BATTERY_MIN, BATTERY_MAX);
+    addToBuffer(newBatterLvl, batteryLevelPtr, BATTERY_LEVEL_BUFFER_LENGTH);
 }
 
 void powerSubsystem(void* powerSubsystemData) {

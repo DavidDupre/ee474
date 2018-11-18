@@ -9,9 +9,13 @@
 #define MIN_DISTANCE 100
 #define MAX_DISTANCE 2000
 
+#include "schedule.h"
+
 typedef struct {
-    volatile double *distanceBufferPtr;
+    volatile float *distanceBufferPtr;
 } TransportDistanceData;
+
+extern TCB transportDistanceTCB;
 
 void transportDistanceInit();
 

@@ -1,6 +1,8 @@
 #ifndef _WARNING_ALARM_H_
 #define _WARNING_ALARM_H_
 
+#include "schedule.h"
+
 
 typedef struct {
     bool *batteryLow;
@@ -9,6 +11,10 @@ typedef struct {
     unsigned short *fuelLevel;
 } WarningAlarmData;
 
+
+extern TCB warningAlarmTCB;
+
+void warningAlarmInit();
 
 void warningAlarm(void *warningAlarmData);
 

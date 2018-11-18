@@ -4,11 +4,42 @@
 #include "thrusterSubsystem.h"
 #include "solarPanel.h"
 #include "schedule.h"
+#include "sharedVariables.h"
 
 
 void printBool(bool input);
 
 void printSolarPanelState(SolarPanelState state);
+
+
+TCB satelliteComsTCB;
+
+SatelliteComsData satelliteComsData = {
+    .fuelLow = &fuelLow,
+    .batteryLow = &batteryLow,
+    .solarPanelState = &solarPanelState,
+    .batteryLevelPtr = batteryLevelPtr,
+    .distanceBufferPtr = distanceBufferPtr,
+    .fuelLevel =  &fuelLevel,
+    .powerConsumption = &powerConsumption,
+    .powerGeneration = &powerGeneration,
+    .thrusterCommand = &thrusterCommand,
+    .vehicleCommand = &vehicleCommand,
+    .vehicleResponse = &vehicleResponse,
+    .imageData = imageData
+};
+
+const char* const taskName = "Satellite Communications";
+
+void satelliteComsInit() {
+    tcbInit(
+        &satelliteComsTCB,
+        &satelliteComsData,
+        satelliteComs,
+        taskName,
+        1
+    );
+}
 
 /******************************************************************************
  * name : satelliteComs
@@ -92,6 +123,14 @@ void satelliteComs(void* satelliteComsData) {
     if (Serial.available()) {
         *data->vehicleCommand = Serial.read();
     }
+
+    Serial.print(F("Image Capture freq: "));
+    Serial.print(data->imageData[0]);
+    Serial.println(F(" Hz"));
+
+    Serial.print(F("Transport Distance: "));
+    Serial.print(data->distanceBufferPtr[0]);
+    Serial.println(F(" m"));
 }
 
 

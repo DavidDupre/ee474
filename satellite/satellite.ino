@@ -3,10 +3,13 @@
 #include "thrusterSubsystem.h"
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
+#include "consoleKeypad.h"
+#include "solarPanel.h"
 #include "satelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
+#include "imageCapture.h"
 #include "schedule.h"
 #include "transportDistance.h"
 #include "tft.h"
@@ -24,62 +27,14 @@ unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
 volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
+volatile float distanceBufferPtr[TRANSPORT_DISTANCE_BUFFER_LENGTH];
 bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
 
-ThrusterSubsystemData thrusterSubsystemData = {
-    &thrusterCommand,
-    &fuelLevel
-};
-
-PowerSubsystemData powerSubsystemData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    batteryLevelPtr,
-    &powerConsumption,
-    &powerGeneration
-};
-
-ConsoleDisplayData consoleDisplayData = {
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &batteryLow,
-    &fuelLow
-};
-
-SatelliteComsData satelliteComsData = {
-    &fuelLow,
-    &batteryLow,
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &thrusterCommand,
-    &vehicleCommand,
-    &vehicleResponse
-};
-
-VehicleCommsData vehicleCommsData = {
-    &vehicleCommand,
-    &vehicleResponse
-};
-
-WarningAlarmData warningAlarmData = {
-    &batteryLow,
-    &fuelLow,
-    batteryLevelPtr,
-    &fuelLevel
-};
-
-// static storage for TCBs inserted in setup
-TCB tcbs[8];
+unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
+unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
     thrusterCommand = 0;
@@ -101,72 +56,39 @@ void setup() {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
-    scheduleInit();
     consoleDisplayInit();
-    solarPanelControlInit();
+    consoleKeypadInit();
+    imageCaptureInit();
     powerSubsystemInit();
-    vehicleCommsInit();
+    satelliteComsInit();
+    solarPanelControlInit();
+    thrusterSubsystemInit();
     transportDistanceInit();
+    vehicleCommsInit();
+    warningAlarmInit();
 
-    // insert power
-    tcbInit(
-        &tcbs[0],
-        &powerSubsystemData,
-        powerSubsystem,
-        "Power Subsystem",  // TODO this will probably fall out of scope...
-        1
-    );
-    taskQueueInsert(&tcbs[0]);
+    powerSubsystemTCB.priority = 1;
+    taskQueueInsert(&powerSubsystemTCB);
 
-    // insert thruster
-    tcbInit(
-        &tcbs[1],
-        &thrusterSubsystemData,
-        thrusterSubsystem,
-        "Thruster Subsystem",
-        1
-    );
-    taskQueueInsert(&tcbs[1]);
+    thrusterSubsystemTCB.priority = 1;
+    taskQueueInsert(&thrusterSubsystemTCB);
 
-    // insert vehicle comms
-    tcbInit(
-        &tcbs[2],
-        &vehicleCommsData,
-        vehicleComms,
-        "Vehicle Communications",
-        4
-    );
-    taskQueueInsert(&tcbs[2]);
+    imageCaptureTCB.priority = 1;
+    taskQueueInsert(&imageCaptureTCB);
 
-    // insert satellite comms
-    tcbInit(
-        &tcbs[3],
-        &satelliteComsData,
-        satelliteComs,
-        "Satellite Communications",
-        4
-    );
-    taskQueueInsert(&tcbs[3]);
+    vehicleCommsTCB.priority = 4;
+    taskQueueInsert(&vehicleCommsTCB);
 
-    // insert warning/alarm
-    tcbInit(
-        &tcbs[4],
-        &warningAlarmData,
-        warningAlarm,
-        "Warning/Alarm",
-        4
-    );
-    taskQueueInsert(&tcbs[4]);
+    satelliteComsTCB.priority = 4;
+    taskQueueInsert(&satelliteComsTCB);
 
-    // insert console display
-    tcbInit(
-        &tcbs[5],
-        &consoleDisplayData,
-        consoleDisplay,
-        "Console Display",
-        4
-    );
-    taskQueueInsert(&tcbs[5]);
+    warningAlarmTCB.priority = 4;
+    taskQueueInsert(&warningAlarmTCB);
+
+    consoleDisplayTCB.priority = 4;
+    taskQueueInsert(&consoleDisplayTCB);
+
+    sei(); // enable interrupts
 }
 
 void loop() {

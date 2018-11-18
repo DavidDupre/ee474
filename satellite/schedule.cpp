@@ -9,6 +9,11 @@
  */
 void delayUntil(unsigned long epochMs);
 
+/*
+ * Delete all dying tasks from the task queue.
+ */
+void purgeTaskQueue();
+
 
 unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
@@ -49,6 +54,9 @@ void schedule() {
             tcb = tcb->next;
         }
 
+        // remove tasks marked for deletion
+        purgeTaskQueue();
+
         // delay until the minor cycle is over
         delayUntil(majorStartTime + MINOR_CYCLE_DURATION_MS * (i + 1));
     }
@@ -66,6 +74,17 @@ void delayUntil(unsigned long epochMs) {
     }
 }
 
+void purgeTaskQueue() {
+    TCB *tcb = taskQueueHead;
+    while (tcb != NULL) {
+        TCB *next = tcb->next;
+        if (tcb->status == TCBStatusDying) {
+            taskQueueDelete(tcb);
+        }
+        tcb = next;
+    }
+}
+
 unsigned long globalTimeBase() {
     return missionElapsedTime;
 }
@@ -73,6 +92,7 @@ unsigned long globalTimeBase() {
 void taskQueueInsert(TCB *node) {
     // don't add a node that's already on the queue
     if (taskQueueIncludes(node)) {
+        node->status = TCBStatusRunning;
         return;
     }
 
@@ -145,6 +165,10 @@ void taskQueueDelete(TCB *node) {
     node->prev = NULL;
 }
 
+void taskQueueDeleteLater(TCB *node) {
+    node->status = TCBStatusDying;
+}
+
 unsigned short taskQueueLength() {
     unsigned short length = 0;
     TCB *node = taskQueueHead;
@@ -163,4 +187,5 @@ void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
     tcb->priority = priority;
     tcb->next = NULL;
     tcb->prev = NULL;
+    tcb->status = TCBStatusRunning;
 }
