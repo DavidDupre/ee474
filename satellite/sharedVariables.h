@@ -5,6 +5,7 @@
 #define BATTERY_TEMP_BUFFER_LENGTH 16
 
 #include "solarPanel.h"
+#include "imageCapture.h"
 
 
 /*
@@ -29,5 +30,8 @@ extern bool driveMotorSpeedInc;
 extern bool driveMotorSpeedDec;
 extern char vehicleCommand;
 extern char vehicleResponse;
+
+extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
+extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 #endif /* _SHARED_VARIABLES_H_ */

@@ -7,25 +7,23 @@
 #include "solarPanel.h"
 
 
+TCB powerSubsystemTCB;
+
+PowerSubsystemData powerSubsystemData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
+    batteryLevelPtr,
+    &powerConsumption,
+    &powerGeneration
+};
+
+const char* const taskName = "Power Subsystem";
+
 unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
-
-SolarPanelControlData solarPanelControlData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    &driveMotorSpeedInc,
-    &driveMotorSpeedDec
-};
-
-TCB solarPanelControlTCB = {
-    &solarPanelControlData,
-    solarPanelControl,
-    "Solar Panel Control",
-    NULL, NULL
-};
 
 /******************************************************************************
  * name: powerSubsystem
@@ -115,10 +113,19 @@ TCB solarPanelControlTCB = {
 *****************************************************************************/
 
 void powerSubsystemInit() {
+    tcbInit(
+        &powerSubsystemTCB,
+        &powerSubsystemData,
+        powerSubsystem,
+        taskName,
+        1
+    );
+
     // setting the battery initialization to unsigned long max value
     // in order to make sure task never measures as it checks to see
     // if the mission elapsed time is greater than it
     batteryInitializationTime = 0;
+
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);

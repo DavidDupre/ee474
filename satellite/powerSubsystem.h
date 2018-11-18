@@ -25,6 +25,7 @@
 #define MEASURE_DELAY_MS 1
 
 #define TEMP_PERCENTAGE_CHANGE_WARNING 20
+#include "powerSubsystem.h"
 
 
 typedef struct {
@@ -37,6 +38,9 @@ typedef struct {
     unsigned short *powerGeneration;
     bool *batteryTempHigh;
 } PowerSubsystemData;
+
+
+extern TCB powerSubsystemTCB;
 
 void powerSubsystemInit();
 

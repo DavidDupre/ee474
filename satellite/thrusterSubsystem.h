@@ -2,6 +2,7 @@
 #define _THRUSTER_SUBSYSTEM_H_
 
 #include <stdint.h>
+#include "schedule.h"
 
 /*
  * This is a special value of thrusterCommand that represents the absence
@@ -27,6 +28,10 @@ typedef struct {
 } ThrusterSubsystemData;
 
 
+extern TCB thrusterSubsystemTCB;
+
+void thrusterSubsystemInit();
+
 void thrusterSubsystem(void *thrusterSubsystemData);
 
 /*
@@ -45,11 +50,5 @@ void thrusterSubsystem(void *thrusterSubsystemData);
 uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
                                bool useDown, uint8_t magnitude,
                                uint8_t duration);
-
-/*
- * Set the max value of partialFuel. Decreasing this will simulate a faster
- * fuel consumption. Do not use this outside of testing.
- */
-void setMaxPartialFuel(uint32_t maxPartialFuel);
 
 #endif  /* _THRUSTER_SUBSYSTEM_H_ */

@@ -1,6 +1,7 @@
 #include "thrusterSubsystem.h"
 #include "schedule.h"
 #include "predefinedMacros.h"
+#include "sharedVariables.h"
 #include <stdint.h>
 
 /*
@@ -13,10 +14,29 @@
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
 
 
+TCB thrusterSubsystemTCB;
+
+ThrusterSubsystemData thrusterSubsystemData = {
+    &thrusterCommand,
+    &fuelLevel
+};
+
+const char* const taskName = "Thruster Subsystem";
+
 /*
  * Holds the max value of a `partialFuel`. Should be changed only for testing.
  */
 uint32_t thrusterSubsystemFullFuel = MSEC_PER_FUEL_UNIT_PER_MAG_LSB;
+
+void thrusterSubsystemInit() {
+    tcbInit(
+        &thrusterSubsystemTCB,
+        &thrusterSubsystemData,
+        thrusterSubsystem,
+        taskName,
+        1
+    );
+}
 
 /******************************************************************************
  * name: thrusterSubsystem
@@ -158,11 +178,4 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     cmd |= (magnitude << 4);
     cmd |= ((uint16_t) duration) << 8;
     return cmd;
-}
-
-void setMaxPartialFuel(uint32_t maxPartialFuel) {
-#ifdef RUN_TESTS
-    thrusterSubsystemFullFuel = maxPartialFuel;
-#endif
-    return;
 }

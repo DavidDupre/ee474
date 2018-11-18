@@ -3,10 +3,13 @@
 #include "thrusterSubsystem.h"
 #include "powerSubsystem.h"
 #include "consoleDisplay.h"
+#include "consoleKeypad.h"
+#include "solarPanel.h"
 #include "satelliteComs.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
+#include "imageCapture.h"
 #include "schedule.h"
 #include "tft.h"
 
@@ -31,102 +34,8 @@ char vehicleResponse;
 bool batteryTempHigh;
 unsigned int batteryTemp;
 
-ThrusterSubsystemData thrusterSubsystemData = {
-    &thrusterCommand,
-    &fuelLevel
-};
-
-PowerSubsystemData powerSubsystemData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    batteryLevelPtr,
-    batteryTempPtr,
-    &powerConsumption,
-    &powerGeneration,
-    &batteryTempHigh,
-};
-
-ConsoleDisplayData consoleDisplayData = {
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &batteryLow,
-    &fuelLow
-};
-
-SatelliteComsData satelliteComsData = {
-    &fuelLow,
-    &batteryLow,
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &thrusterCommand,
-    &vehicleResponse
-};
-
-VehicleCommsData vehicleCommsData = {
-    &vehicleCommand,
-    &vehicleResponse
-};
-
-WarningAlarmData warningAlarmData = {
-    &batteryLow,
-    &fuelLow,
-    batteryLevelPtr,
-    &fuelLevel,
-    &batteryTempHigh
-};
-
-
-
-TCB powerSubsystemTCB = {
-    &powerSubsystemData,
-    powerSubsystem,
-    "Power Subsystem",
-    NULL, NULL
-};
-
-TCB thrusterSubsystemTCB = {
-    &thrusterSubsystemData,
-    thrusterSubsystem,
-    "Thruster Subsystem",
-    NULL, NULL
-};
-
-TCB consoleDisplayTCB = {
-    &consoleDisplayData,
-    consoleDisplay,
-    "Console Display",
-    NULL, NULL
-};
-
-TCB satelliteComsTCB = {
-    &satelliteComsData,
-    satelliteComs,
-    "Satellite Communications",
-    NULL, NULL
-};
-
-TCB vehicleCommsTCB = {
-    &vehicleCommsData,
-    vehicleComms,
-    "Vehicle Communications",
-    NULL, NULL
-};
-
-TCB warningAlarmTCB = {
-    &warningAlarmData,
-    warningAlarm,
-    "Warning/Alarm",
-    NULL, NULL
-};
-
-
+unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
+unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
     thrusterCommand = 0;
@@ -143,7 +52,6 @@ void setup() {
     batteryTempHigh = false;
     vehicleCommand = '\0';
     vehicleResponse = '\0';
-    // batteryTemp = some initial value
 
     Serial.begin(250000);
     Serial1.begin(9600);
@@ -151,27 +59,41 @@ void setup() {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
-    scheduleInit();
     consoleDisplayInit();
-    solarPanelControlInit();
+    consoleKeypadInit();
+    imageCaptureInit();
     powerSubsystemInit();
+    satelliteComsInit();
+    solarPanelControlInit();
+    thrusterSubsystemInit();
+    vehicleCommsInit();
+    warningAlarmInit();
 
-    // initialize the task queue
-#ifndef RUN_TESTS
+    powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);
+
+    thrusterSubsystemTCB.priority = 1;
     taskQueueInsert(&thrusterSubsystemTCB);
+
+    imageCaptureTCB.priority = 1;
+    taskQueueInsert(&imageCaptureTCB);
+
+    vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);
+
+    satelliteComsTCB.priority = 4;
     taskQueueInsert(&satelliteComsTCB);
+
+    warningAlarmTCB.priority = 4;
     taskQueueInsert(&warningAlarmTCB);
+
+    consoleDisplayTCB.priority = 4;
     taskQueueInsert(&consoleDisplayTCB);
-#endif
+
+    sei(); // enable interrupts
 }
 
 void loop() {
-#ifdef RUN_TESTS
-    aunit::TestRunner::run();
-#else
     schedule();
-#endif  /* RUN_TESTS */
     return;
 }

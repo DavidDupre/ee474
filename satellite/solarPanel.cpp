@@ -20,21 +20,29 @@
 void solarPanelStop();
 
 
-ConsoleKeypadData consoleKeypadData = {
+TCB solarPanelControlTCB;
+
+SolarPanelControlData solarPanelControlData = {
+    &solarPanelState,
+    &solarPanelDeploy,
+    &solarPanelRetract,
     &driveMotorSpeedInc,
     &driveMotorSpeedDec
 };
 
-TCB consoleKeypadTCB = {
-    &consoleKeypadData,
-    consoleKeypad,
-    "Console Keypad",
-    NULL, NULL
-};
+const char* const taskName = "Solar Panel Control";
 
 unsigned short solarPanelSpeed;
 
 void solarPanelControlInit() {
+    tcbInit(
+        &solarPanelControlTCB,
+        &solarPanelControlData,
+        solarPanelControl,
+        taskName,
+        1
+    );
+
     solarPanelSpeed = 0;
     pinMode(PIN_SOLAR_PANEL_OUTPUT, OUTPUT);
     pinMode(PIN_SOLAR_PANEL_STOPPED, INPUT_PULLUP);
@@ -103,5 +111,6 @@ void solarPanelStop() {
     } else if (solarPanelState == SOLAR_PANEL_RETRACTING) {
         solarPanelState = SOLAR_PANEL_RETRACTED;
     }
-    taskQueueDelete(&consoleKeypadTCB);
+    taskQueueDeleteLater(&consoleKeypadTCB);
+    taskQueueDeleteLater(&solarPanelControlTCB);
 }

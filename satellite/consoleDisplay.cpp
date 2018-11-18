@@ -3,6 +3,7 @@
 #include "tft.h"
 #include "solarPanel.h"
 #include "schedule.h"
+#include "sharedVariables.h"
 
 #define TEXT_SIZE         2
 #define TEXT_HEIGHT       8  // in multiples of TEXT_SIZE
@@ -10,6 +11,20 @@
 #define HEIGHT            50 // where the display starts
 #define MAX_VALUE_STR_LEN 20
 
+
+TCB consoleDisplayTCB;
+
+ConsoleDisplayData consoleDisplayData = {
+    &solarPanelState,
+    batteryLevelPtr,
+    &fuelLevel,
+    &powerConsumption,
+    &powerGeneration,
+    &batteryLow,
+    &fuelLow
+};
+
+const char* const taskName = "Console Display";
 
 const char *labels[] = {
     "Solar panel: ",
@@ -20,6 +35,14 @@ const char *labels[] = {
 };
 
 void consoleDisplayInit() {
+    tcbInit(
+        &consoleDisplayTCB,
+        &consoleDisplayData,
+        consoleDisplay,
+        taskName,
+        1
+    );
+
     tft.setCursor(0, HEIGHT);
     tft.setTextSize(TEXT_SIZE);
     tft.setTextColor(WHITE);

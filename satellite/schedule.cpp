@@ -9,6 +9,12 @@
  */
 void delayUntil(unsigned long epochMs);
 
+/*
+ * Delete all dying tasks from the task queue.
+ */
+void purgeTaskQueue();
+
+
 unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;
@@ -18,7 +24,6 @@ void scheduleInit() {
 }
 
 void schedule() {
-    unsigned short size = taskQueueLength();
     unsigned long majorStartTime = millis();
 
     // it's okay if integer division rounds this down because we will delay for
@@ -49,6 +54,9 @@ void schedule() {
             tcb = tcb->next;
         }
 
+        // remove tasks marked for deletion
+        purgeTaskQueue();
+
         // delay until the minor cycle is over
         delayUntil(majorStartTime + MINOR_CYCLE_DURATION_MS * (i + 1));
     }
@@ -66,20 +74,25 @@ void delayUntil(unsigned long epochMs) {
     }
 }
 
-unsigned long globalTimeBase() {
-    return missionElapsedTime;
+void purgeTaskQueue() {
+    TCB *tcb = taskQueueHead;
+    while (tcb != NULL) {
+        TCB *next = tcb->next;
+        if (tcb->status == TCBStatusDying) {
+            taskQueueDelete(tcb);
+        }
+        tcb = next;
+    }
 }
 
-void setGlobalTimeBase(unsigned long epoch) {
-#ifdef RUN_TESTS
-    missionElapsedTime = epoch;
-#endif
-    return;
+unsigned long globalTimeBase() {
+    return missionElapsedTime;
 }
 
 void taskQueueInsert(TCB *node) {
     // don't add a node that's already on the queue
     if (taskQueueIncludes(node)) {
+        node->status = TCBStatusRunning;
         return;
     }
 
@@ -87,9 +100,23 @@ void taskQueueInsert(TCB *node) {
         taskQueueHead = node;
         taskQueueTail = node;
     } else {
-        taskQueueTail->next = node;
-        node->prev = taskQueueTail;
-        taskQueueTail = node;
+        // find the task to insert after (node before last node with lower
+        // priority)
+        TCB *other = taskQueueHead;
+        while (other->next != NULL
+                && other->next->priority <= node->priority) {
+            other = other->next;
+        }
+
+        // insert after "other"
+        if (other->next) {
+            other->next->prev = node;
+        } else {
+            taskQueueTail = node;
+        }
+        node->next = other->next;
+        node->prev = other;
+        other->next = node;
     }
     return;
 }
@@ -138,6 +165,10 @@ void taskQueueDelete(TCB *node) {
     node->prev = NULL;
 }
 
+void taskQueueDeleteLater(TCB *node) {
+    node->status = TCBStatusDying;
+}
+
 unsigned short taskQueueLength() {
     unsigned short length = 0;
     TCB *node = taskQueueHead;
@@ -146,4 +177,15 @@ unsigned short taskQueueLength() {
         node = node->next;
     }
     return length;
+}
+
+void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
+       unsigned short priority) {
+    tcb->data = data;
+    tcb->task = task;
+    tcb->name = name;
+    tcb->priority = priority;
+    tcb->next = NULL;
+    tcb->prev = NULL;
+    tcb->status = TCBStatusRunning;
 }
