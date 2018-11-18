@@ -23,7 +23,8 @@ SatelliteComsData satelliteComsData = {
     &powerConsumption,
     &powerGeneration,
     &thrusterCommand,
-    &vehicleResponse
+    &vehicleResponse,
+    imageData
 };
 
 const char* const taskName = "Satellite Communications";
@@ -115,6 +116,10 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerGeneration);
     Serial.print(F("Vehicle Response: A "));
     Serial.println(*data->vehicleResponse);
+
+    Serial.print(F("Image Capture freq: "));
+    Serial.print(data->imageData[0]);
+    Serial.println(F(" Hz"));
 }
 
 void printBool(bool input) {

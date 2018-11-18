@@ -9,6 +9,7 @@
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
+#include "imageCapture.h"
 #include "schedule.h"
 #include "tft.h"
 
@@ -29,6 +30,9 @@ bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
+
+unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
+unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
     thrusterCommand = 0;
@@ -52,6 +56,7 @@ void setup() {
 
     consoleDisplayInit();
     consoleKeypadInit();
+    imageCaptureInit();
     powerSubsystemInit();
     satelliteComsInit();
     solarPanelControlInit();
@@ -65,6 +70,9 @@ void setup() {
     thrusterSubsystemTCB.priority = 1;
     taskQueueInsert(&thrusterSubsystemTCB);
 
+    imageCaptureTCB.priority = 1;
+    taskQueueInsert(&imageCaptureTCB);
+
     vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);
 
@@ -76,6 +84,8 @@ void setup() {
 
     consoleDisplayTCB.priority = 4;
     taskQueueInsert(&consoleDisplayTCB);
+
+    sei(); // enable interrupts
 }
 
 void loop() {
