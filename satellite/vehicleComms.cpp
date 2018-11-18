@@ -31,7 +31,7 @@
  *  author: Philip White
 *****************************************************************************/
 
-volatile unsigned int distanceBufferPtr[TRANSPORT_DISTANCE_BUFFER_LENGTH];
+volatile double distanceBufferPtr[TRANSPORT_DISTANCE_BUFFER_LENGTH];
 
 TransportDistanceData transportDistanceData = {
     distanceBufferPtr

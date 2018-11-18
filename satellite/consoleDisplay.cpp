@@ -16,7 +16,8 @@ const char *labels[] = {
     "Battery Level: ",
     "Fuel Level: ",
     "Power Consumption: ",
-    "Power Generation: "
+    "Power Generation: ",
+    "Transport Distance"
 };
 
 void consoleDisplayInit() {
@@ -85,6 +86,10 @@ void consoleDisplay(void *consoleDisplayData) {
     printLabel(labels[lineNum], lineNum);
     lineNum++;
     tft.print(*(data->powerConsumption));
+
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
+    tft.print(*(data->powerGeneration));
 
     printLabel(labels[lineNum], lineNum);
     lineNum++;

@@ -32,7 +32,11 @@
  *  author: Philip White
 *****************************************************************************/
 
-void addToBuffer(int distance, volatile unsigned int *buffer);
+void addToBuffer(double distance, volatile double *buffer);
+
+void transportDistanceInit() {
+    pinMode(SENSOR_PIN, INPUT);
+}
 
 void transportDistance(void *transportDistanceData) {
 
@@ -48,22 +52,23 @@ void transportDistance(void *transportDistanceData) {
         pinState = digitalRead(SENSOR_PIN);
         if (startPulse == 0 && !pinState && pinState != lastPinState) {
             startPulse = micros();
-            Serial.println("START");
         } else if (lastPinState != pinState && startPulse > 0 && !pinState) {
             endPulse = micros();
-            Serial.println("END");
         }
         lastPinState = pinState;      
     }
 
     if (endPulse > 0) {
-        Serial.println(endPulse - startPulse);
         unsigned long frequency = 1000000/(endPulse - startPulse); // Change from micros to Hz
-        Serial.print("----FREAUENCY  ");
+        Serial.print("----FREQUENCY: ");
         Serial.println(frequency);
-        unsigned short distance = MAX_FREQ - frequency + MIN_FREQ; // Reverse range so Norm works
-        // distance = (MAX_DISTANCE - MIN_DISTANCE)*(distance - MIN_FREQ)/(MAX_FREQ - MIN_FREQ);
+        double distance = MAX_FREQ - frequency + MIN_FREQ; // Reverse range so Norm works
+        // if (distance > MAX_FREQ) {
+        //     distance = MAX_FREQ;
+        // }
         distance = norm <unsigned short>(distance, MIN_FREQ, MAX_FREQ, MIN_DISTANCE, MAX_DISTANCE);
+        distance = norm <double>(distance, MIN_FREQ, MAX_FREQ, MIN_DISTANCE, MAX_DISTANCE);
+        Serial.print("----DISTANCE: ");
         Serial.println(distance);
 
         if (abs(data->distanceBufferPtr[0] - distance) > (data->distanceBufferPtr[0])*0.10) {
@@ -72,8 +77,10 @@ void transportDistance(void *transportDistanceData) {
     }
 }
 
-void addToBuffer(int distance, volatile unsigned int *buffer) {
-    for (int i = 1 - 1; i <= TRANSPORT_DISTANCE_BUFFER_LENGTH; i++) {
+// TODO: Problem where distance becomes max double value around 10000
+
+void addToBuffer(double distance, volatile double *buffer) {
+    for (int i = 1; i < TRANSPORT_DISTANCE_BUFFER_LENGTH; i++) {
         buffer[i] = buffer[i - 1];
     }
     buffer[0] = distance;

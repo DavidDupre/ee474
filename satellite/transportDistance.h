@@ -1,7 +1,7 @@
 #ifndef _TRANSPORT_DISTANCE_H_
 #define _TRANSPORT_DISTANCE_H_
 
-#define LONGEST_PERIOD 550000
+#define LONGEST_PERIOD 250000
 #define SENSOR_PIN 45
 
 #define MIN_FREQ 0
@@ -10,9 +10,10 @@
 #define MAX_DISTANCE 2000
 
 typedef struct {
-    volatile unsigned int *distanceBufferPtr;
+    volatile double *distanceBufferPtr;
 } TransportDistanceData;
 
+void transportDistanceInit();
 
 void transportDistance(void *transportDistanceData);
 

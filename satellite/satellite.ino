@@ -8,6 +8,7 @@
 #include "warningAlarm.h"
 #include "solarPanel.h"
 #include "schedule.h"
+#include "transportDistance.h"
 #include "tft.h"
 
 #include <AUnit.h>  // Test framework
@@ -105,6 +106,7 @@ void setup() {
     solarPanelControlInit();
     powerSubsystemInit();
     vehicleCommsInit();
+    transportDistanceInit();
 
     // insert power
     tcbInit(
