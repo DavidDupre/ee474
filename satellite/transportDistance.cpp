@@ -6,6 +6,15 @@
 #include "vehicleComms.h"
 #include "udools.h"
 
+#define LONGEST_PERIOD 250000
+#define SENSOR_PIN 45
+
+#define MIN_FREQ 0
+#define MAX_FREQ 10000
+#define MIN_DISTANCE 100
+#define MAX_DISTANCE 2000
+#define MEASURE_DIFF 0.10
+
 /******************************************************************************
  * name : transportDistance
  *
@@ -85,7 +94,7 @@ void transportDistance(void *transportDistanceData) {
 
         distance = norm <float>(distance, MIN_FREQ, MAX_FREQ, MIN_DISTANCE, MAX_DISTANCE);
 
-        if (abs(data->distanceBufferPtr[0] - distance) > (data->distanceBufferPtr[0])*0.10) {
+        if (abs(data->distanceBufferPtr[0] - distance) > (data->distanceBufferPtr[0])*MEASURE_DIFF) {
             addToBuffer(distance, distanceBufferPtr, TRANSPORT_DISTANCE_BUFFER_LENGTH);
         }
     }
