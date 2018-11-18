@@ -9,6 +9,7 @@ typedef struct {
     char *vehicleResponse;
 } VehicleCommsData;
 
+void vehicleCommsInit();
 
 extern TCB vehicleCommsTCB;
 

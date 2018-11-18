@@ -8,7 +8,7 @@ void loop() {
         comm = Serial.read();
         // Do not respond if command is null
         if(comm != '\0') {
-            Serial.println(comm);
+            Serial.print(comm);
         }
     }
 }
