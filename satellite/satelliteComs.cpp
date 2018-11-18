@@ -15,16 +15,18 @@ void printSolarPanelState(SolarPanelState state);
 TCB satelliteComsTCB;
 
 SatelliteComsData satelliteComsData = {
-    &fuelLow,
-    &batteryLow,
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &thrusterCommand,
-    &vehicleResponse,
-    imageData
+    .fuelLow = &fuelLow,
+    .batteryLow = &batteryLow,
+    .solarPanelState = &solarPanelState,
+    .batteryLevelPtr = batteryLevelPtr,
+    .distanceBufferPtr = distanceBufferPtr,
+    .fuelLevel =  &fuelLevel,
+    .powerConsumption = &powerConsumption,
+    .powerGeneration = &powerGeneration,
+    .thrusterCommand = &thrusterCommand,
+    .vehicleCommand = &vehicleCommand,
+    .vehicleResponse = &vehicleResponse,
+    .imageData = imageData
 };
 
 const char* const taskName = "Satellite Communications";
@@ -116,11 +118,21 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerGeneration);
     Serial.print(F("Vehicle Response: A "));
     Serial.println(*data->vehicleResponse);
+    *data->vehicleResponse = '\0';
+
+    if (Serial.available()) {
+        *data->vehicleCommand = Serial.read();
+    }
 
     Serial.print(F("Image Capture freq: "));
     Serial.print(data->imageData[0]);
     Serial.println(F(" Hz"));
+
+    Serial.print(F("Transport Distance: "));
+    Serial.print(data->distanceBufferPtr[0]);
+    Serial.println(F(" m"));
 }
+
 
 void printBool(bool input) {
     if (input) {
