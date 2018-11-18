@@ -62,4 +62,10 @@ TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "_exec_time.txt", locals: { tname: "THRUST" } %>
   <%= render "_exec_time.txt", locals: { tname: "VEHCOMS" } %>
   <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
-  APPEND_ITEM PAD 192 UINT
+  <%= render "_exec_time.txt", locals: { tname: "IMAGE" } %>
+  APPEND_ITEM PAD 160 UINT
+
+TELEMETRY SATELLITE IMAGE LITTLE_ENDIAN "Image capture freq."
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 6 } %>
+  
+  APPEND_ITEM FREQ 16 UINT "Frequency"

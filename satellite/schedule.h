@@ -25,6 +25,7 @@ typedef enum {
     TASKID_THRUST =  7,
     TASKID_VEHCOMS = 8,
     TASKID_ALARM =   9,
+    TASKID_IMAGE =   10,
 } TaskId;
 
 typedef void (*tcb_task_fn)(void *data);

@@ -18,6 +18,7 @@ typedef enum {
     TLMID_SOLAR_PANEL = 2,
     TLMID_THRUSTER =    3,
     TLMID_TIMES =       5,
+    TLMID_IMAGE =       6,
 } TlmId;
 
 // returns true if the command was handled

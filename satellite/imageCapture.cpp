@@ -1,5 +1,6 @@
 #include "imageCapture.h"
 #include "schedule.h"
+#include "binarySatelliteComs.h"
 #include "sharedVariables.h"
 #include "fft.h"
 #include <string.h>
@@ -13,18 +14,10 @@
 #define IMAGE_CAPTURE_MAX_MVOLTS 5000.0
 
 
-TCB imageCaptureTCB;
+TLM_PACKET {
+    uint16_t frequency;
+} ImagePacket;
 
-ImageCaptureData imageCaptureData;
-
-const char* const taskName = "Image Capture";
-
-/*
- * This is a private, truly circular buffer for incoming data collected by the
- * ISR.
- */
-volatile unsigned short imageDataRawest[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
-volatile unsigned int imageDataRawestIndex;
 
 void imageCaptureTimerInit();
 void imageCaptureTimerEnable();
@@ -33,12 +26,27 @@ void imageCaptureTimerDisable();
 // convert a raw analogRead measurement to +-2.5V
 float imageCaptureRawToVolts(unsigned short raw);
 
+
+TCB imageCaptureTCB;
+
+ImageCaptureData imageCaptureData;
+
+/*
+ * This is a private, truly circular buffer for incoming data collected by the
+ * ISR.
+ */
+volatile unsigned short imageDataRawest[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
+volatile unsigned int imageDataRawestIndex;
+
+static ImagePacket tlmPacket;
+
+
 void imageCaptureInit() {
     tcbInit(
         &imageCaptureTCB,
         &imageCaptureData,
         imageCapture,
-        taskName,
+        TASKID_IMAGE,
         1
     );
 
@@ -61,8 +69,10 @@ void imageCaptureInit() {
     }
     imageDataRawestIndex = 0;
 
-    // initialize the timer0 interrupt at 7.5 kHz
+    // initialize the timer interrupt
     imageCaptureTimerInit();
+
+    bcRegisterTlmSender(TLMID_IMAGE, sizeof(tlmPacket), &tlmPacket);
 }
 
 void imageCaptureTimerInit() {
@@ -144,6 +154,10 @@ void imageCapture(void *imageCaptureData) {
         data->imageData[i] = data->imageData[i - 1];
     }
     data->imageData[0] = frequency;
+
+    // send telemetry
+    tlmPacket.frequency = frequency;
+    bcSend(TLMID_IMAGE);
 }
 
 // timer5 interrupt service routine
