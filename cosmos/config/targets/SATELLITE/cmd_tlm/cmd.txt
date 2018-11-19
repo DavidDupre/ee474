@@ -19,3 +19,9 @@ COMMAND SATELLITE THRUSTER LITTLE_ENDIAN "Send thruster command"
   APPEND_PARAMETER RIGHT 1 UINT 0 1 0 "Right thruster"
   APPEND_PARAMETER UP 1 UINT 0 1 0 "Up thruster"
   APPEND_PARAMETER DOWN 1 UINT 0 1 0 "Down thruster"
+
+COMMAND SATELLITE VEHICLE LITTLE_ENDIAN "Send vehicle command"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 1, tid: 8, opc: 0 } %>
+
+  APPEND_PARAMETER COMMAND 8 STRING "A" "Command"

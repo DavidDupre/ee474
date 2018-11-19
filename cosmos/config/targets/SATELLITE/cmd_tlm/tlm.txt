@@ -75,3 +75,8 @@ TELEMETRY SATELLITE DISTANCE LITTLE_ENDIAN "Transport distance"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 7 } %>
 
   APPEND_ITEM DISTANCE 32 FLOAT "Distance"
+
+TELEMETRY SATELLITE VEHICLE LITTLE_ENDIAN "Vehicle Communications"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 8 } %>
+
+  APPEND_ITEM RESPONSE 8 STRING "Response"

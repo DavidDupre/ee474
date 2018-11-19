@@ -19,7 +19,8 @@ typedef enum {
     TLMID_THRUSTER =    3,
     TLMID_TIMES =       5,
     TLMID_IMAGE =       6,
-    TLMID_DISTANCE =    7
+    TLMID_DISTANCE =    7,
+    TLMID_VEHICLE =     8,
 } TlmId;
 
 // returns true if the command was handled

@@ -111,9 +111,11 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->vehicleResponse);
     *data->vehicleResponse = '\0';
 
+#ifndef ENABLE_BINARY_COMS
     if (Serial.available()) {
         *data->vehicleCommand = Serial.read();
     }
+#endif /* ENABLE_BINARY_COMS */
 
     Serial.print(F("Image Capture freq: "));
     Serial.print(data->imageData[0]);
