@@ -1,6 +1,7 @@
 #include "satelliteComs.h"
 #include <stdint.h>
 #include <Arduino.h>
+#include "powerSubsystem.h"
 #include "thrusterSubsystem.h"
 #include "solarPanel.h"
 #include "schedule.h"
@@ -20,11 +21,12 @@ SatelliteComsData satelliteComsData = {
     .solarPanelState = &solarPanelState,
     .batteryLevelPtr = batteryLevelPtr,
     .distanceBufferPtr = distanceBufferPtr,
-    .fuelLevel =  &fuelLevel,
+    .vehicleCommand = &vehicleCommand,
+    .batteryTempPtr = batteryTempPtr,
+    .fuelLevel = &fuelLevel,
     .powerConsumption = &powerConsumption,
     .powerGeneration = &powerGeneration,
     .thrusterCommand = &thrusterCommand,
-    .vehicleCommand = &vehicleCommand,
     .vehicleResponse = &vehicleResponse,
     .imageData = imageData
 };
@@ -124,6 +126,9 @@ void satelliteComs(void* satelliteComsData) {
     Serial.print(F("Transport Distance: "));
     Serial.print(data->distanceBufferPtr[0]);
     Serial.println(F(" m"));
+
+    Serial.print(F("Battery Temperature: "));
+    Serial.println(powerToCelsiusTemperature(data->batteryTempPtr));
 }
 
 

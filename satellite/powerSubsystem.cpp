@@ -19,12 +19,14 @@ TLM_PACKET {
 TCB powerSubsystemTCB;
 
 PowerSubsystemData powerSubsystemData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    batteryLevelPtr,
-    &powerConsumption,
-    &powerGeneration
+    .solarPanelState = &solarPanelState,
+    .solarPanelDeploy = &solarPanelDeploy,
+    .solarPanelRetract = &solarPanelRetract,
+    .batteryLevelPtr = batteryLevelPtr,
+    .batteryTempPtr = batteryTempPtr,
+    .powerConsumption = &powerConsumption,
+    .powerGeneration = &powerGeneration,
+    .batteryTempHigh = &batteryTempHigh
 };
 
 static PowerTlmPacket tlmPacket;
@@ -33,6 +35,8 @@ unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
+
+void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh);
 
 /******************************************************************************
  * name: powerSubsystem
@@ -73,8 +77,26 @@ volatile unsigned long batteryInitializationTime;
  *  move them to the next index (indices 1-15)
  *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
  *
+ * if solar panel is deployed
+ *  measure temperature
  *
- * powerSubsystem:
+ *
+ * measure temperature:
+ *  record measurement from analog read pins MEASURE_TEMP_PIN_1 and MEASURE_TEMP_PIN_2 in the range of 0-325mV
+ *  Calculating greatest recent measurement to compare new measurements against
+ *  if either of the two readings are 20% greater than the greater of the two previous readings
+ *   set batteryTempHigh flag to true
+ *
+ *  call normalizing function to normalize readings to 0-3250mV (3.25V)
+ *  convert readings to celsius: 32*battTemp + 33
+ *
+ *  store data and update buffer
+ *  for every measurement in indices 0-14 (first 15 measurements)
+ *  move them to the next index (indices 1-15)
+ *  add new measurements to index 0,1 via analogRead of
+ *
+ *
+ * power generation and consumption
  *
  * If we are passed the time that we have stored for the global time globalTimeBase
  * AKA. we have delayed 600 microseconds, then measure and update buffer
@@ -123,6 +145,9 @@ void powerSubsystemInit() {
 
     // register telemerty
     bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
+
+    measureTemperature(powerSubsystemData.batteryTempPtr, powerSubsystemData.batteryTempHigh);
+    *powerSubsystemData.batteryTempHigh = false;
 }
 
 void measurementExternalInterruptISR() {
@@ -136,10 +161,54 @@ void measurementExternalInterruptISR() {
 // batteryLevelPtr points to a pointer which points to an array of the 16
 // most recent battery level measurements
 void measureBattery() {
+    // Moving up the first 15 measurements, overwriting the 16th measurement
+    for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
+        batteryLevelPtr[i] = batteryLevelPtr[i-1];
+    }
+
     // Taking the most recent measurement from the external event interrupt pin
     unsigned int analogBatteryLvl = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
     unsigned int newBatterLvl = norm<unsigned int>(analogBatteryLvl, ANALOG_MIN, ANALOG_MAX, BATTERY_MIN, BATTERY_MAX);
     addToBuffer(newBatterLvl, batteryLevelPtr, BATTERY_LEVEL_BUFFER_LENGTH);
+}
+
+void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh) {
+    // record measurement from analog read pins 14,15 from 0-5V
+    unsigned int analogTempLvlFirst = analogRead(MEASURE_TEMP_PIN_1);
+    unsigned int analogTempLvlSecond = analogRead(MEASURE_TEMP_PIN_2);
+
+    // Convert it from 0-1023 to 0-325mV by multiplying by 325/1023
+    unsigned int rawMeasurement1 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlFirst;
+    unsigned int rawMeasurement2 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlSecond;
+
+    Serial.println(rawMeasurement1);
+    Serial.println(rawMeasurement2);
+
+    // Calculating greatest recent measurement to compare new measurements against
+    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1]
+    ? batteryTempPtr[0] : batteryTempPtr[1];
+
+    // Checking to see if either of the two recent measurements are greater than than greater recent two
+    // previous measurements by 20%
+    if(rawMeasurement1 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement ||
+       rawMeasurement2 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement) {
+        // set flag for battery temperature being too high
+        Serial.println("entered into batterytemphigh");
+        *batteryTempHigh = true;
+
+    }
+    Serial.println("The value immediately below is batteryTempHigh");
+    Serial.println(*batteryTempHigh);
+
+    // Store data and update buffer
+    // Moving up the first 14 measurements, overwriting the 15th and 16th measurement
+    for(int i = BATTERY_TEMP_BUFFER_LENGTH - 1 - 2; i >= 0; i--) {
+        batteryTempPtr[i + 2] = batteryTempPtr[i];
+    }
+
+    // Updating the buffer with the most recent two measurements
+    batteryTempPtr[0] = rawMeasurement1;
+    batteryTempPtr[1] = rawMeasurement2;
 }
 
 void powerSubsystem(void* powerSubsystemData) {
@@ -150,6 +219,9 @@ void powerSubsystem(void* powerSubsystemData) {
     }
     lastRunTime = globalTimeBase();
 
+    // Casting pointer to proper data type
+    PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
+
     // This if condition will be satisfied if it is greater by 1 which would measurement
     // it is 1 millisecond (1000 microseconds) more which is more than 600 microseconds
     // and would not measure if the interrupt hasn't happen because that is the max value
@@ -158,8 +230,11 @@ void powerSubsystem(void* powerSubsystemData) {
         measureBattery();
     }
 
-    // Casting pointer to proper data type
-    PowerSubsystemData* data = (PowerSubsystemData*) powerSubsystemData;
+    // If solar panel is deployed, measure the temperature of the battery
+
+    if(*data->solarPanelState == SOLAR_PANEL_DEPLOYED) {
+        measureTemperature(data->batteryTempPtr, data->batteryTempHigh);
+    }
 
     // Initially the Power Consumption is increasing until it reaches
     // the upper limit of POWER_CONSUMPTION_UPPER
@@ -222,4 +297,23 @@ unsigned int normBattery(unsigned int input) {
     unsigned int output = (((BATTERY_MAX - BATTERY_MIN)*
         (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
     return output;
+}
+
+
+// Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.
+unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
+    // Takes the greater of the most recent number because it is most relevant for
+    // warning considerations
+    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1]
+    ? batteryTempPtr[0] : batteryTempPtr[1];
+
+    // Multiplying the raw value (0-325mV) by 10 to reach the normal range 0-3.25V
+    unsigned int normalizedTemp = NORMALIZATION_MULTIPLIER * greaterRecentMeasurement;
+    // Multiplying battTemp by 32 and adding 33
+    unsigned long tempCelsiusMv = CELSIUS_MULTIPLY_AMOUNT * (unsigned long)normalizedTemp;
+    // Dividing by 1000 to account for mV / V conversion
+    unsigned int tempCelsius = tempCelsiusMv / 1000;
+    tempCelsius += CELSIUS_ADD_AMOUNT;
+    //Serial.println(tempCelsius);
+    return tempCelsius;
 }
