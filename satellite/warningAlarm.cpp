@@ -11,6 +11,9 @@
 #define HALF_BATTERY    18
 #define BATTERY_RATE    1000
 #define FUEL_RATE       2000
+#define ACK_PERIOD      15000
+
+#define ACK_PIN         35
 
 
 TCB warningAlarmTCB;
@@ -19,7 +22,8 @@ WarningAlarmData warningAlarmData = {
     &batteryLow,
     &fuelLow,
     batteryLevelPtr,
-    &fuelLevel
+    &fuelLevel,
+    &batteryTempHigh
 };
 
 const char* const taskName = "Warning/Alarm";
@@ -32,6 +36,8 @@ void warningAlarmInit() {
         taskName,
         1
     );
+
+    pinMode(ACK_PIN, INPUT);
 }
 
 void warningAlarm(void *warningAlarmData) {
@@ -41,8 +47,10 @@ void warningAlarm(void *warningAlarmData) {
 
     static bool fuelFlashed = false;
     static bool batteryFlashed = false;
+    static bool tempFlashed = false;
     static unsigned long lastBatteryUpdateEpochMs = globalTimeBase();
     static unsigned long lastFuelUpdateEpochMs = globalTimeBase();
+    static unsigned long tempWarningStart = 0;
 
     unsigned long currentEpochMs = globalTimeBase();
     unsigned long timePassedMsBattery = currentEpochMs - lastBatteryUpdateEpochMs;
@@ -115,6 +123,28 @@ void warningAlarm(void *warningAlarmData) {
         // Last update time doesn't change if status is GREEN
         // This makes sure that the flashing starts immediately rather than
         // a second late
+    }
+
+    if(*data->batteryTempHigh) {
+        if (digitalRead(ACK_PIN)) {
+            *data->batteryTempHigh = false;
+            tempWarningStart = 0;
+            tft.fillRect(0, 150, 270, 60, BLACK);
+        } else if(tempWarningStart == 0) {
+            tempWarningStart = globalTimeBase();
+            tft.setTextColor(RED);
+            tft.setCursor(0, 150);
+            tft.print(F("TEMPERATURE"));
+        } else if (globalTimeBase() > tempWarningStart + ACK_PERIOD) {
+            if (tempFlashed) {
+                tft.fillRect(0, 150, 270, 60, BLACK);
+            } else {
+                tft.setTextColor(RED);
+                tft.setCursor(0, 150);
+                tft.print(F("TEMPERATURE"));
+            }
+            tempFlashed = !tempFlashed;
+        }
     }
 
     return;

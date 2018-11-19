@@ -18,8 +18,19 @@
 #define POWER_CONSUMPTION_LOWER 5
 #define SOLAR_PANEL_NOT_DEPLOYED_AMPLIFIER 3
 #define EXTERNAL_MEASUREMENT_EVENT_PIN A13
+
+#define MEASURE_TEMP_PIN_1 A14
+#define MEASURE_TEMP_PIN_2 A15
 #define MEAUSURE_INTERRUPT_PIN 20
 #define MEASURE_DELAY_MS 1
+
+#define TEMP_PERCENTAGE_CHANGE_WARNING .2
+#define RAW_TEMP_MILLIVOLTS_MAX 325.0
+#define MEASUREMENT_MILLIVOLTS_MAX 1023.0
+
+#define NORMALIZATION_MULTIPLIER 10.0
+#define CELSIUS_ADD_AMOUNT 33.0
+#define CELSIUS_MULTIPLY_AMOUNT 32.0
 
 #include "powerSubsystem.h"
 
@@ -29,8 +40,10 @@ typedef struct {
     bool *solarPanelDeploy;
     bool *solarPanelRetract;
     volatile unsigned int *batteryLevelPtr;
+    volatile unsigned int *batteryTempPtr;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
+    bool *batteryTempHigh;
 } PowerSubsystemData;
 
 
@@ -41,5 +54,7 @@ void powerSubsystemInit();
 void measurementExternalInterruptISR();
 
 void powerSubsystem(void* powerSubsystemData);
+
+unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr);
 
 #endif  /* _POWER_SUBSYSTEM_H_ */

@@ -17,6 +17,4 @@ void addToBuffer(T newValue, volatile T *buffer, int bufferLength) {
     buffer[0] = newValue;
 }
 
-void vehicleComms(void *vehicleCommsData);
-
 #endif  /* _UDOOLS_ */

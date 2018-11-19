@@ -9,6 +9,7 @@ typedef struct {
     bool *fuelLow;
     volatile unsigned int *batteryLevelPtr;
     unsigned short *fuelLevel;
+    bool *batteryTempHigh;
 } WarningAlarmData;
 
 

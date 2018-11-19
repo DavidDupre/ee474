@@ -27,11 +27,13 @@ unsigned short powerGeneration;
 bool batteryLow;
 bool fuelLow;
 volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
+volatile unsigned int batteryTempPtr[BATTERY_TEMP_BUFFER_LENGTH];
 volatile float distanceBufferPtr[TRANSPORT_DISTANCE_BUFFER_LENGTH];
 bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
+bool batteryTempHigh;
 
 unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
@@ -41,12 +43,14 @@ void setup() {
     fuelLevel = 100;
     solarPanelState = SOLAR_PANEL_RETRACTED;
     memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
+    memset((unsigned int *) batteryTempPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
     solarPanelDeploy = false;
     solarPanelRetract = false;
     powerConsumption = 0;
     powerGeneration = 0;
     batteryLow = false;
     fuelLow = false;
+    batteryTempHigh = false;
     vehicleCommand = '\0';
     vehicleResponse = '\0';
 
