@@ -63,9 +63,15 @@ TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "_exec_time.txt", locals: { tname: "VEHCOMS" } %>
   <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
   <%= render "_exec_time.txt", locals: { tname: "IMAGE" } %>
-  APPEND_ITEM PAD 160 UINT
+  <%= render "_exec_time.txt", locals: { tname: "DISTANCE" } %>
+  APPEND_ITEM PAD 128 UINT
 
 TELEMETRY SATELLITE IMAGE LITTLE_ENDIAN "Image capture freq."
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 6 } %>
   
   APPEND_ITEM FREQ 16 UINT "Frequency"
+
+TELEMETRY SATELLITE DISTANCE LITTLE_ENDIAN "Transport distance"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 7 } %>
+
+  APPEND_ITEM DISTANCE 32 FLOAT "Distance"

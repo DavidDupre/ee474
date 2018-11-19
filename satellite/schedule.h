@@ -15,17 +15,18 @@
  * These are NOT used as telemetry IDs.
  */
 typedef enum {
-    TASKID_BINCOMS = 0,
-    TASKID_DISPLAY = 1,
-    TASKID_KEYPAD =  2,
-    TASKID_POWER =   3,
-    TASKID_SATCOMS = 4,
-    TASKID_SCHED =   5,
-    TASKID_PANEL =   6,
-    TASKID_THRUST =  7,
-    TASKID_VEHCOMS = 8,
-    TASKID_ALARM =   9,
-    TASKID_IMAGE =   10,
+    TASKID_BINCOMS =  0,
+    TASKID_DISPLAY =  1,
+    TASKID_KEYPAD =   2,
+    TASKID_POWER =    3,
+    TASKID_SATCOMS =  4,
+    TASKID_SCHED =    5,
+    TASKID_PANEL =    6,
+    TASKID_THRUST =   7,
+    TASKID_VEHCOMS =  8,
+    TASKID_ALARM =    9,
+    TASKID_IMAGE =    10,
+    TASKID_DISTANCE = 11,
 } TaskId;
 
 typedef void (*tcb_task_fn)(void *data);
