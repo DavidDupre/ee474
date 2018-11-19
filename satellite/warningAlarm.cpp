@@ -36,7 +36,6 @@ void warningAlarmInit() {
         taskName,
         1
     );
-    tft.fillRect(0, 100, 100, 100, RED);
 
     pinMode(ACK_PIN, INPUT);
 }
@@ -132,18 +131,20 @@ void warningAlarm(void *warningAlarmData) {
             Serial.println("Entered into flipping of batterytemphigh");
             *data->batteryTempHigh = false;
             tempWarningStart = 0;
+            tft.fillRect(0, 150, 270, 60, BLACK);
         } else if(tempWarningStart == 0) {
             Serial.println("~~~~~~~~~~~~~~~hi!");
             tempWarningStart = globalTimeBase();
             tft.setTextColor(RED);
-            tft.setCursor(0, 300);
+            tft.setCursor(0, 150);
             tft.print(F("TEMPERATURE"));
         } else if (globalTimeBase() > tempWarningStart + ACK_PERIOD) {
             if (tempFlashed) {
-                tft.fillRect(0, 300, 400, 330, BLACK);
+                tft.fillRect(0, 150, 270, 60, BLACK);
             } else {
                 tft.setTextColor(RED);
-                tft.setCursor(0, 300);
+                tft.setCursor(0, 150);
+                tft.print(F("TEMPERATURE"));
             }
             tempFlashed = !tempFlashed;
         }

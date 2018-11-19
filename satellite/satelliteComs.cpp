@@ -1,6 +1,7 @@
 #include "satelliteComs.h"
 #include <stdint.h>
 #include <Arduino.h>
+#include "powerSubsystem.h"
 #include "thrusterSubsystem.h"
 #include "solarPanel.h"
 #include "schedule.h"
@@ -15,16 +16,17 @@ void printSolarPanelState(SolarPanelState state);
 TCB satelliteComsTCB;
 
 SatelliteComsData satelliteComsData = {
-    &fuelLow,
-    &batteryLow,
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &thrusterCommand,
-    &vehicleResponse,
-    imageData
+    .fuelLow = &fuelLow,
+    .batteryLow = &batteryLow,
+    .solarPanelState = &solarPanelState,
+    .batteryLevelPtr = batteryLevelPtr,
+    .batteryTempPtr = batteryTempPtr,
+    .fuelLevel = &fuelLevel,
+    .powerConsumption = &powerConsumption,
+    .powerGeneration = &powerGeneration,
+    .thrusterCommand = &thrusterCommand,
+    .vehicleResponse = &vehicleResponse,
+    .imageData = imageData
 };
 
 const char* const taskName = "Satellite Communications";
@@ -120,6 +122,9 @@ void satelliteComs(void* satelliteComsData) {
     Serial.print(F("Image Capture freq: "));
     Serial.print(data->imageData[0]);
     Serial.println(F(" Hz"));
+
+    Serial.print(F("Battery Temperature: "));
+    Serial.println(powerToCelsiusTemperature(data->batteryTempPtr));
 }
 
 void printBool(bool input) {

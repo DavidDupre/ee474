@@ -10,12 +10,14 @@
 TCB powerSubsystemTCB;
 
 PowerSubsystemData powerSubsystemData = {
-    &solarPanelState,
-    &solarPanelDeploy,
-    &solarPanelRetract,
-    batteryLevelPtr,
-    &powerConsumption,
-    &powerGeneration
+    .solarPanelState = &solarPanelState,
+    .solarPanelDeploy = &solarPanelDeploy,
+    .solarPanelRetract = &solarPanelRetract,
+    .batteryLevelPtr = batteryLevelPtr,
+    .batteryTempPtr = batteryTempPtr,
+    .powerConsumption = &powerConsumption,
+    .powerGeneration = &powerGeneration,
+    .batteryTempHigh = &batteryTempHigh
 };
 
 const char* const taskName = "Power Subsystem";
@@ -24,6 +26,8 @@ unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
+
+void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh);
 
 /******************************************************************************
  * name: powerSubsystem
@@ -129,6 +133,10 @@ void powerSubsystemInit() {
     // Attaching interrupt
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);
+
+
+    measureTemperature(powerSubsystemData.batteryTempPtr, powerSubsystemData.batteryTempHigh);
+    *powerSubsystemData.batteryTempHigh = false;
 }
 
 void measurementExternalInterruptISR() {
@@ -144,7 +152,7 @@ void measurementExternalInterruptISR() {
 void measureBattery() {
     // Moving up the first 15 measurements, overwriting the 16th measurement
     for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
-        batteryLevelPtr[i] = batteryLevelPtr[i+1];
+        batteryLevelPtr[i] = batteryLevelPtr[i-1];
     }
 
     // Taking the most recent measurement from the external event interrupt pin
@@ -283,9 +291,10 @@ unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
     // Multiplying the raw value (0-325mV) by 10 to reach the normal range 0-3.25V
     unsigned int normalizedTemp = NORMALIZATION_MULTIPLIER * greaterRecentMeasurement;
     // Multiplying battTemp by 32 and adding 33
-    unsigned long tempCelsiusMv = CELSIUS_MULTIPLY_AMOUNT * normalizedTemp + CELSIUS_ADD_AMOUNT;
+    unsigned long tempCelsiusMv = CELSIUS_MULTIPLY_AMOUNT * (unsigned long)normalizedTemp;
     // Dividing by 1000 to account for mV / V conversion
     unsigned int tempCelsius = tempCelsiusMv / 1000;
+    tempCelsius += CELSIUS_ADD_AMOUNT;
     //Serial.println(tempCelsius);
     return tempCelsius;
 }
