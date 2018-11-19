@@ -153,9 +153,13 @@ void measureBattery() {
 }
 
 void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh) {
-    // record measurement from analog read pins 14,15
+    // record measurement from analog read pins 14,15 from 0-5V
     unsigned int analogTempLvlFirst = analogRead(MEASURE_TEMP_PIN_1);
     unsigned int analogTempLvlSecond = analogRead(MEASURE_TEMP_PIN_2);
+
+    // Convert it from 0-1023 to 0-325mV by multiplying by 325/1023
+    unsigned int rawMeasurement1 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlFirst;
+    unsigned int rawMeasurement2 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlSecond;
     
     // Calculating greatest recent measurement to compare new measurements against
     unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
@@ -163,26 +167,21 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
 
     // Checking to see if either of the two recent measurements are greater than than greater recent two
     // previous measurements by 20%
-    if(analogTempLvlFirst > 1.2 * greaterRecentMeasurement || analogTempLvlSecond > 1.2 * greaterRecentMeasurement) {
+    if(rawMeasurement1 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement ||
+       rawMeasurement2 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement) {
         // set flag for battery temperature being too high
         *batteryTempHigh = true;
     }
-    
-    // TODO: Change the normalization method to update the normalization logic for this lab
-    // Note the normalization should amplify the measured value to 0-3.25V
-    unsigned int tempCelsiusFirst = 33 + (32 * normBattery(analogTempLvlFirst));
-    unsigned int tempCelsiusSecond = 33 + (32 * normBattery(analogTempLvlSecond));
-
+   
     // Store data and update buffer
     // Moving up the first 14 measurements, overwriting the 15th and 16th measurement
     for(int i = BATTERY_TEMP_BUFFER_LENGTH - 1 - 2; i >= 0; i--) {
-        batteryTempPtr[i] = batteryTempPtr[i + 2];
+        batteryTempPtr[i + 2] = batteryTempPtr[i];
     }
 
     // Updating the buffer with the most recent two measurements
-    batteryTempPtr[0] = tempCelsiusFirst;
-    batteryTempPtr[1] = tempCelsiusSecond;
-
+    batteryTempPtr[0] = rawMeasurement1;
+    batteryTempPtr[1] = rawMeasurement2;
 }
 
 void powerSubsystem(void* powerSubsystemData) {
@@ -263,4 +262,20 @@ unsigned int normBattery(unsigned int input) {
     unsigned int output = (((BATTERY_MAX - BATTERY_MIN)*
         (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
     return output;
+}
+
+
+// Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.
+unsigned int celsiusTemperature(volatile unsigned int* batteryTempPtr) {
+    // Takes the greater of the most recent number because it is most relevant for
+    // warning considerations
+    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
+    ? batteryTempPtr[0] : batteryTempPtr[1];
+
+    // Multiplying the raw value (0-325mV) by 10 to reach the normal range 0-3.25V
+    unsigned int normalizedTemp = NORMALIZATION_MULTIPLIER * greaterRecentMeasurement;
+    // Multiplying battTemp by 32 and adding 33 to converted to Celsius
+    unsigned int tempCelsius = CELSIUS_MULTIPLY_AMOUNT * normalizedTemp + CELSIUS_ADD_AMOUNT;
+    
+    return tempCelsius;
 }

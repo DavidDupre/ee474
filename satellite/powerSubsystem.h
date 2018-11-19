@@ -24,7 +24,14 @@
 #define MEAUSURE_INTERRUPT_PIN 20
 #define MEASURE_DELAY_MS 1
 
-#define TEMP_PERCENTAGE_CHANGE_WARNING 20
+#define TEMP_PERCENTAGE_CHANGE_WARNING .2
+#define RAW_TEMP_MILLIVOLTS_MAX 325
+#define MEASUREMENT_MILLIVOLTS_MAX 1023
+
+#define NORMALIZATION_MULTIPLIER 10
+#define CELSIUS_ADD_AMOUNT 33
+#define CELSIUS_MULTIPLY_AMOUNT 32
+
 #include "powerSubsystem.h"
 
 
@@ -47,5 +54,7 @@ void powerSubsystemInit();
 void measurementExternalInterruptISR();
 
 void powerSubsystem(void* powerSubsystemData);
+
+unsigned int celsiusTemperature(volatile unsigned int* batteryTempPtr);
 
 #endif  /* _POWER_SUBSYSTEM_H_ */
