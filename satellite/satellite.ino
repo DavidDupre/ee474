@@ -11,6 +11,7 @@
 #include "solarPanel.h"
 #include "imageCapture.h"
 #include "schedule.h"
+#include "transportDistance.h"
 #include "tft.h"
 
 #include <AUnit.h>  // Test framework
@@ -27,6 +28,7 @@ bool batteryLow;
 bool fuelLow;
 volatile unsigned int batteryLevelPtr[BATTERY_LEVEL_BUFFER_LENGTH];
 volatile unsigned int batteryTempPtr[BATTERY_TEMP_BUFFER_LENGTH];
+volatile float distanceBufferPtr[TRANSPORT_DISTANCE_BUFFER_LENGTH];
 bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
@@ -65,6 +67,7 @@ void setup() {
     satelliteComsInit();
     solarPanelControlInit();
     thrusterSubsystemInit();
+    transportDistanceInit();
     vehicleCommsInit();
     warningAlarmInit();
 

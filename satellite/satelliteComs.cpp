@@ -21,10 +21,12 @@ SatelliteComsData satelliteComsData = {
     .solarPanelState = &solarPanelState,
     .batteryLevelPtr = batteryLevelPtr,
     .batteryTempPtr = batteryTempPtr,
-    .fuelLevel = &fuelLevel,
+    .distanceBufferPtr = distanceBufferPtr,
+    .fuelLevel =  &fuelLevel,
     .powerConsumption = &powerConsumption,
     .powerGeneration = &powerGeneration,
     .thrusterCommand = &thrusterCommand,
+    .vehicleCommand = &vehicleCommand,
     .vehicleResponse = &vehicleResponse,
     .imageData = imageData
 };
@@ -118,6 +120,11 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerGeneration);
     Serial.print(F("Vehicle Response: A "));
     Serial.println(*data->vehicleResponse);
+    *data->vehicleResponse = '\0';
+
+    if (Serial.available()) {
+        *data->vehicleCommand = Serial.read();
+    }
 
     Serial.print(F("Image Capture freq: "));
     Serial.print(data->imageData[0]);
@@ -125,7 +132,12 @@ void satelliteComs(void* satelliteComsData) {
 
     Serial.print(F("Battery Temperature: "));
     Serial.println(powerToCelsiusTemperature(data->batteryTempPtr));
+    
+    Serial.print(F("Transport Distance: "));
+    Serial.print(data->distanceBufferPtr[0]);
+    Serial.println(F(" m"));
 }
+
 
 void printBool(bool input) {
     if (input) {

@@ -15,13 +15,14 @@
 TCB consoleDisplayTCB;
 
 ConsoleDisplayData consoleDisplayData = {
-    &solarPanelState,
-    batteryLevelPtr,
-    &fuelLevel,
-    &powerConsumption,
-    &powerGeneration,
-    &batteryLow,
-    &fuelLow
+    .solarPanelState = &solarPanelState,
+    .batteryLevelPtr = batteryLevelPtr,
+    .distanceBufferPtr = distanceBufferPtr,
+    .fuelLevel = &fuelLevel,
+    .powerConsumption = &powerConsumption,
+    .powerGeneration = &powerGeneration,
+    .batteryLow = &batteryLow,
+    .fuelLow = &fuelLow
 };
 
 const char* const taskName = "Console Display";
@@ -31,7 +32,8 @@ const char *labels[] = {
     "Battery Level: ",
     "Fuel Level: ",
     "Power Consumption: ",
-    "Power Generation: "
+    "Power Generation: ",
+    "Transport Distance: "
 };
 
 void consoleDisplayInit() {
@@ -112,4 +114,8 @@ void consoleDisplay(void *consoleDisplayData) {
     printLabel(labels[lineNum], lineNum);
     lineNum++;
     tft.print(*(data->powerGeneration));
+
+    printLabel(labels[lineNum], lineNum);
+    lineNum++;
+    tft.print(data->distanceBufferPtr[0]);
 }

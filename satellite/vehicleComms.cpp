@@ -3,6 +3,7 @@
 #include "vehicleComms.h"
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "transportDistance.h"
 
 
 TCB vehicleCommsTCB;
@@ -49,6 +50,7 @@ void vehicleCommsInit() {
  *
  *  author: Philip White
 *****************************************************************************/
+
 void vehicleComms(void *vehicleCommsData) {
 
     // Don't run if it has been less than a major cycle since last execution
@@ -61,15 +63,25 @@ void vehicleComms(void *vehicleCommsData) {
     // Cast from void to correct type
     VehicleCommsData *data = (VehicleCommsData *) vehicleCommsData;
 
-    // Print command to Serial1 for the Uno to pick up
-    // Do not print if there is no command
-    if (*data->vehicleCommand != '\0') {
-        Serial1.println(*data->vehicleCommand);
-        *data->vehicleCommand = '\0';
-    }
-
     // Set response if serial is available
     if (Serial1.available()) {
         *data->vehicleResponse = Serial1.read();
+
+        if (*data->vehicleResponse == 'D') {
+            taskQueueInsert(&transportDistanceTCB);
+        }
     }
+
+    if (*data->vehicleCommand == 'C') {
+        taskQueueDelete(&transportDistanceTCB);
+    }
+    
+    // Print command to Serial1 for the Uno to pick up
+    // Do not print if there is no command
+    if (*data->vehicleCommand != '\0') {
+        Serial1.print(*data->vehicleCommand);
+        *data->vehicleCommand = '\0';
+    }
+
+    
 }

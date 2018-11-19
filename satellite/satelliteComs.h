@@ -11,10 +11,12 @@ typedef struct {
     SolarPanelState *solarPanelState;
     volatile unsigned int *batteryLevelPtr;
     volatile unsigned int *batteryTempPtr;
+    volatile float *distanceBufferPtr;
     unsigned short *fuelLevel;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
     unsigned int *thrusterCommand;
+    char *vehicleCommand;
     char *vehicleResponse;
     unsigned int *imageData;
 } SatelliteComsData;

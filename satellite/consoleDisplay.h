@@ -8,6 +8,7 @@
 typedef struct {
     SolarPanelState *solarPanelState;
     volatile unsigned int *batteryLevelPtr;
+    volatile float *distanceBufferPtr;
     unsigned short *fuelLevel;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;

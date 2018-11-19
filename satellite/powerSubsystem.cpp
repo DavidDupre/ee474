@@ -5,7 +5,7 @@
 #include <Arduino.h>
 #include <limits.h>
 #include "solarPanel.h"
-
+#include "udools.h"
 
 TCB powerSubsystemTCB;
 
@@ -22,7 +22,6 @@ PowerSubsystemData powerSubsystemData = {
 
 const char* const taskName = "Power Subsystem";
 
-unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
@@ -150,14 +149,10 @@ void measurementExternalInterruptISR() {
 // batteryLevelPtr points to a pointer which points to an array of the 16
 // most recent battery level measurements
 void measureBattery() {
-    // Moving up the first 15 measurements, overwriting the 16th measurement
-    for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
-        batteryLevelPtr[i] = batteryLevelPtr[i-1];
-    }
-
     // Taking the most recent measurement from the external event interrupt pin
     unsigned int analogBatteryLvl = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
-    batteryLevelPtr[0] = normBattery(analogBatteryLvl);
+    unsigned int newBatterLvl = norm<unsigned int>(analogBatteryLvl, ANALOG_MIN, ANALOG_MAX, BATTERY_MIN, BATTERY_MAX);
+    addToBuffer(newBatterLvl, batteryLevelPtr, BATTERY_LEVEL_BUFFER_LENGTH);
 }
 
 void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh) {
@@ -266,12 +261,6 @@ void powerSubsystem(void* powerSubsystemData) {
             taskQueueInsert(&solarPanelControlTCB);
         }
     }
-}
-
-unsigned int normBattery(unsigned int input) {
-    unsigned int output = (((BATTERY_MAX - BATTERY_MIN)*
-        (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
-    return output;
 }
 
 
