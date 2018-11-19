@@ -55,6 +55,6 @@ void measurementExternalInterruptISR();
 
 void powerSubsystem(void* powerSubsystemData);
 
-unsigned int celsiusTemperature(volatile unsigned int* batteryTempPtr);
+unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr);
 
 #endif  /* _POWER_SUBSYSTEM_H_ */
