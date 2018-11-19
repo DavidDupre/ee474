@@ -38,6 +38,8 @@ extern char vehicleResponse;
 extern uint8_t numTlmErrors;
 extern bool batteryTempHigh;
 
+extern bool temperatureAlarmAcked;
+
 extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 

@@ -21,12 +21,12 @@ SatelliteComsData satelliteComsData = {
     .solarPanelState = &solarPanelState,
     .batteryLevelPtr = batteryLevelPtr,
     .distanceBufferPtr = distanceBufferPtr,
-    .vehicleCommand = &vehicleCommand,
     .batteryTempPtr = batteryTempPtr,
     .fuelLevel = &fuelLevel,
     .powerConsumption = &powerConsumption,
     .powerGeneration = &powerGeneration,
     .thrusterCommand = &thrusterCommand,
+    .vehicleCommand = &vehicleCommand,
     .vehicleResponse = &vehicleResponse,
     .imageData = imageData
 };

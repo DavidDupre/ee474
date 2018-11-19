@@ -10,6 +10,7 @@ typedef struct {
     volatile unsigned int *batteryLevelPtr;
     unsigned short *fuelLevel;
     bool *batteryTempHigh;
+    bool *temperatureAlarmAcked;
 } WarningAlarmData;
 
 

@@ -37,6 +37,8 @@ char vehicleResponse;
 uint8_t numTlmErrors;
 bool batteryTempHigh;
 
+bool temperatureAlarmAcked;
+
 unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 

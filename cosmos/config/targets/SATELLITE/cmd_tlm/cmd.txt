@@ -25,3 +25,7 @@ COMMAND SATELLITE VEHICLE LITTLE_ENDIAN "Send vehicle command"
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 1, tid: 8, opc: 0 } %>
 
   APPEND_PARAMETER COMMAND 8 STRING "A" "Command"
+
+COMMAND SATELLITE ACK_TEMP LITTLE_ENDIAN "Acknowledge temp. alarm"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 0, tid: 9, opc: 0 } %>

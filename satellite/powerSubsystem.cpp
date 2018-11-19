@@ -10,9 +10,11 @@
 
 TLM_PACKET {
     uint32_t batteryLevel;
+    uint16_t temperature;
     uint16_t consumption;
     uint16_t generation;
     uint8_t panelState;
+    uint8_t batteryTempHigh;
 } PowerTlmPacket;
 
 
@@ -31,6 +33,7 @@ PowerSubsystemData powerSubsystemData = {
 
 static PowerTlmPacket tlmPacket;
 
+static bool handleCommand(uint8_t opcode, uint8_t *data);
 unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
@@ -143,11 +146,11 @@ void powerSubsystemInit() {
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);
 
-    // register telemerty
-    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
-
     measureTemperature(powerSubsystemData.batteryTempPtr, powerSubsystemData.batteryTempHigh);
     *powerSubsystemData.batteryTempHigh = false;
+
+    // register telemerty
+    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
 }
 
 void measurementExternalInterruptISR() {
@@ -161,11 +164,6 @@ void measurementExternalInterruptISR() {
 // batteryLevelPtr points to a pointer which points to an array of the 16
 // most recent battery level measurements
 void measureBattery() {
-    // Moving up the first 15 measurements, overwriting the 16th measurement
-    for(int i = BATTERY_LEVEL_BUFFER_LENGTH - 1; i >= 0; i--) {
-        batteryLevelPtr[i] = batteryLevelPtr[i-1];
-    }
-
     // Taking the most recent measurement from the external event interrupt pin
     unsigned int analogBatteryLvl = analogRead(EXTERNAL_MEASUREMENT_EVENT_PIN);
     unsigned int newBatterLvl = norm<unsigned int>(analogBatteryLvl, ANALOG_MIN, ANALOG_MAX, BATTERY_MIN, BATTERY_MAX);
@@ -287,9 +285,11 @@ void powerSubsystem(void* powerSubsystemData) {
 
     // send telemetry
     tlmPacket.batteryLevel = data->batteryLevelPtr[0];
+    tlmPacket.temperature = powerToCelsiusTemperature(data->batteryTempPtr);
     tlmPacket.consumption = *data->powerConsumption;
     tlmPacket.generation = *data->powerGeneration;
     tlmPacket.panelState = *data->solarPanelState;
+    tlmPacket.batteryTempHigh = *data->batteryTempHigh;
     bcSend(TLMID_POWER);
 }
 
@@ -298,7 +298,6 @@ unsigned int normBattery(unsigned int input) {
         (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
     return output;
 }
-
 
 // Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.
 unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
