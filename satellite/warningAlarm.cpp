@@ -3,6 +3,7 @@
 #include "warningAlarm.h"
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "binarySatelliteComs.h"
 #include "tft.h"
 
 #define HALF_FUEL       50
@@ -16,6 +17,9 @@
 #define ACK_PIN         35
 
 
+static bool handleCommand(uint8_t opcode, uint8_t *data);
+
+
 TCB warningAlarmTCB;
 
 WarningAlarmData warningAlarmData = {
@@ -23,21 +27,25 @@ WarningAlarmData warningAlarmData = {
     &fuelLow,
     batteryLevelPtr,
     &fuelLevel,
-    &batteryTempHigh
+    &batteryTempHigh,
+    &temperatureAlarmAcked
 };
-
-const char* const taskName = "Warning/Alarm";
 
 void warningAlarmInit() {
     tcbInit(
         &warningAlarmTCB,
         &warningAlarmData,
         warningAlarm,
-        taskName,
+        TASKID_ALARM,
         1
     );
 
+    temperatureAlarmAcked = false;
+
     pinMode(ACK_PIN, INPUT);
+
+    // optionally acknowledge temperature through serial
+    bcRegisterCmdHandler(TASKID_ALARM, handleCommand);
 }
 
 void warningAlarm(void *warningAlarmData) {
@@ -125,8 +133,12 @@ void warningAlarm(void *warningAlarmData) {
         // a second late
     }
 
+    *data->temperatureAlarmAcked |= digitalRead(ACK_PIN);
+
     if(*data->batteryTempHigh) {
-        if (digitalRead(ACK_PIN)) {
+        if (*data->temperatureAlarmAcked) {
+            *data->temperatureAlarmAcked = false;
+            Serial.println("Entered into flipping of batterytemphigh");
             *data->batteryTempHigh = false;
             tempWarningStart = 0;
             tft.fillRect(0, 150, 270, 60, BLACK);
@@ -148,4 +160,10 @@ void warningAlarm(void *warningAlarmData) {
     }
 
     return;
+}
+
+// handle command from serial
+static bool handleCommand(uint8_t opcode, uint8_t *data) {
+    temperatureAlarmAcked = true;
+    return true;
 }

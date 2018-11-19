@@ -1,6 +1,14 @@
 #include "predefinedMacros.h"
 #include "schedule.h"
+#include "binarySatelliteComs.h"
 #include <Arduino.h>
+
+
+TLM_PACKET {
+    // the execution time of each task in microseconds
+    // indexed by task ID
+    uint32_t execTimeMicros[MAX_NUM_TASKS];
+} TimePacket;
 
 
 /*
@@ -19,8 +27,13 @@ unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;
 
+TimePacket timePacket;
+
+
 void scheduleInit() {
     missionElapsedTime = millis();
+
+    bcRegisterTlmSender(TLMID_TIMES, sizeof(timePacket), &timePacket);
 }
 
 void schedule() {
@@ -43,16 +56,15 @@ void schedule() {
 #endif  /* GET_TIMES */
             tcb->task(tcb->data);
 #ifdef GET_TIMES
-            unsigned long taskEnd = micros();
-            if (0 == i) {
-                Serial.print(tcb->name);
-                Serial.print(F(" Task took: "));
-                Serial.print(taskEnd - taskStart);
-                Serial.println(F(" us to complete"));
-            }
+            timePacket.execTimeMicros[tcb->taskId] = micros() - taskStart;
 #endif  /* GET_TIMES */
             tcb = tcb->next;
         }
+
+#ifdef GET_TIMES
+        // send the execution times packet
+        bcSend(TLMID_TIMES);
+#endif /* GET_TIMES */
 
         // remove tasks marked for deletion
         purgeTaskQueue();
@@ -179,11 +191,11 @@ unsigned short taskQueueLength() {
     return length;
 }
 
-void tcbInit(TCB *tcb, void *data, tcb_task_fn task, const char *name,
+void tcbInit(TCB *tcb, void *data, tcb_task_fn task, TaskId taskId,
        unsigned short priority) {
     tcb->data = data;
     tcb->task = task;
-    tcb->name = name;
+    tcb->taskId = taskId;
     tcb->priority = priority;
     tcb->next = NULL;
     tcb->prev = NULL;

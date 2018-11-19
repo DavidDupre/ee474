@@ -2,10 +2,21 @@
 #include <stdint.h>
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "binarySatelliteComs.h"
 #include <Arduino.h>
 #include <limits.h>
 #include "solarPanel.h"
 #include "udools.h"
+
+TLM_PACKET {
+    uint32_t batteryLevel;
+    uint16_t temperature;
+    uint16_t consumption;
+    uint16_t generation;
+    uint8_t panelState;
+    uint8_t batteryTempHigh;
+} PowerTlmPacket;
+
 
 TCB powerSubsystemTCB;
 
@@ -20,8 +31,10 @@ PowerSubsystemData powerSubsystemData = {
     .batteryTempHigh = &batteryTempHigh
 };
 
-const char* const taskName = "Power Subsystem";
+static PowerTlmPacket tlmPacket;
 
+static bool handleCommand(uint8_t opcode, uint8_t *data);
+unsigned int normBattery(unsigned int input);
 // Flags
 // volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
@@ -66,24 +79,24 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
  *  for every measurement in indices 0-14 (first 15 measurements)
  *  move them to the next index (indices 1-15)
  *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
- * 
+ *
  * if solar panel is deployed
  *  measure temperature
- * 
- * 
+ *
+ *
  * measure temperature:
  *  record measurement from analog read pins MEASURE_TEMP_PIN_1 and MEASURE_TEMP_PIN_2 in the range of 0-325mV
  *  Calculating greatest recent measurement to compare new measurements against
  *  if either of the two readings are 20% greater than the greater of the two previous readings
  *   set batteryTempHigh flag to true
- * 
+ *
  *  call normalizing function to normalize readings to 0-3250mV (3.25V)
  *  convert readings to celsius: 32*battTemp + 33
- * 
+ *
  *  store data and update buffer
  *  for every measurement in indices 0-14 (first 15 measurements)
  *  move them to the next index (indices 1-15)
- *  add new measurements to index 0,1 via analogRead of 
+ *  add new measurements to index 0,1 via analogRead of
  *
  *
  * power generation and consumption
@@ -120,7 +133,7 @@ void powerSubsystemInit() {
         &powerSubsystemTCB,
         &powerSubsystemData,
         powerSubsystem,
-        taskName,
+        TASKID_POWER,
         1
     );
 
@@ -133,9 +146,11 @@ void powerSubsystemInit() {
     attachInterrupt(digitalPinToInterrupt(MEAUSURE_INTERRUPT_PIN),
     measurementExternalInterruptISR, RISING);
 
-
     measureTemperature(powerSubsystemData.batteryTempPtr, powerSubsystemData.batteryTempHigh);
     *powerSubsystemData.batteryTempHigh = false;
+
+    // register telemerty
+    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
 }
 
 void measurementExternalInterruptISR() {
@@ -163,9 +178,9 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
     // Convert it from 0-1023 to 0-325mV by multiplying by 325/1023
     unsigned int rawMeasurement1 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlFirst;
     unsigned int rawMeasurement2 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlSecond;
-    
+
     // Calculating greatest recent measurement to compare new measurements against
-    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
+    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1]
     ? batteryTempPtr[0] : batteryTempPtr[1];
 
     // Checking to see if either of the two recent measurements are greater than than greater recent two
@@ -174,9 +189,9 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
        rawMeasurement2 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement) {
         // set flag for battery temperature being too high
         *batteryTempHigh = true;
-        
+
     }
-   
+
     // Store data and update buffer
     // Moving up the first 14 measurements, overwriting the 15th and 16th measurement
     for(int i = BATTERY_TEMP_BUFFER_LENGTH - 1 - 2; i >= 0; i--) {
@@ -261,14 +276,22 @@ void powerSubsystem(void* powerSubsystemData) {
             taskQueueInsert(&solarPanelControlTCB);
         }
     }
-}
 
+    // send telemetry
+    tlmPacket.batteryLevel = data->batteryLevelPtr[0];
+    tlmPacket.temperature = powerToCelsiusTemperature(data->batteryTempPtr);
+    tlmPacket.consumption = *data->powerConsumption;
+    tlmPacket.generation = *data->powerGeneration;
+    tlmPacket.panelState = *data->solarPanelState;
+    tlmPacket.batteryTempHigh = *data->batteryTempHigh;
+    bcSend(TLMID_POWER);
+}
 
 // Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.
 unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
     // Takes the greater of the most recent number because it is most relevant for
     // warning considerations
-    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
+    unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1]
     ? batteryTempPtr[0] : batteryTempPtr[1];
 
     // Multiplying the raw value (0-325mV) by 10 to reach the normal range 0-3.25V

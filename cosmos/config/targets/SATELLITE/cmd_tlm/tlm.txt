@@ -1,0 +1,89 @@
+TELEMETRY SATELLITE META LITTLE_ENDIAN "Telemetry Status"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
+  
+  APPEND_ITEM NERRS 8 UINT "Number of errors"
+  APPEND_ITEM NCMD 8 UINT "Number of command handlers"
+  APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
+
+
+TELEMETRY SATELLITE POWER LITTLE_ENDIAN "Power Subsystem"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 1 } %>
+  
+  APPEND_ITEM BATT_LVL 32 UINT "Battery level"
+    UNITS Volts V
+    LIMITS DEFAULT 1 ENABLED 3 3 18 36
+  APPEND_ITEM TEMP 16 UINT "Temperature"
+    UNITS Celcius C
+  APPEND_ITEM CON 16 UINT "Power consumption"
+  APPEND_ITEM GEN 16 UINT "Power generation"
+  APPEND_ITEM PANEL_STATE 8 UINT "Solar panel state"
+    STATE DEPLOYED   0
+    STATE DEPLOYING  1
+    STATE RETRACTING 2
+    STATE RETRACTED  3
+  APPEND_ITEM TEMP_HIGH 8 UINT "Battery temp high?"
+    STATE HIGH 1 RED
+    STATE LOW 0 GREEN
+
+    
+TELEMETRY SATELLITE SOLAR_PANEL LITTLE_ENDIAN "Solar panel"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 2 } %>
+  
+  APPEND_ITEM SPEED 16 UINT "Panel motor speed"
+
+
+TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 3 } %>
+
+  APPEND_ITEM PAD 16 UINT "Padding"
+  APPEND_ITEM DURATION 8 UINT "Duration"
+    UNITS Seconds s
+  APPEND_ITEM MAG 4 UINT "Magnitude"
+  APPEND_ITEM LEFT 1 UINT "Left thruster"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM RIGHT 1 UINT "Right thruster"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM UP 1 UINT "Up thruster"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM DOWN 1 UINT "Down thruster"
+    STATE ON  1
+    STATE OFF 0
+  APPEND_ITEM FUEL 16 UINT "Fuel level"
+    LIMITS DEFAULT 1 ENABLED 10 50 101 101
+
+
+TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 5 } %>
+  
+  <%= render "_exec_time.txt", locals: { tname: "BINCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "DISPLAY" } %>
+  <%= render "_exec_time.txt", locals: { tname: "KEYPAD" } %>
+  <%= render "_exec_time.txt", locals: { tname: "POWER" } %>
+  <%= render "_exec_time.txt", locals: { tname: "SATCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "SCHED" } %>
+  <%= render "_exec_time.txt", locals: { tname: "PANEL" } %>
+  <%= render "_exec_time.txt", locals: { tname: "THRUST" } %>
+  <%= render "_exec_time.txt", locals: { tname: "VEHCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
+  <%= render "_exec_time.txt", locals: { tname: "IMAGE" } %>
+  <%= render "_exec_time.txt", locals: { tname: "DISTANCE" } %>
+  APPEND_ITEM PAD 128 UINT
+
+TELEMETRY SATELLITE IMAGE LITTLE_ENDIAN "Image capture freq."
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 6 } %>
+  
+  APPEND_ITEM FREQ 16 UINT "Frequency"
+
+TELEMETRY SATELLITE DISTANCE LITTLE_ENDIAN "Transport distance"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 7 } %>
+
+  APPEND_ITEM DISTANCE 32 FLOAT "Distance"
+    FORMAT_STRING "%.2f"
+
+TELEMETRY SATELLITE VEHICLE LITTLE_ENDIAN "Vehicle Communications"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 8 } %>
+
+  APPEND_ITEM RESPONSE 8 STRING "Response"

@@ -22,7 +22,7 @@ SatelliteComsData satelliteComsData = {
     .batteryLevelPtr = batteryLevelPtr,
     .batteryTempPtr = batteryTempPtr,
     .distanceBufferPtr = distanceBufferPtr,
-    .fuelLevel =  &fuelLevel,
+    .fuelLevel = &fuelLevel,
     .powerConsumption = &powerConsumption,
     .powerGeneration = &powerGeneration,
     .thrusterCommand = &thrusterCommand,
@@ -31,14 +31,12 @@ SatelliteComsData satelliteComsData = {
     .imageData = imageData
 };
 
-const char* const taskName = "Satellite Communications";
-
 void satelliteComsInit() {
     tcbInit(
         &satelliteComsTCB,
         &satelliteComsData,
         satelliteComs,
-        taskName,
+        TASKID_SATCOMS,
         1
     );
 }
@@ -92,13 +90,6 @@ void satelliteComs(void* satelliteComsData) {
 
     SatelliteComsData* data = (SatelliteComsData*) satelliteComsData;
 
-    // 50/50 Chance for the command to be random or invalid
-    // Last bit 0: random, Last bit 1: Invalid
-    *data->thrusterCommand = rand();
-    if (*data->thrusterCommand & 1) {
-        *data->thrusterCommand = THRUSTER_CMD_NONE;
-    }
-
     // Transferring data back to earth
     Serial.print(F("Fuel Low status is: "));
     printBool(*data->fuelLow);
@@ -122,9 +113,11 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->vehicleResponse);
     *data->vehicleResponse = '\0';
 
+#ifndef ENABLE_BINARY_COMS
     if (Serial.available()) {
         *data->vehicleCommand = Serial.read();
     }
+#endif /* ENABLE_BINARY_COMS */
 
     Serial.print(F("Image Capture freq: "));
     Serial.print(data->imageData[0]);
@@ -132,7 +125,7 @@ void satelliteComs(void* satelliteComsData) {
 
     Serial.print(F("Battery Temperature: "));
     Serial.println(powerToCelsiusTemperature(data->batteryTempPtr));
-    
+
     Serial.print(F("Transport Distance: "));
     Serial.print(data->distanceBufferPtr[0]);
     Serial.println(F(" m"));

@@ -1,0 +1,38 @@
+SCREEN AUTO AUTO 1.0
+
+  SECTIONHEADER "Command"
+  MATRIXBYCOLUMNS 3 10
+    LABEL ""
+    LABEL "Current"
+    LABEL "Next"
+  
+    LABEL "Duration"
+    VALUE SATELLITE THRUSTER DURATION
+    NAMED_WIDGET DURATION TEXTFIELD 12 "10"
+
+    LABEL "Magnitude"
+    VALUE SATELLITE THRUSTER MAG
+    NAMED_WIDGET MAG TEXTFIELD 12 "15"
+
+    LABEL "Left"
+    VALUE SATELLITE THRUSTER LEFT
+    NAMED_WIDGET LEFT CHECKBUTTON ""
+
+    LABEL "Right"
+    VALUE SATELLITE THRUSTER RIGHT
+    NAMED_WIDGET RIGHT CHECKBUTTON ""
+
+    LABEL "Up"
+    VALUE SATELLITE THRUSTER UP
+    NAMED_WIDGET UP CHECKBUTTON ""
+
+    LABEL "Down"
+    VALUE SATELLITE THRUSTER DOWN
+    NAMED_WIDGET DOWN CHECKBUTTON ""
+  END
+  BUTTON 'Send command' 'cmd("SATELLITE THRUSTER with DURATION #{get_named_widget("DURATION").text.to_i}, MAG #{get_named_widget("MAG").text.to_i}, LEFT #{get_named_widget("LEFT").checked ? 1 : 0}, RIGHT #{get_named_widget("RIGHT").checked ? 1 : 0}, UP #{get_named_widget("UP").checked ? 1 : 0}, DOWN #{get_named_widget("DOWN").checked ? 1 : 0}")'
+  
+  SECTIONHEADER "Fuel"
+  LABELVALUELIMITSBAR SATELLITE THRUSTER FUEL
+  
+END

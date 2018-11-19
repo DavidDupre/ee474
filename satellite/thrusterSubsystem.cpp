@@ -2,6 +2,7 @@
 #include "schedule.h"
 #include "predefinedMacros.h"
 #include "sharedVariables.h"
+#include "binarySatelliteComs.h"
 #include <stdint.h>
 
 /*
@@ -13,6 +14,21 @@
  */
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
 
+#define CMDID_THRUSTER 0
+
+
+TLM_PACKET {
+    uint32_t command;
+    uint16_t fuel;
+} ThrusterTlmPacket;
+
+
+/*
+ * This is a command handler to be registered with binary satellite coms.
+ * It processing a command destined for the thruster subsystem.
+ */
+bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data);
+
 
 TCB thrusterSubsystemTCB;
 
@@ -21,7 +37,7 @@ ThrusterSubsystemData thrusterSubsystemData = {
     &fuelLevel
 };
 
-const char* const taskName = "Thruster Subsystem";
+static ThrusterTlmPacket tlmPacket;
 
 /*
  * Holds the max value of a `partialFuel`. Should be changed only for testing.
@@ -33,9 +49,12 @@ void thrusterSubsystemInit() {
         &thrusterSubsystemTCB,
         &thrusterSubsystemData,
         thrusterSubsystem,
-        taskName,
+        TASKID_THRUST,
         1
     );
+
+    bcRegisterCmdHandler(TASKID_THRUST, thrusterSubsystemProcessCommand);
+    bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
 }
 
 /******************************************************************************
@@ -156,6 +175,11 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
         command = 0;
     }
 
+    // update the telemetry
+    tlmPacket.command = command;
+    tlmPacket.fuel = *data->fuelLevel;
+    bcSend(TLMID_THRUSTER);
+
     return;
 }
 
@@ -178,4 +202,13 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     cmd |= (magnitude << 4);
     cmd |= ((uint16_t) duration) << 8;
     return cmd;
+}
+
+bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data) {
+    if (opcode != CMDID_THRUSTER) {
+        return false;
+    }
+    // TODO this seems to be broken somehow
+    thrusterCommand = *((uint16_t *) data);
+    return true;
 }

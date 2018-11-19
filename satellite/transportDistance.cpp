@@ -4,6 +4,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "vehicleComms.h"
+#include "binarySatelliteComs.h"
 #include "udools.h"
 
 #define LONGEST_PERIOD 250000
@@ -15,6 +16,12 @@
 #define MAX_DISTANCE 2000
 #define MEASURE_DIFF 0.10
 
+
+TLM_PACKET {
+    float distance;
+} TransportDistancePacket;
+
+
 /******************************************************************************
  * name : transportDistance
  *
@@ -25,7 +32,7 @@
  *
  * description:
  *
- * transportDistance measures the frequency of an input signal to determine 
+ * transportDistance measures the frequency of an input signal to determine
  * the distance of transport vehicles
  *
  *
@@ -36,7 +43,7 @@
  * convert to frequency
  * frequency convert to distance
  * if distance is more than 10% different from last reading in buffer, store value
- * 
+ *
  *
  *  author: Philip White
 *****************************************************************************/
@@ -51,7 +58,8 @@ TransportDistanceData transportDistanceData = {
 
 TCB transportDistanceTCB;
 
-const char* const taskName = "Transport Distance";
+static TransportDistancePacket tlmPacket;
+
 
 void transportDistanceInit() {
     pinMode(SENSOR_PIN, INPUT);
@@ -59,9 +67,10 @@ void transportDistanceInit() {
         &transportDistanceTCB,
         &transportDistanceData,
         transportDistance,
-        taskName,
+        TASKID_DISTANCE,
         3
     );
+    bcRegisterTlmSender(TLMID_DISTANCE, sizeof(tlmPacket), &tlmPacket);
 }
 
 void transportDistance(void *transportDistanceData) {
@@ -69,7 +78,6 @@ void transportDistance(void *transportDistanceData) {
 
     unsigned long startPulse = 0;
     unsigned long endPulse = 0;
-    bool firstDown = false;
     bool lastPinState = digitalRead(SENSOR_PIN);
     bool pinState;
     unsigned long taskStartTime = micros();
@@ -80,7 +88,7 @@ void transportDistance(void *transportDistanceData) {
         } else if (lastPinState != pinState && startPulse > 0 && !pinState) {
             endPulse = micros();
         }
-        lastPinState = pinState;      
+        lastPinState = pinState;
     }
 
     if (endPulse > 0) {
@@ -96,6 +104,10 @@ void transportDistance(void *transportDistanceData) {
 
         if (abs(data->distanceBufferPtr[0] - distance) > (data->distanceBufferPtr[0])*MEASURE_DIFF) {
             addToBuffer(distance, distanceBufferPtr, TRANSPORT_DISTANCE_BUFFER_LENGTH);
+
+            // send telemetry
+            tlmPacket.distance = distance;
+            bcSend(TLMID_DISTANCE);
         }
     }
 }

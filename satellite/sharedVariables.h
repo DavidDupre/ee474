@@ -6,6 +6,7 @@
 #define TRANSPORT_DISTANCE_BUFFER_LENGTH 8
 
 #include "solarPanel.h"
+#include <stdint.h>
 #include "imageCapture.h"
 #include "transportDistance.h"
 
@@ -34,7 +35,10 @@ extern bool driveMotorSpeedInc;
 extern bool driveMotorSpeedDec;
 extern char vehicleCommand;
 extern char vehicleResponse;
+extern uint8_t numTlmErrors;
 extern bool batteryTempHigh;
+
+extern bool temperatureAlarmAcked;
 
 extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];

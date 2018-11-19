@@ -3,7 +3,16 @@
 #include "vehicleComms.h"
 #include "schedule.h"
 #include "sharedVariables.h"
+#include "binarySatelliteComs.h"
 #include "transportDistance.h"
+
+
+TLM_PACKET {
+    char response;
+} VehiclePacket;
+
+
+bool handleCommand(uint8_t opcode, uint8_t *data);
 
 
 TCB vehicleCommsTCB;
@@ -13,16 +22,19 @@ VehicleCommsData vehicleCommsData = {
     &vehicleResponse
 };
 
-const char* const taskName = "Vehicle Communications";
+static VehiclePacket tlmPacket;
+
 
 void vehicleCommsInit() {
     tcbInit(
         &vehicleCommsTCB,
         &vehicleCommsData,
         vehicleComms,
-        taskName,
+        TASKID_VEHCOMS,
         1
     );
+    bcRegisterTlmSender(TLMID_VEHICLE, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterCmdHandler(TASKID_VEHCOMS, handleCommand);
 }
 
 /******************************************************************************
@@ -70,12 +82,16 @@ void vehicleComms(void *vehicleCommsData) {
         if (*data->vehicleResponse == 'D') {
             taskQueueInsert(&transportDistanceTCB);
         }
+
+        // relay response to binary comms
+        tlmPacket.response = *data->vehicleResponse;
+        bcSend(TLMID_VEHICLE);
     }
 
     if (*data->vehicleCommand == 'C') {
         taskQueueDelete(&transportDistanceTCB);
     }
-    
+
     // Print command to Serial1 for the Uno to pick up
     // Do not print if there is no command
     if (*data->vehicleCommand != '\0') {
@@ -83,5 +99,9 @@ void vehicleComms(void *vehicleCommsData) {
         *data->vehicleCommand = '\0';
     }
 
-    
+
+}
+
+bool handleCommand(uint8_t opcode, uint8_t *data) {
+    vehicleCommand = data[0];
 }

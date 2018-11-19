@@ -18,7 +18,7 @@ void consoleKeypadInit() {
         &consoleKeypadTCB,
         &consoleKeypadData,
         consoleKeypad,
-        taskName,
+        TASKID_KEYPAD,
         1
     );
 
