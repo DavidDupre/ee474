@@ -160,6 +160,9 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
     // Convert it from 0-1023 to 0-325mV by multiplying by 325/1023
     unsigned int rawMeasurement1 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlFirst;
     unsigned int rawMeasurement2 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlSecond;
+
+    Serial.println(rawMeasurement1);
+    Serial.println(rawMeasurement2);
     
     // Calculating greatest recent measurement to compare new measurements against
     unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
@@ -170,8 +173,12 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
     if(rawMeasurement1 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement ||
        rawMeasurement2 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement) {
         // set flag for battery temperature being too high
+        Serial.println("entered into batterytemphigh");
         *batteryTempHigh = true;
+        
     }
+    Serial.println("The value immediately below is batteryTempHigh");
+    Serial.println(*batteryTempHigh);
    
     // Store data and update buffer
     // Moving up the first 14 measurements, overwriting the 15th and 16th measurement
@@ -204,7 +211,8 @@ void powerSubsystem(void* powerSubsystemData) {
     }
 
     // If solar panel is deployed, measure the temperature of the battery
-    if(*data->solarPanelDeploy) {
+
+    if(*data->solarPanelState == SOLAR_PANEL_DEPLOYED) {
         measureTemperature(data->batteryTempPtr, data->batteryTempHigh);
     }
 
@@ -266,7 +274,7 @@ unsigned int normBattery(unsigned int input) {
 
 
 // Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.
-unsigned int celsiusTemperature(volatile unsigned int* batteryTempPtr) {
+unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
     // Takes the greater of the most recent number because it is most relevant for
     // warning considerations
     unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1] 
@@ -274,8 +282,10 @@ unsigned int celsiusTemperature(volatile unsigned int* batteryTempPtr) {
 
     // Multiplying the raw value (0-325mV) by 10 to reach the normal range 0-3.25V
     unsigned int normalizedTemp = NORMALIZATION_MULTIPLIER * greaterRecentMeasurement;
-    // Multiplying battTemp by 32 and adding 33 to converted to Celsius
-    unsigned int tempCelsius = CELSIUS_MULTIPLY_AMOUNT * normalizedTemp + CELSIUS_ADD_AMOUNT;
-    
+    // Multiplying battTemp by 32 and adding 33
+    unsigned long tempCelsiusMv = CELSIUS_MULTIPLY_AMOUNT * normalizedTemp + CELSIUS_ADD_AMOUNT;
+    // Dividing by 1000 to account for mV / V conversion
+    unsigned int tempCelsius = tempCelsiusMv / 1000;
+    //Serial.println(tempCelsius);
     return tempCelsius;
 }
