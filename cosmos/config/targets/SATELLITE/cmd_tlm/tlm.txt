@@ -47,6 +47,7 @@ TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
     STATE ON  1
     STATE OFF 0
   APPEND_ITEM FUEL 16 UINT "Fuel level"
+    LIMITS DEFAULT 1 ENABLED 10 50 101 101
 
 
 TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
@@ -75,6 +76,7 @@ TELEMETRY SATELLITE DISTANCE LITTLE_ENDIAN "Transport distance"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 7 } %>
 
   APPEND_ITEM DISTANCE 32 FLOAT "Distance"
+    FORMAT_STRING "%.2f"
 
 TELEMETRY SATELLITE VEHICLE LITTLE_ENDIAN "Vehicle Communications"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 8 } %>
