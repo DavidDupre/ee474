@@ -136,7 +136,6 @@ void warningAlarm(void *warningAlarmData) {
     *data->temperatureAlarmAcked |= digitalRead(ACK_PIN);
 
     if(*data->batteryTempHigh) {
-        Serial.println(digitalRead(ACK_PIN));
         if (*data->temperatureAlarmAcked) {
             *data->temperatureAlarmAcked = false;
             Serial.println("Entered into flipping of batterytemphigh");
@@ -144,7 +143,6 @@ void warningAlarm(void *warningAlarmData) {
             tempWarningStart = 0;
             tft.fillRect(0, 150, 270, 60, BLACK);
         } else if(tempWarningStart == 0) {
-            Serial.println("~~~~~~~~~~~~~~~hi!");
             tempWarningStart = globalTimeBase();
             tft.setTextColor(RED);
             tft.setCursor(0, 150);

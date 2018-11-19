@@ -20,8 +20,8 @@ SatelliteComsData satelliteComsData = {
     .batteryLow = &batteryLow,
     .solarPanelState = &solarPanelState,
     .batteryLevelPtr = batteryLevelPtr,
-    .distanceBufferPtr = distanceBufferPtr,
     .batteryTempPtr = batteryTempPtr,
+    .distanceBufferPtr = distanceBufferPtr,
     .fuelLevel = &fuelLevel,
     .powerConsumption = &powerConsumption,
     .powerGeneration = &powerGeneration,
@@ -123,12 +123,12 @@ void satelliteComs(void* satelliteComsData) {
     Serial.print(data->imageData[0]);
     Serial.println(F(" Hz"));
 
+    Serial.print(F("Battery Temperature: "));
+    Serial.println(powerToCelsiusTemperature(data->batteryTempPtr));
+
     Serial.print(F("Transport Distance: "));
     Serial.print(data->distanceBufferPtr[0]);
     Serial.println(F(" m"));
-
-    Serial.print(F("Battery Temperature: "));
-    Serial.println(powerToCelsiusTemperature(data->batteryTempPtr));
 }
 
 

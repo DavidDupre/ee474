@@ -179,9 +179,6 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
     unsigned int rawMeasurement1 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlFirst;
     unsigned int rawMeasurement2 = (RAW_TEMP_MILLIVOLTS_MAX/MEASUREMENT_MILLIVOLTS_MAX) * analogTempLvlSecond;
 
-    Serial.println(rawMeasurement1);
-    Serial.println(rawMeasurement2);
-
     // Calculating greatest recent measurement to compare new measurements against
     unsigned int greaterRecentMeasurement = batteryTempPtr[0] > batteryTempPtr[1]
     ? batteryTempPtr[0] : batteryTempPtr[1];
@@ -191,12 +188,9 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
     if(rawMeasurement1 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement ||
        rawMeasurement2 > (1.0 + TEMP_PERCENTAGE_CHANGE_WARNING) * greaterRecentMeasurement) {
         // set flag for battery temperature being too high
-        Serial.println("entered into batterytemphigh");
         *batteryTempHigh = true;
 
     }
-    Serial.println("The value immediately below is batteryTempHigh");
-    Serial.println(*batteryTempHigh);
 
     // Store data and update buffer
     // Moving up the first 14 measurements, overwriting the 15th and 16th measurement
@@ -293,12 +287,6 @@ void powerSubsystem(void* powerSubsystemData) {
     bcSend(TLMID_POWER);
 }
 
-unsigned int normBattery(unsigned int input) {
-    unsigned int output = (((BATTERY_MAX - BATTERY_MIN)*
-        (input - ANALOG_MIN))/(ANALOG_MAX - ANALOG_MIN) + BATTERY_MIN);
-    return output;
-}
-
 // Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.
 unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
     // Takes the greater of the most recent number because it is most relevant for
@@ -313,6 +301,5 @@ unsigned int powerToCelsiusTemperature(volatile unsigned int* batteryTempPtr) {
     // Dividing by 1000 to account for mV / V conversion
     unsigned int tempCelsius = tempCelsiusMv / 1000;
     tempCelsius += CELSIUS_ADD_AMOUNT;
-    //Serial.println(tempCelsius);
     return tempCelsius;
 }
