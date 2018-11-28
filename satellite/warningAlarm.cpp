@@ -17,6 +17,11 @@
 
 #define ACK_PIN         35
 
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_ACK_TEMP 4
+
 
 static bool handleCommand(uint8_t *data);
 

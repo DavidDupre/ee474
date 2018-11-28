@@ -7,6 +7,15 @@
 #include "command.h"
 #include "transportDistance.h"
 
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_VEHICLE 3
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_VEHICLE 8
+
 
 TLM_PACKET {
     char response;

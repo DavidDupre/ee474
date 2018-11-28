@@ -6,25 +6,6 @@
 #define TLM_PACKET typedef struct __attribute__((__packed__))
 
 
-/*
- * Telemetry IDs used to identify telemetry packets
- *
- * These must be unique across the entire satellite.
- * Range 0 through 255.
- */
-typedef enum {
-    TLMID_META =        0,
-    TLMID_POWER =       1,
-    TLMID_SOLAR_PANEL = 2,
-    TLMID_THRUSTER =    3,
-    TLMID_TIMES =       5,
-    TLMID_IMAGE =       6,
-    TLMID_DISTANCE =    7,
-    TLMID_VEHICLE =     8,
-    TLMID_COMMAND =     9,
-} TlmId;
-
-
 typedef struct { 
 } BCData;
 
@@ -42,7 +23,7 @@ void binarySatelliteComs(void *bcData);
  *  length: The length of the telemetry, not counting the header
  *  data:   The telemtry to send. Must be a static location
  */
-void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data);
+void bcRegisterTlmSender(uint8_t tlmId, uint8_t length, void *data);
 
 /**
  * Indicate that a registered telemetry packet is ready to send.
@@ -50,5 +31,5 @@ void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data);
  * inputs:
  *  tlmId: The unique telemetry ID
  */
-void bcSend(TlmId tlmId);
+void bcSend(uint8_t tlmId);
 

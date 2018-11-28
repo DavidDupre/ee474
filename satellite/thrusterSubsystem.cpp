@@ -15,7 +15,14 @@
  */
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
 
-#define CMDID_THRUSTER 0
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_THRUSTER 2
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_THRUSTER 3
 
 
 TLM_PACKET {

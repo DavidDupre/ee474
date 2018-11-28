@@ -3,6 +3,10 @@
 #include "binarySatelliteComs.h"
 #include <Arduino.h>
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_TIMES 5
+
 
 TLM_PACKET {
     // the execution time of each task in microseconds

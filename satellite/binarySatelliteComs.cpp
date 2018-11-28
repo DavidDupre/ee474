@@ -6,9 +6,13 @@
 #define MAX_TLM_SENDERS      16
 #define TLM_SYNC_PATTERN     0xFC
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_META 0
+
 
 typedef struct {
-    TlmId tlmId;
+    uint8_t tlmId;
     uint8_t length;
     uint8_t *data;
     bool ready;
@@ -19,7 +23,7 @@ TLM_PACKET {
 } MetaPacket;
 
 
-void sendTelemetryPacket(TlmId tlmId, uint8_t *data, uint8_t size);
+void sendTelemetryPacket(uint8_t tlmId, uint8_t *data, uint8_t size);
 
 
 TCB bcTCB;
@@ -61,7 +65,7 @@ void binarySatelliteComs(void *bcData) {
     bcSend(TLMID_META);
 }
 
-void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data) {
+void bcRegisterTlmSender(uint8_t tlmId, uint8_t length, void *data) {
     if (numTlmSenders >= MAX_TLM_SENDERS) {
         Serial.println(F("ERROR! Too many telementry senders!"));
         return;
@@ -74,7 +78,7 @@ void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data) {
     };
 }
 
-void bcSend(TlmId tlmId) {
+void bcSend(uint8_t tlmId) {
     for (uint8_t i = 0; i < numTlmSenders; i++) {
         if (tlmSenders[i].tlmId == tlmId) {
             tlmSenders[i].ready = true;
@@ -83,7 +87,7 @@ void bcSend(TlmId tlmId) {
     }
 }
 
-void sendTelemetryPacket(TlmId tlmId, uint8_t *data, uint8_t size) {
+void sendTelemetryPacket(uint8_t tlmId, uint8_t *data, uint8_t size) {
     // write the header (sync byte, full length, and ID)
     Serial.write(TLM_SYNC_PATTERN);
     Serial.write(size + 3); // add 3 for these header bytes

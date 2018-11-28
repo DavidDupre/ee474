@@ -8,9 +8,13 @@
 #define CMD_SYNC_PATTERN     0xFC
 #define SERIAL_TIMEOUT_MS    100
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_COMMAND 9
+
 
 typedef struct {
-    CmdId cmdId;
+    uint8_t cmdId;
     cmd_callback_fn handle;
 } CommandHandler;
 
@@ -65,7 +69,7 @@ void cmdUpdate(void *cmdData) {
     bcSend(TLMID_COMMAND);
 }
 
-void cmdRegisterCallback(CmdId cmdId, cmd_callback_fn callback) {
+void cmdRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {
     if (numCommandHandlers >= MAX_COMMAND_HANDLERS) {
         Serial.println(F("ERROR! Too many command handlers!"));
         return;

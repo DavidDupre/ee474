@@ -13,6 +13,10 @@
 // maximum milli-volts for an analogRead
 #define IMAGE_CAPTURE_MAX_MVOLTS 5000.0
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_IMAGE 6
+
 
 TLM_PACKET {
     uint16_t frequency;

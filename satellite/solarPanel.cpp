@@ -18,9 +18,15 @@
 // the value added to the stopped duty cycle to achieve max speed
 #define SOLAR_PANEL_DUTY_CYCLE_RANGE   100
 
-// opcodes for commands over Serial
-#define SOLAR_PANEL_OPCODE_INC 0
-#define SOLAR_PANEL_OPCODE_DEC 1
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_INC_PANEL_SPEED 0
+#define CMDID_DEC_PANEL_SPEED 1
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_SOLAR_PANEL 2
 
 
 TLM_PACKET {
