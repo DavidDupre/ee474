@@ -30,7 +30,8 @@ TLM_PACKET {
 
 void solarPanelStop();
 
-bool solarPanelProcessCommand(uint8_t opcode, uint8_t *data);
+bool handleIncCommand(uint8_t *data);
+bool handleDecCommand(uint8_t *data);
 
 
 TCB solarPanelControlTCB;
@@ -64,7 +65,8 @@ void solarPanelControlInit() {
         solarPanelStop, RISING);
 
     bcRegisterTlmSender(TLMID_SOLAR_PANEL, sizeof(tlmPacket), &tlmPacket);
-    cmdRegisterCallback(TASKID_PANEL, solarPanelProcessCommand);
+    cmdRegisterCallback(CMDID_INC_PANEL_SPEED, handleIncCommand);
+    cmdRegisterCallback(CMDID_INC_PANEL_SPEED, handleDecCommand);
 }
 
 void solarPanelControl(void *solarPanelControlData) {
@@ -126,17 +128,14 @@ void solarPanelControl(void *solarPanelControlData) {
     bcSend(TLMID_SOLAR_PANEL);
 }
 
-bool solarPanelProcessCommand(uint8_t opcode, uint8_t *data) {
-    switch(opcode) {
-        case SOLAR_PANEL_OPCODE_INC:
-            driveMotorSpeedInc = true;
-            return true;
-        case SOLAR_PANEL_OPCODE_DEC:
-            driveMotorSpeedDec = true;
-            return true;
-        default:
-            return false;
-    }
+bool handleIncCommand(uint8_t *data) {
+    driveMotorSpeedInc = true;
+    return true;
+}
+
+bool handleDecCommand(uint8_t *data) {
+    driveMotorSpeedDec = true;
+    return true;
 }
 
 void solarPanelStop() {

@@ -10,7 +10,7 @@
 
 
 typedef struct {
-    TaskId taskId;
+    CmdId cmdId;
     cmd_callback_fn handle;
 } CommandHandler;
 
@@ -65,13 +65,13 @@ void cmdUpdate(void *cmdData) {
     bcSend(TLMID_COMMAND);
 }
 
-void cmdRegisterCallback(TaskId taskId, cmd_callback_fn callback) {
+void cmdRegisterCallback(CmdId cmdId, cmd_callback_fn callback) {
     if (numCommandHandlers >= MAX_COMMAND_HANDLERS) {
         Serial.println(F("ERROR! Too many command handlers!"));
         return;
     }
     commandHandlers[numCommandHandlers++] = {
-        taskId,
+        cmdId,
         callback
     };
 }
@@ -88,11 +88,9 @@ bool sync() {
 void processCommand(CmdData *cmdData) {
     // read the header
     uint8_t length;
-    uint8_t taskId;
-    uint8_t opcode;
+    uint8_t cmdId;
     Serial.readBytes(&length, 1);
-    Serial.readBytes(&taskId, 1);
-    Serial.readBytes(&opcode, 1);
+    Serial.readBytes(&cmdId, 1);
 
     // read the body of the command
     uint8_t data[256];
@@ -102,8 +100,8 @@ void processCommand(CmdData *cmdData) {
     bool handled = false;
     for (uint8_t i = 0; i < numCommandHandlers; i++) {
         CommandHandler *h = &commandHandlers[i];
-        if (taskId == h->taskId) {
-            handled = h->handle(opcode, data);
+        if (cmdId == h->cmdId) {
+            handled = h->handle(data);
             break;
         }
     }

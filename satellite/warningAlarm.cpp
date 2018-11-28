@@ -18,7 +18,7 @@
 #define ACK_PIN         35
 
 
-static bool handleCommand(uint8_t opcode, uint8_t *data);
+static bool handleCommand(uint8_t *data);
 
 
 TCB warningAlarmTCB;
@@ -46,7 +46,7 @@ void warningAlarmInit() {
     pinMode(ACK_PIN, INPUT);
 
     // optionally acknowledge temperature through serial
-    cmdRegisterCallback(TASKID_ALARM, handleCommand);
+    cmdRegisterCallback(CMDID_ACK_TEMP, handleCommand);
 }
 
 void warningAlarm(void *warningAlarmData) {
@@ -164,7 +164,7 @@ void warningAlarm(void *warningAlarmData) {
 }
 
 // handle command from serial
-static bool handleCommand(uint8_t opcode, uint8_t *data) {
+static bool handleCommand(uint8_t *data) {
     temperatureAlarmAcked = true;
     return true;
 }

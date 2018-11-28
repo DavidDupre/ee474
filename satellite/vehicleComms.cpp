@@ -13,7 +13,7 @@ TLM_PACKET {
 } VehiclePacket;
 
 
-bool handleCommand(uint8_t opcode, uint8_t *data);
+bool handleCommand(uint8_t *data);
 
 
 TCB vehicleCommsTCB;
@@ -35,7 +35,7 @@ void vehicleCommsInit() {
         1
     );
     bcRegisterTlmSender(TLMID_VEHICLE, sizeof(tlmPacket), &tlmPacket);
-    cmdRegisterCallback(TASKID_VEHCOMS, handleCommand);
+    cmdRegisterCallback(CMDID_VEHICLE, handleCommand);
 }
 
 /******************************************************************************
@@ -103,6 +103,7 @@ void vehicleComms(void *vehicleCommsData) {
 
 }
 
-bool handleCommand(uint8_t opcode, uint8_t *data) {
+bool handleCommand(uint8_t *data) {
     vehicleCommand = data[0];
+    return true;
 }

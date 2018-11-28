@@ -28,7 +28,7 @@ TLM_PACKET {
  * This is a command handler to be registered with binary satellite coms.
  * It processing a command destined for the thruster subsystem.
  */
-bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data);
+bool thrusterSubsystemProcessCommand(uint8_t *data);
 
 
 TCB thrusterSubsystemTCB;
@@ -54,7 +54,7 @@ void thrusterSubsystemInit() {
         1
     );
 
-    cmdRegisterCallback(TASKID_THRUST, thrusterSubsystemProcessCommand);
+    cmdRegisterCallback(CMDID_THRUSTER, thrusterSubsystemProcessCommand);
     bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
 }
 
@@ -205,10 +205,7 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     return cmd;
 }
 
-bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data) {
-    if (opcode != CMDID_THRUSTER) {
-        return false;
-    }
+bool thrusterSubsystemProcessCommand(uint8_t *data) {
     // TODO this seems to be broken somehow
     thrusterCommand = *((uint16_t *) data);
     return true;
