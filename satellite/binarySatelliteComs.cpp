@@ -12,6 +12,7 @@
 
 
 typedef struct {
+    serial_bus *bus;
     uint8_t tlmId;
     uint8_t length;
     uint8_t *data;
@@ -23,7 +24,8 @@ TLM_PACKET {
 } MetaPacket;
 
 
-void sendTelemetryPacket(uint8_t tlmId, uint8_t *data, uint8_t size);
+void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,
+        uint8_t size);
 
 
 TCB bcTCB;
@@ -45,7 +47,8 @@ void bcInit() {
     );
 
     memset(tlmSenders, 0, sizeof(tlmSenders));
-    bcRegisterTlmSender(TLMID_META, sizeof(metaPacket), &metaPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_META, sizeof(metaPacket),
+            &metaPacket);
 }
 
 void binarySatelliteComs(void *bcData) {
@@ -54,8 +57,8 @@ void binarySatelliteComs(void *bcData) {
     // send telemetry packets
     for (uint8_t i = 0; i < numTlmSenders; i++) {
         if (tlmSenders[i].ready) {
-            sendTelemetryPacket(tlmSenders[i].tlmId, tlmSenders[i].data,
-                    tlmSenders[i].length);
+            sendTelemetryPacket(tlmSenders[i].bus, tlmSenders[i].tlmId,
+                    tlmSenders[i].data, tlmSenders[i].length);
             tlmSenders[i].ready = false;
         }
     }
@@ -65,12 +68,14 @@ void binarySatelliteComs(void *bcData) {
     bcSend(TLMID_META);
 }
 
-void bcRegisterTlmSender(uint8_t tlmId, uint8_t length, void *data) {
+void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
+        void *data) {
     if (numTlmSenders >= MAX_TLM_SENDERS) {
         Serial.println(F("ERROR! Too many telementry senders!"));
         return;
     }
     tlmSenders[numTlmSenders++] = {
+        bus,
         tlmId,
         length,
         (uint8_t *) data,
@@ -87,12 +92,13 @@ void bcSend(uint8_t tlmId) {
     }
 }
 
-void sendTelemetryPacket(uint8_t tlmId, uint8_t *data, uint8_t size) {
+void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,
+        uint8_t size) {
     // write the header (sync byte, full length, and ID)
-    Serial.write(TLM_SYNC_PATTERN);
-    Serial.write(size + 3); // add 3 for these header bytes
-    Serial.write(tlmId);
+    bus->write(TLM_SYNC_PATTERN);
+    bus->write(size + 3); // add 3 for these header bytes
+    bus->write(tlmId);
 
     // write the data
-    Serial.write(data, size);
+    bus->write(data, size);
 }

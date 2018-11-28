@@ -62,7 +62,8 @@ void thrusterSubsystemInit() {
     );
 
     cmdRegisterCallback(CMDID_THRUSTER, thrusterSubsystemProcessCommand);
-    bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_THRUSTER, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 /******************************************************************************

@@ -74,7 +74,8 @@ void transportDistanceInit() {
         TASKID_DISTANCE,
         3
     );
-    bcRegisterTlmSender(TLMID_DISTANCE, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_DISTANCE, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void transportDistance(void *transportDistanceData) {

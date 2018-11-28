@@ -25,10 +25,10 @@ TLM_PACKET {
 
 
 // reads an incoming command from Serial and dispatches it to a command handler
-void processCommand(CmdData *data);
+void processCommand(serial_bus *bus, CmdData *data);
 
 // returns true if it found the sync byte
-bool sync();
+bool sync(serial_bus *bus);
 
 
 CommandHandler commandHandlers[MAX_COMMAND_HANDLERS];
@@ -41,6 +41,11 @@ CmdData cmdData = {
 
 CmdTlmPacket cmdTlmPacket;
 
+serial_bus *serialBuses[] = {
+    BUS_GROUND,
+    BUS_VEHICLE
+};
+
 
 void cmdInit() {
     tcbInit(
@@ -51,7 +56,6 @@ void cmdInit() {
         1
     );
 
-    Serial.setTimeout(SERIAL_TIMEOUT_MS);
     numCmdErrors = 0;
     memset(commandHandlers, 0, sizeof(commandHandlers));
 }
@@ -59,9 +63,12 @@ void cmdInit() {
 void cmdUpdate(void *cmdData) {
     CmdData *data = (CmdData *) cmdData;
 
-    // process commands
-    while (sync()) {
-        processCommand(data);
+    // process commands from each serial bus
+    for (uint8_t i = 0; i < sizeof(serialBuses) / sizeof(serial_bus); i++) {
+        serial_bus *bus = serialBuses[0];
+        while (sync(bus)) {
+            processCommand(bus, data);
+        }
     }
 
     // send metadata telementry
@@ -80,25 +87,25 @@ void cmdRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {
     };
 }
 
-bool sync() {
-    while (Serial.available()) {
-        if (Serial.read() == CMD_SYNC_PATTERN) {
+bool sync(serial_bus *bus) {
+    while (bus->available()) {
+        if (bus->read() == CMD_SYNC_PATTERN) {
             return true;
         }
     }
     return false;
 }
 
-void processCommand(CmdData *cmdData) {
+void processCommand(serial_bus *bus, CmdData *cmdData) {
     // read the header
     uint8_t length;
     uint8_t cmdId;
-    Serial.readBytes(&length, 1);
-    Serial.readBytes(&cmdId, 1);
+    bus->readBytes(&length, 1);
+    bus->readBytes(&cmdId, 1);
 
     // read the body of the command
     uint8_t data[256];
-    Serial.readBytes(data, length);
+    bus->readBytes(data, length);
 
     // dispatch to different entities
     bool handled = false;

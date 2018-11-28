@@ -43,7 +43,8 @@ void vehicleCommsInit() {
         TASKID_VEHCOMS,
         1
     );
-    bcRegisterTlmSender(TLMID_VEHICLE, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_VEHICLE, sizeof(tlmPacket),
+            &tlmPacket);
     cmdRegisterCallback(CMDID_VEHICLE, handleCommand);
 }
 

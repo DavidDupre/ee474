@@ -155,7 +155,8 @@ void powerSubsystemInit() {
     *powerSubsystemData.batteryTempHigh = false;
 
     // register telemerty
-    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_POWER, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void measurementExternalInterruptISR() {

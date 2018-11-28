@@ -37,7 +37,8 @@ TimePacket timePacket;
 void scheduleInit() {
     missionElapsedTime = millis();
 
-    bcRegisterTlmSender(TLMID_TIMES, sizeof(timePacket), &timePacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_TIMES, sizeof(timePacket),
+            &timePacket);
 }
 
 void schedule() {

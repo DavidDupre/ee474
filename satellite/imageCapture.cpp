@@ -76,7 +76,8 @@ void imageCaptureInit() {
     // initialize the timer interrupt
     imageCaptureTimerInit();
 
-    bcRegisterTlmSender(TLMID_IMAGE, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_IMAGE, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void imageCaptureTimerInit() {

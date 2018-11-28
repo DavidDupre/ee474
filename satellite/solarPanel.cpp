@@ -70,7 +70,8 @@ void solarPanelControlInit() {
     attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_STOPPED),
         solarPanelStop, RISING);
 
-    bcRegisterTlmSender(TLMID_SOLAR_PANEL, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_SOLAR_PANEL, sizeof(tlmPacket),
+            &tlmPacket);
     cmdRegisterCallback(CMDID_INC_PANEL_SPEED, handleIncCommand);
     cmdRegisterCallback(CMDID_INC_PANEL_SPEED, handleDecCommand);
 }
