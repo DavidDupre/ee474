@@ -13,6 +13,7 @@
 #include "imageCapture.h"
 #include "schedule.h"
 #include "transportDistance.h"
+#include "command.h"
 #include "tft.h"
 
 #include <AUnit.h>  // Test framework
@@ -34,7 +35,7 @@ bool driveMotorSpeedInc;
 bool driveMotorSpeedDec;
 char vehicleCommand;
 char vehicleResponse;
-uint8_t numTlmErrors;
+uint8_t numCmdErrors;
 bool batteryTempHigh;
 
 bool temperatureAlarmAcked;
@@ -76,6 +77,7 @@ void setup() {
     transportDistanceInit();
     vehicleCommsInit();
     warningAlarmInit();
+    cmdInit();
 
     powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);
@@ -85,6 +87,9 @@ void setup() {
 
     imageCaptureTCB.priority = 1;
     taskQueueInsert(&imageCaptureTCB);
+
+    cmdTCB.priority = 2;
+    taskQueueInsert(&cmdTCB);
 
     vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);

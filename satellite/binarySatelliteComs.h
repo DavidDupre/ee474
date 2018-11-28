@@ -21,13 +21,11 @@ typedef enum {
     TLMID_IMAGE =       6,
     TLMID_DISTANCE =    7,
     TLMID_VEHICLE =     8,
+    TLMID_COMMAND =     9,
 } TlmId;
 
-// returns true if the command was handled
-typedef bool (*cmd_handler_fn)(uint8_t, uint8_t*);
 
-typedef struct {
-    uint8_t *numErrors;
+typedef struct { 
 } BCData;
 
 
@@ -54,4 +52,3 @@ void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data);
  */
 void bcSend(TlmId tlmId);
 
-void bcRegisterCmdHandler(TaskId taskId, cmd_handler_fn handler);

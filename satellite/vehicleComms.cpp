@@ -4,6 +4,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include "transportDistance.h"
 
 
@@ -34,7 +35,7 @@ void vehicleCommsInit() {
         1
     );
     bcRegisterTlmSender(TLMID_VEHICLE, sizeof(tlmPacket), &tlmPacket);
-    bcRegisterCmdHandler(TASKID_VEHCOMS, handleCommand);
+    cmdRegisterCallback(TASKID_VEHCOMS, handleCommand);
 }
 
 /******************************************************************************

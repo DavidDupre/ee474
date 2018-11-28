@@ -3,6 +3,7 @@
 #include "predefinedMacros.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include <stdint.h>
 
 /*
@@ -53,7 +54,7 @@ void thrusterSubsystemInit() {
         1
     );
 
-    bcRegisterCmdHandler(TASKID_THRUST, thrusterSubsystemProcessCommand);
+    cmdRegisterCallback(TASKID_THRUST, thrusterSubsystemProcessCommand);
     bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
 }
 

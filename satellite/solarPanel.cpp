@@ -3,6 +3,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include <Arduino.h>
 
 // the max value of the solar panel speed
@@ -63,7 +64,7 @@ void solarPanelControlInit() {
         solarPanelStop, RISING);
 
     bcRegisterTlmSender(TLMID_SOLAR_PANEL, sizeof(tlmPacket), &tlmPacket);
-    bcRegisterCmdHandler(TASKID_PANEL, solarPanelProcessCommand);
+    cmdRegisterCallback(TASKID_PANEL, solarPanelProcessCommand);
 }
 
 void solarPanelControl(void *solarPanelControlData) {

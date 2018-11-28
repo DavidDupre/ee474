@@ -4,6 +4,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include "tft.h"
 
 #define HALF_FUEL       50
@@ -45,7 +46,7 @@ void warningAlarmInit() {
     pinMode(ACK_PIN, INPUT);
 
     // optionally acknowledge temperature through serial
-    bcRegisterCmdHandler(TASKID_ALARM, handleCommand);
+    cmdRegisterCallback(TASKID_ALARM, handleCommand);
 }
 
 void warningAlarm(void *warningAlarmData) {
