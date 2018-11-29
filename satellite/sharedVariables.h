@@ -37,6 +37,8 @@ extern char vehicleCommand;
 extern char vehicleResponse;
 extern uint8_t numTlmErrors;
 extern bool batteryTempHigh;
+extern bool detected;
+extern unsigned int pirateProximity;
 
 extern bool temperatureAlarmAcked;
 
