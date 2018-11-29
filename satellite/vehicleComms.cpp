@@ -3,8 +3,8 @@
 #include "vehicleComms.h"
 #include "schedule.h"
 #include "sharedVariables.h"
-#include "binarySatelliteComs.h"
-#include "command.h"
+#include "comsReceive.h"
+#include "comsTransmit.h"
 #include "transportDistance.h"
 
 // command IDs for commands over Serial
@@ -43,9 +43,9 @@ void vehicleCommsInit() {
         TASKID_VEHCOMS,
         1
     );
-    bcRegisterTlmSender(BUS_GROUND, TLMID_VEHICLE, sizeof(tlmPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_VEHICLE, sizeof(tlmPacket),
             &tlmPacket);
-    cmdRegisterCallback(CMDID_VEHICLE, handleCommand);
+    comsRxRegisterCallback(CMDID_VEHICLE, handleCommand);
 }
 
 /******************************************************************************
@@ -96,7 +96,7 @@ void vehicleComms(void *vehicleCommsData) {
 
         // relay response to binary comms
         tlmPacket.response = *data->vehicleResponse;
-        bcSend(TLMID_VEHICLE);
+        comsTxSend(TLMID_VEHICLE);
     }
 
     if (*data->vehicleCommand == 'C') {

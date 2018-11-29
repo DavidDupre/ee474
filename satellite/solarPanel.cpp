@@ -2,8 +2,8 @@
 #include "consoleKeypad.h"
 #include "schedule.h"
 #include "sharedVariables.h"
-#include "binarySatelliteComs.h"
-#include "command.h"
+#include "comsReceive.h"
+#include "comsTransmit.h"
 #include <Arduino.h>
 
 // the max value of the solar panel speed
@@ -70,10 +70,10 @@ void solarPanelControlInit() {
     attachInterrupt(digitalPinToInterrupt(PIN_SOLAR_PANEL_STOPPED),
         solarPanelStop, RISING);
 
-    bcRegisterTlmSender(BUS_GROUND, TLMID_SOLAR_PANEL, sizeof(tlmPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_SOLAR_PANEL, sizeof(tlmPacket),
             &tlmPacket);
-    cmdRegisterCallback(CMDID_INC_PANEL_SPEED, handleIncCommand);
-    cmdRegisterCallback(CMDID_INC_PANEL_SPEED, handleDecCommand);
+    comsRxRegisterCallback(CMDID_INC_PANEL_SPEED, handleIncCommand);
+    comsRxRegisterCallback(CMDID_INC_PANEL_SPEED, handleDecCommand);
 }
 
 void solarPanelControl(void *solarPanelControlData) {
@@ -132,7 +132,7 @@ void solarPanelControl(void *solarPanelControlData) {
 
     // send telemetry
     tlmPacket.speed = solarPanelSpeed;
-    bcSend(TLMID_SOLAR_PANEL);
+    comsTxSend(TLMID_SOLAR_PANEL);
 }
 
 bool handleIncCommand(uint8_t *data) {

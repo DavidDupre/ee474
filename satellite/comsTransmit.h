@@ -12,16 +12,16 @@
 
 typedef HardwareSerial serial_bus;
 
-typedef struct { 
-} BCData;
+typedef struct {
+} ComsTxData;
 
 
-extern TCB bcTCB;
+extern TCB comsTxTCB;
 
 
-void bcInit();
+void comsTxInit();
 
-void binarySatelliteComs(void *bcData);
+void comsTx(void *comsTxData);
 
 /**
  * inputs:
@@ -30,7 +30,7 @@ void binarySatelliteComs(void *bcData);
  *  length: The length of the telemetry, not counting the header
  *  data:   The telemtry to send. Must be a static location
  */
-void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
+void comsTxRegisterSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
         void *data);
 
 /**
@@ -39,5 +39,5 @@ void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
  * inputs:
  *  tlmId: The unique telemetry ID
  */
-void bcSend(uint8_t tlmId);
+void comsTxSend(uint8_t tlmId);
 

@@ -1,4 +1,4 @@
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include "schedule.h"
 #include "sharedVariables.h"
 #include <Arduino.h>
@@ -28,8 +28,8 @@ void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,
         uint8_t size);
 
 
-TCB bcTCB;
-BCData bcData;
+TCB comsTxTCB;
+ComsTxData comsTxData;
 
 TelemetrySender tlmSenders[MAX_TLM_SENDERS];
 uint8_t numTlmSenders = 0;
@@ -37,22 +37,22 @@ uint8_t numTlmSenders = 0;
 MetaPacket metaPacket;
 
 
-void bcInit() {
+void comsTxInit() {
     tcbInit(
-        &bcTCB,
-        &bcData,
-        binarySatelliteComs,
+        &comsTxTCB,
+        &comsTxData,
+        comsTx,
         TASKID_BINCOMS,
         1
     );
 
     memset(tlmSenders, 0, sizeof(tlmSenders));
-    bcRegisterTlmSender(BUS_GROUND, TLMID_TLM_STATUS, sizeof(metaPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_TLM_STATUS, sizeof(metaPacket),
             &metaPacket);
 }
 
-void binarySatelliteComs(void *bcData) {
-    BCData *data = (BCData *) bcData;
+void comsTx(void *comsTxData) {
+    ComsTxData *data = (ComsTxData *) comsTxData;
 
     // send telemetry packets
     for (uint8_t i = 0; i < numTlmSenders; i++) {
@@ -65,10 +65,10 @@ void binarySatelliteComs(void *bcData) {
 
     // update meta packet
     metaPacket.numTlmSenders = numTlmSenders;
-    bcSend(TLMID_TLM_STATUS);
+    comsTxSend(TLMID_TLM_STATUS);
 }
 
-void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
+void comsTxRegisterSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
         void *data) {
     if (numTlmSenders >= MAX_TLM_SENDERS) {
         Serial.println(F("ERROR! Too many telementry senders!"));
@@ -83,7 +83,7 @@ void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
     };
 }
 
-void bcSend(uint8_t tlmId) {
+void comsTxSend(uint8_t tlmId) {
     for (uint8_t i = 0; i < numTlmSenders; i++) {
         if (tlmSenders[i].tlmId == tlmId) {
             tlmSenders[i].ready = true;

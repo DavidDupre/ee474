@@ -1,6 +1,6 @@
 #include "predefinedMacros.h"
 #include "schedule.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include <Arduino.h>
 
 // Telemetry IDs unique to the entire satellite
@@ -37,7 +37,7 @@ TimePacket timePacket;
 void scheduleInit() {
     missionElapsedTime = millis();
 
-    bcRegisterTlmSender(BUS_GROUND, TLMID_TIMES, sizeof(timePacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_TIMES, sizeof(timePacket),
             &timePacket);
 }
 
@@ -68,7 +68,7 @@ void schedule() {
 
 #ifdef GET_TIMES
         // send the execution times packet
-        bcSend(TLMID_TIMES);
+        comsTxSend(TLMID_TIMES);
 #endif /* GET_TIMES */
 
         // remove tasks marked for deletion

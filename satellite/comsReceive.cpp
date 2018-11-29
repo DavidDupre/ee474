@@ -1,6 +1,6 @@
-#include "command.h"
 #include "schedule.h"
-#include "binarySatelliteComs.h"
+#include "comsReceive.h"
+#include "comsTransmit.h"
 #include "sharedVariables.h"
 #include <Arduino.h>
 
@@ -34,7 +34,7 @@ bool sync(serial_bus *bus);
 CommandHandler commandHandlers[MAX_COMMAND_HANDLERS];
 uint8_t numCommandHandlers = 0;
 
-TCB cmdTCB;
+TCB comsRxTCB;
 CmdData cmdData = {
     &numCmdErrors
 };
@@ -47,22 +47,22 @@ serial_bus *serialBuses[] = {
 };
 
 
-void cmdInit() {
+void comsRxInit() {
     tcbInit(
-        &cmdTCB,
+        &comsRxTCB,
         &cmdData,
-        cmdUpdate,
+        comsRxUpdate,
         TASKID_COMMAND,
         1
     );
 
     numCmdErrors = 0;
     memset(commandHandlers, 0, sizeof(commandHandlers));
-    bcRegisterTlmSender(BUS_GROUND, TLMID_CMD_STATUS, sizeof(cmdTlmPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_CMD_STATUS, sizeof(cmdTlmPacket),
         &cmdTlmPacket);
 }
 
-void cmdUpdate(void *cmdData) {
+void comsRxUpdate(void *cmdData) {
     CmdData *data = (CmdData *) cmdData;
 
     // process commands from each serial bus
@@ -75,10 +75,10 @@ void cmdUpdate(void *cmdData) {
 
     // send metadata telementry
     cmdTlmPacket.numErrors = *data->numErrors;
-    bcSend(TLMID_CMD_STATUS);
+    comsTxSend(TLMID_CMD_STATUS);
 }
 
-void cmdRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {
+void comsRxRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {
     if (numCommandHandlers >= MAX_COMMAND_HANDLERS) {
         Serial.println(F("ERROR! Too many command handlers!"));
         return;

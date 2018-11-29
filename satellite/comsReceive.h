@@ -12,11 +12,11 @@ typedef struct {
 } CmdData;
 
 
-extern TCB cmdTCB;
+extern TCB comsRxTCB;
 
 
-void cmdInit();
+void comsRxInit();
 
-void cmdUpdate(void *cmdData);
+void comsRxUpdate(void *cmdData);
 
-void cmdRegisterCallback(uint8_t cmdId, cmd_callback_fn callback);
+void comsRxRegisterCallback(uint8_t cmdId, cmd_callback_fn callback);

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "schedule.h"
 #include "sharedVariables.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include <Arduino.h>
 #include <limits.h>
 #include "solarPanel.h"
@@ -155,7 +155,7 @@ void powerSubsystemInit() {
     *powerSubsystemData.batteryTempHigh = false;
 
     // register telemerty
-    bcRegisterTlmSender(BUS_GROUND, TLMID_POWER, sizeof(tlmPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_POWER, sizeof(tlmPacket),
             &tlmPacket);
 }
 
@@ -290,7 +290,7 @@ void powerSubsystem(void* powerSubsystemData) {
     tlmPacket.generation = *data->powerGeneration;
     tlmPacket.panelState = *data->solarPanelState;
     tlmPacket.batteryTempHigh = *data->batteryTempHigh;
-    bcSend(TLMID_POWER);
+    comsTxSend(TLMID_POWER);
 }
 
 // Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.

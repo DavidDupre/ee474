@@ -2,8 +2,8 @@
 #include "schedule.h"
 #include "predefinedMacros.h"
 #include "sharedVariables.h"
-#include "binarySatelliteComs.h"
-#include "command.h"
+#include "comsReceive.h"
+#include "comsTransmit.h"
 #include <stdint.h>
 
 /*
@@ -61,8 +61,8 @@ void thrusterSubsystemInit() {
         1
     );
 
-    cmdRegisterCallback(CMDID_THRUSTER, thrusterSubsystemProcessCommand);
-    bcRegisterTlmSender(BUS_GROUND, TLMID_THRUSTER, sizeof(tlmPacket),
+    comsRxRegisterCallback(CMDID_THRUSTER, thrusterSubsystemProcessCommand);
+    comsTxRegisterSender(BUS_GROUND, TLMID_THRUSTER, sizeof(tlmPacket),
             &tlmPacket);
 }
 
@@ -187,7 +187,7 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
     // update the telemetry
     tlmPacket.command = command;
     tlmPacket.fuel = *data->fuelLevel;
-    bcSend(TLMID_THRUSTER);
+    comsTxSend(TLMID_THRUSTER);
 
     return;
 }

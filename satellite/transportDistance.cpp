@@ -4,7 +4,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "vehicleComms.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include "udools.h"
 
 #define LONGEST_PERIOD 250000
@@ -74,7 +74,7 @@ void transportDistanceInit() {
         TASKID_DISTANCE,
         3
     );
-    bcRegisterTlmSender(BUS_GROUND, TLMID_DISTANCE, sizeof(tlmPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_DISTANCE, sizeof(tlmPacket),
             &tlmPacket);
 }
 
@@ -112,7 +112,7 @@ void transportDistance(void *transportDistanceData) {
 
             // send telemetry
             tlmPacket.distance = distance;
-            bcSend(TLMID_DISTANCE);
+            comsTxSend(TLMID_DISTANCE);
         }
     }
 }

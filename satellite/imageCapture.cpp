@@ -1,6 +1,6 @@
 #include "imageCapture.h"
 #include "schedule.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include "sharedVariables.h"
 #include "fft.h"
 #include <string.h>
@@ -76,7 +76,7 @@ void imageCaptureInit() {
     // initialize the timer interrupt
     imageCaptureTimerInit();
 
-    bcRegisterTlmSender(BUS_GROUND, TLMID_IMAGE, sizeof(tlmPacket),
+    comsTxRegisterSender(BUS_GROUND, TLMID_IMAGE, sizeof(tlmPacket),
             &tlmPacket);
 }
 
@@ -162,7 +162,7 @@ void imageCapture(void *imageCaptureData) {
 
     // send telemetry
     tlmPacket.frequency = frequency;
-    bcSend(TLMID_IMAGE);
+    comsTxSend(TLMID_IMAGE);
 }
 
 // timer5 interrupt service routine

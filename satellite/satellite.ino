@@ -6,14 +6,14 @@
 #include "consoleKeypad.h"
 #include "solarPanel.h"
 #include "satelliteComs.h"
-#include "binarySatelliteComs.h"
+#include "comsReceive.h"
+#include "comsTransmit.h"
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
 #include "imageCapture.h"
 #include "schedule.h"
 #include "transportDistance.h"
-#include "command.h"
 #include "tft.h"
 
 #include <AUnit.h>  // Test framework
@@ -65,7 +65,7 @@ void setup() {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
 
-    bcInit(); // must be called first
+    comsTxInit(); // must be called first
     scheduleInit();
     consoleDisplayInit();
     consoleKeypadInit();
@@ -77,7 +77,7 @@ void setup() {
     transportDistanceInit();
     vehicleCommsInit();
     warningAlarmInit();
-    cmdInit();
+    comsRxInit();
 
     powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);
@@ -88,15 +88,15 @@ void setup() {
     imageCaptureTCB.priority = 1;
     taskQueueInsert(&imageCaptureTCB);
 
-    cmdTCB.priority = 2;
-    taskQueueInsert(&cmdTCB);
+    comsRxTCB.priority = 2;
+    taskQueueInsert(&comsRxTCB);
 
     vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);
 
 #ifdef ENABLE_BINARY_COMS
-    bcTCB.priority = 5;
-    taskQueueInsert(&bcTCB);
+    comsTxTCB.priority = 5;
+    taskQueueInsert(&comsTxTCB);
 #else
     satelliteComsTCB.priority = 5;
     taskQueueInsert(&satelliteComsTCB);

@@ -3,8 +3,8 @@
 #include "warningAlarm.h"
 #include "schedule.h"
 #include "sharedVariables.h"
-#include "binarySatelliteComs.h"
-#include "command.h"
+#include "comsReceive.h"
+#include "comsTransmit.h"
 #include "tft.h"
 
 #define HALF_FUEL       50
@@ -51,7 +51,7 @@ void warningAlarmInit() {
     pinMode(ACK_PIN, INPUT);
 
     // optionally acknowledge temperature through serial
-    cmdRegisterCallback(CMDID_ACK_TEMP, handleCommand);
+    comsRxRegisterCallback(CMDID_ACK_TEMP, handleCommand);
 }
 
 void warningAlarm(void *warningAlarmData) {
