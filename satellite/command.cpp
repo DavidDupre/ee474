@@ -10,7 +10,7 @@
 
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
-#define TLMID_COMMAND 9
+#define TLMID_CMD_STATUS 9
 
 
 typedef struct {
@@ -58,6 +58,8 @@ void cmdInit() {
 
     numCmdErrors = 0;
     memset(commandHandlers, 0, sizeof(commandHandlers));
+    bcRegisterTlmSender(BUS_GROUND, TLMID_CMD_STATUS, sizeof(cmdTlmPacket),
+        &cmdTlmPacket);
 }
 
 void cmdUpdate(void *cmdData) {
@@ -73,7 +75,7 @@ void cmdUpdate(void *cmdData) {
 
     // send metadata telementry
     cmdTlmPacket.numErrors = *data->numErrors;
-    bcSend(TLMID_COMMAND);
+    bcSend(TLMID_CMD_STATUS);
 }
 
 void cmdRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {

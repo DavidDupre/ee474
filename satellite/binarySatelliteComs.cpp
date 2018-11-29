@@ -3,12 +3,12 @@
 #include "sharedVariables.h"
 #include <Arduino.h>
 
-#define MAX_TLM_SENDERS      16
+#define MAX_TLM_SENDERS      32
 #define TLM_SYNC_PATTERN     0xFC
 
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
-#define TLMID_META 0
+#define TLMID_TLM_STATUS 0
 
 
 typedef struct {
@@ -47,7 +47,7 @@ void bcInit() {
     );
 
     memset(tlmSenders, 0, sizeof(tlmSenders));
-    bcRegisterTlmSender(BUS_GROUND, TLMID_META, sizeof(metaPacket),
+    bcRegisterTlmSender(BUS_GROUND, TLMID_TLM_STATUS, sizeof(metaPacket),
             &metaPacket);
 }
 
@@ -65,7 +65,7 @@ void binarySatelliteComs(void *bcData) {
 
     // update meta packet
     metaPacket.numTlmSenders = numTlmSenders;
-    bcSend(TLMID_META);
+    bcSend(TLMID_TLM_STATUS);
 }
 
 void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
@@ -87,9 +87,11 @@ void bcSend(uint8_t tlmId) {
     for (uint8_t i = 0; i < numTlmSenders; i++) {
         if (tlmSenders[i].tlmId == tlmId) {
             tlmSenders[i].ready = true;
-            break;
+            return;
         }
     }
+    Serial.print("unknown tlm id! ");
+    Serial.println(tlmId);
 }
 
 void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,

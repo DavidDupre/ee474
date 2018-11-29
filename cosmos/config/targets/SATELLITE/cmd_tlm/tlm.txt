@@ -1,10 +1,10 @@
-TELEMETRY SATELLITE META LITTLE_ENDIAN "Telemetry Status"
+TELEMETRY SATELLITE TLM_STATUS LITTLE_ENDIAN "Telemetry Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
   
   APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
 
 
-TELEMETRY SATELLITE META LITTLE_ENDIAN "Command Status"
+TELEMETRY SATELLITE CMD_STATUS LITTLE_ENDIAN "Command Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 9 } %>
   
   APPEND_ITEM NERRS 8 UINT "Number of errors"
