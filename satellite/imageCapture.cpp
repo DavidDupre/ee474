@@ -1,6 +1,6 @@
 #include "imageCapture.h"
 #include "schedule.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include "sharedVariables.h"
 #include "fft.h"
 #include <string.h>
@@ -12,6 +12,10 @@
 
 // maximum milli-volts for an analogRead
 #define IMAGE_CAPTURE_MAX_MVOLTS 5000.0
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_IMAGE 6
 
 
 TLM_PACKET {
@@ -72,7 +76,8 @@ void imageCaptureInit() {
     // initialize the timer interrupt
     imageCaptureTimerInit();
 
-    bcRegisterTlmSender(TLMID_IMAGE, sizeof(tlmPacket), &tlmPacket);
+    comsTxRegisterSender(BUS_GROUND, TLMID_IMAGE, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void imageCaptureTimerInit() {
@@ -157,7 +162,7 @@ void imageCapture(void *imageCaptureData) {
 
     // send telemetry
     tlmPacket.frequency = frequency;
-    bcSend(TLMID_IMAGE);
+    comsTxSend(TLMID_IMAGE);
 }
 
 // timer5 interrupt service routine

@@ -4,7 +4,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "vehicleComms.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include "udools.h"
 
 #define LONGEST_PERIOD 250000
@@ -15,6 +15,10 @@
 #define MIN_DISTANCE 100
 #define MAX_DISTANCE 2000
 #define MEASURE_DIFF 0.10
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_DISTANCE 7
 
 
 TLM_PACKET {
@@ -70,7 +74,8 @@ void transportDistanceInit() {
         TASKID_DISTANCE,
         3
     );
-    bcRegisterTlmSender(TLMID_DISTANCE, sizeof(tlmPacket), &tlmPacket);
+    comsTxRegisterSender(BUS_GROUND, TLMID_DISTANCE, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void transportDistance(void *transportDistanceData) {
@@ -107,7 +112,7 @@ void transportDistance(void *transportDistanceData) {
 
             // send telemetry
             tlmPacket.distance = distance;
-            bcSend(TLMID_DISTANCE);
+            comsTxSend(TLMID_DISTANCE);
         }
     }
 }

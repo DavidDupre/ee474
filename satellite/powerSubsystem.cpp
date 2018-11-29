@@ -2,11 +2,16 @@
 #include <stdint.h>
 #include "schedule.h"
 #include "sharedVariables.h"
-#include "binarySatelliteComs.h"
+#include "comsTransmit.h"
 #include <Arduino.h>
 #include <limits.h>
 #include "solarPanel.h"
 #include "udools.h"
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_POWER 1
+
 
 TLM_PACKET {
     uint32_t batteryLevel;
@@ -150,7 +155,8 @@ void powerSubsystemInit() {
     *powerSubsystemData.batteryTempHigh = false;
 
     // register telemerty
-    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
+    comsTxRegisterSender(BUS_GROUND, TLMID_POWER, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void measurementExternalInterruptISR() {
@@ -284,7 +290,7 @@ void powerSubsystem(void* powerSubsystemData) {
     tlmPacket.generation = *data->powerGeneration;
     tlmPacket.panelState = *data->solarPanelState;
     tlmPacket.batteryTempHigh = *data->batteryTempHigh;
-    bcSend(TLMID_POWER);
+    comsTxSend(TLMID_POWER);
 }
 
 // Takes the raw measurement from 0-325mV and returns the appropriate Celsius measurement.

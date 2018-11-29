@@ -1,9 +1,14 @@
-TELEMETRY SATELLITE META LITTLE_ENDIAN "Telemetry Status"
+TELEMETRY SATELLITE TLM_STATUS LITTLE_ENDIAN "Telemetry Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
+  
+  APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
+
+
+TELEMETRY SATELLITE CMD_STATUS LITTLE_ENDIAN "Command Status"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 9 } %>
   
   APPEND_ITEM NERRS 8 UINT "Number of errors"
   APPEND_ITEM NCMD 8 UINT "Number of command handlers"
-  APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
 
 
 TELEMETRY SATELLITE POWER LITTLE_ENDIAN "Power Subsystem"
@@ -70,7 +75,8 @@ TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
   <%= render "_exec_time.txt", locals: { tname: "IMAGE" } %>
   <%= render "_exec_time.txt", locals: { tname: "DISTANCE" } %>
-  APPEND_ITEM PAD 128 UINT
+  <%= render "_exec_time.txt", locals: { tname: "COMMAND" } %>
+  APPEND_ITEM PAD 96 UINT
 
 TELEMETRY SATELLITE IMAGE LITTLE_ENDIAN "Image capture freq."
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 6 } %>
