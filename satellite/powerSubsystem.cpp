@@ -8,6 +8,11 @@
 #include "solarPanel.h"
 #include "udools.h"
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_POWER 1
+
+
 TLM_PACKET {
     uint32_t batteryLevel;
     uint16_t temperature;
@@ -150,7 +155,8 @@ void powerSubsystemInit() {
     *powerSubsystemData.batteryTempHigh = false;
 
     // register telemerty
-    bcRegisterTlmSender(TLMID_POWER, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_POWER, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void measurementExternalInterruptISR() {

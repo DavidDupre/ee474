@@ -2,32 +2,17 @@
 
 #include <stdint.h>
 #include "schedule.h"
+#include <Arduino.h>
 
 #define TLM_PACKET typedef struct __attribute__((__packed__))
 
+#define BUS_GROUND  (&Serial)
+#define BUS_VEHICLE (&Serial1)
 
-/*
- * Telemetry IDs used to identify telemetry packets
- *
- * These must be unique across the entire satellite.
- * Range 0 through 255.
- */
-typedef enum {
-    TLMID_META =        0,
-    TLMID_POWER =       1,
-    TLMID_SOLAR_PANEL = 2,
-    TLMID_THRUSTER =    3,
-    TLMID_TIMES =       5,
-    TLMID_IMAGE =       6,
-    TLMID_DISTANCE =    7,
-    TLMID_VEHICLE =     8,
-} TlmId;
 
-// returns true if the command was handled
-typedef bool (*cmd_handler_fn)(uint8_t, uint8_t*);
+typedef HardwareSerial serial_bus;
 
-typedef struct {
-    uint8_t *numErrors;
+typedef struct { 
 } BCData;
 
 
@@ -40,11 +25,13 @@ void binarySatelliteComs(void *bcData);
 
 /**
  * inputs:
+ *  bus:    The serial bus to send the packet on
  *  tlmId:  The unique telemetry ID
  *  length: The length of the telemetry, not counting the header
  *  data:   The telemtry to send. Must be a static location
  */
-void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data);
+void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
+        void *data);
 
 /**
  * Indicate that a registered telemetry packet is ready to send.
@@ -52,6 +39,5 @@ void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data);
  * inputs:
  *  tlmId: The unique telemetry ID
  */
-void bcSend(TlmId tlmId);
+void bcSend(uint8_t tlmId);
 
-void bcRegisterCmdHandler(TaskId taskId, cmd_handler_fn handler);

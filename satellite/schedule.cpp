@@ -3,6 +3,10 @@
 #include "binarySatelliteComs.h"
 #include <Arduino.h>
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_TIMES 5
+
 
 TLM_PACKET {
     // the execution time of each task in microseconds
@@ -33,7 +37,8 @@ TimePacket timePacket;
 void scheduleInit() {
     missionElapsedTime = millis();
 
-    bcRegisterTlmSender(TLMID_TIMES, sizeof(timePacket), &timePacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_TIMES, sizeof(timePacket),
+            &timePacket);
 }
 
 void schedule() {

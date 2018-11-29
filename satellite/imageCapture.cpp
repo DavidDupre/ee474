@@ -13,6 +13,10 @@
 // maximum milli-volts for an analogRead
 #define IMAGE_CAPTURE_MAX_MVOLTS 5000.0
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_IMAGE 6
+
 
 TLM_PACKET {
     uint16_t frequency;
@@ -72,7 +76,8 @@ void imageCaptureInit() {
     // initialize the timer interrupt
     imageCaptureTimerInit();
 
-    bcRegisterTlmSender(TLMID_IMAGE, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_IMAGE, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void imageCaptureTimerInit() {

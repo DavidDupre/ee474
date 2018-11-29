@@ -3,47 +3,33 @@
 #include "sharedVariables.h"
 #include <Arduino.h>
 
-#define MAX_COMMAND_HANDLERS 10
-#define MAX_TLM_SENDERS      10
+#define MAX_TLM_SENDERS      32
 #define TLM_SYNC_PATTERN     0xFC
-#define SERIAL_TIMEOUT_MS    100
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_TLM_STATUS 0
 
 
 typedef struct {
-    TaskId taskId;
-    cmd_handler_fn handle;
-} CommandHandler;
-
-typedef struct {
-    TlmId tlmId;
+    serial_bus *bus;
+    uint8_t tlmId;
     uint8_t length;
     uint8_t *data;
     bool ready;
 } TelemetrySender;
 
 TLM_PACKET {
-    uint8_t numErrors;
-    uint8_t numCmdHandlers;
     uint8_t numTlmSenders;
 } MetaPacket;
 
 
-void sendTelemetryPacket(TlmId tlmId, uint8_t *data, uint8_t size);
-
-// reads an incoming command from Serial and dispatches it to a command handler
-void processCommand(BCData *data);
-
-// returns true if it found the sync byte
-bool sync();
+void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,
+        uint8_t size);
 
 
 TCB bcTCB;
-BCData bcData = {
-    &numTlmErrors
-};
-
-CommandHandler commandHandlers[MAX_COMMAND_HANDLERS];
-uint8_t numCommandHandlers = 0;
+BCData bcData;
 
 TelemetrySender tlmSenders[MAX_TLM_SENDERS];
 uint8_t numTlmSenders = 0;
@@ -60,12 +46,9 @@ void bcInit() {
         1
     );
 
-    Serial.setTimeout(SERIAL_TIMEOUT_MS);
-    numTlmErrors = 0;
-    memset(commandHandlers, 0, sizeof(commandHandlers));
     memset(tlmSenders, 0, sizeof(tlmSenders));
-
-    bcRegisterTlmSender(TLMID_META, sizeof(metaPacket), &metaPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_TLM_STATUS, sizeof(metaPacket),
+            &metaPacket);
 }
 
 void binarySatelliteComs(void *bcData) {
@@ -74,41 +57,25 @@ void binarySatelliteComs(void *bcData) {
     // send telemetry packets
     for (uint8_t i = 0; i < numTlmSenders; i++) {
         if (tlmSenders[i].ready) {
-            sendTelemetryPacket(tlmSenders[i].tlmId, tlmSenders[i].data,
-                    tlmSenders[i].length);
+            sendTelemetryPacket(tlmSenders[i].bus, tlmSenders[i].tlmId,
+                    tlmSenders[i].data, tlmSenders[i].length);
             tlmSenders[i].ready = false;
         }
     }
 
-    // process commands
-    while (sync()) {
-        processCommand(data);
-    }
-
     // update meta packet
-    metaPacket.numErrors = *data->numErrors;
     metaPacket.numTlmSenders = numTlmSenders;
-    metaPacket.numCmdHandlers = numCommandHandlers;
-    bcSend(TLMID_META);
+    bcSend(TLMID_TLM_STATUS);
 }
 
-void bcRegisterCmdHandler(TaskId taskId, cmd_handler_fn handler) {
-    if (numCommandHandlers >= MAX_COMMAND_HANDLERS) {
-        Serial.println(F("ERROR! Too many command handlers!"));
-        return;
-    }
-    commandHandlers[numCommandHandlers++] = {
-        taskId,
-        handler
-    };
-}
-
-void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data) {
+void bcRegisterTlmSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
+        void *data) {
     if (numTlmSenders >= MAX_TLM_SENDERS) {
         Serial.println(F("ERROR! Too many telementry senders!"));
         return;
     }
     tlmSenders[numTlmSenders++] = {
+        bus,
         tlmId,
         length,
         (uint8_t *) data,
@@ -116,59 +83,24 @@ void bcRegisterTlmSender(TlmId tlmId, uint8_t length, void *data) {
     };
 }
 
-void bcSend(TlmId tlmId) {
+void bcSend(uint8_t tlmId) {
     for (uint8_t i = 0; i < numTlmSenders; i++) {
         if (tlmSenders[i].tlmId == tlmId) {
             tlmSenders[i].ready = true;
-            break;
+            return;
         }
     }
+    Serial.print("unknown tlm id! ");
+    Serial.println(tlmId);
 }
 
-void sendTelemetryPacket(TlmId tlmId, uint8_t *data, uint8_t size) {
+void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,
+        uint8_t size) {
     // write the header (sync byte, full length, and ID)
-    Serial.write(TLM_SYNC_PATTERN);
-    Serial.write(size + 3); // add 3 for these header bytes
-    Serial.write(tlmId);
+    bus->write(TLM_SYNC_PATTERN);
+    bus->write(size + 3); // add 3 for these header bytes
+    bus->write(tlmId);
 
     // write the data
-    Serial.write(data, size);
-}
-
-bool sync() {
-    while (Serial.available()) {
-        if (Serial.read() == TLM_SYNC_PATTERN) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void processCommand(BCData *bcData) {
-    // read the header
-    uint8_t length;
-    uint8_t taskId;
-    uint8_t opcode;
-    Serial.readBytes(&length, 1);
-    Serial.readBytes(&taskId, 1);
-    Serial.readBytes(&opcode, 1);
-
-    // read the body of the command
-    uint8_t cmdData[256];
-    Serial.readBytes(cmdData, length);
-
-    // dispatch to different entities
-    bool handled = false;
-    for (uint8_t i = 0; i < numCommandHandlers; i++) {
-        CommandHandler *h = &commandHandlers[i];
-        if (taskId == h->taskId) {
-            handled = h->handle(opcode, cmdData);
-            break;
-        }
-    }
-
-    // report unhandled commands
-    if (!handled) {
-        bcData->numErrors++;
-    }
+    bus->write(data, size);
 }

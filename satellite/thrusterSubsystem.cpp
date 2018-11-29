@@ -3,6 +3,7 @@
 #include "predefinedMacros.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include <stdint.h>
 
 /*
@@ -14,7 +15,14 @@
  */
 #define MSEC_PER_FUEL_UNIT_PER_MAG_LSB 210240000
 
-#define CMDID_THRUSTER 0
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_THRUSTER 2
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_THRUSTER 3
 
 
 TLM_PACKET {
@@ -27,7 +35,7 @@ TLM_PACKET {
  * This is a command handler to be registered with binary satellite coms.
  * It processing a command destined for the thruster subsystem.
  */
-bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data);
+bool thrusterSubsystemProcessCommand(uint8_t *data);
 
 
 TCB thrusterSubsystemTCB;
@@ -53,8 +61,9 @@ void thrusterSubsystemInit() {
         1
     );
 
-    bcRegisterCmdHandler(TASKID_THRUST, thrusterSubsystemProcessCommand);
-    bcRegisterTlmSender(TLMID_THRUSTER, sizeof(tlmPacket), &tlmPacket);
+    cmdRegisterCallback(CMDID_THRUSTER, thrusterSubsystemProcessCommand);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_THRUSTER, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 /******************************************************************************
@@ -204,10 +213,7 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
     return cmd;
 }
 
-bool thrusterSubsystemProcessCommand(uint8_t opcode, uint8_t *data) {
-    if (opcode != CMDID_THRUSTER) {
-        return false;
-    }
+bool thrusterSubsystemProcessCommand(uint8_t *data) {
     // TODO this seems to be broken somehow
     thrusterCommand = *((uint16_t *) data);
     return true;

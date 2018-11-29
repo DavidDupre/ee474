@@ -16,6 +16,10 @@
 #define MAX_DISTANCE 2000
 #define MEASURE_DIFF 0.10
 
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_DISTANCE 7
+
 
 TLM_PACKET {
     float distance;
@@ -70,7 +74,8 @@ void transportDistanceInit() {
         TASKID_DISTANCE,
         3
     );
-    bcRegisterTlmSender(TLMID_DISTANCE, sizeof(tlmPacket), &tlmPacket);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_DISTANCE, sizeof(tlmPacket),
+            &tlmPacket);
 }
 
 void transportDistance(void *transportDistanceData) {

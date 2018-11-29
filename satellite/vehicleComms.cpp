@@ -4,7 +4,17 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include "transportDistance.h"
+
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_VEHICLE 3
+
+// Telemetry IDs unique to the entire satellite
+// Keep this in sync with COSMOS
+#define TLMID_VEHICLE 8
 
 
 TLM_PACKET {
@@ -12,7 +22,7 @@ TLM_PACKET {
 } VehiclePacket;
 
 
-bool handleCommand(uint8_t opcode, uint8_t *data);
+bool handleCommand(uint8_t *data);
 
 
 TCB vehicleCommsTCB;
@@ -33,8 +43,9 @@ void vehicleCommsInit() {
         TASKID_VEHCOMS,
         1
     );
-    bcRegisterTlmSender(TLMID_VEHICLE, sizeof(tlmPacket), &tlmPacket);
-    bcRegisterCmdHandler(TASKID_VEHCOMS, handleCommand);
+    bcRegisterTlmSender(BUS_GROUND, TLMID_VEHICLE, sizeof(tlmPacket),
+            &tlmPacket);
+    cmdRegisterCallback(CMDID_VEHICLE, handleCommand);
 }
 
 /******************************************************************************
@@ -102,6 +113,7 @@ void vehicleComms(void *vehicleCommsData) {
 
 }
 
-bool handleCommand(uint8_t opcode, uint8_t *data) {
+bool handleCommand(uint8_t *data) {
     vehicleCommand = data[0];
+    return true;
 }

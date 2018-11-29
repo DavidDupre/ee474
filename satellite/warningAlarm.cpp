@@ -4,6 +4,7 @@
 #include "schedule.h"
 #include "sharedVariables.h"
 #include "binarySatelliteComs.h"
+#include "command.h"
 #include "tft.h"
 
 #define HALF_FUEL       50
@@ -16,8 +17,13 @@
 
 #define ACK_PIN         35
 
+// command IDs for commands over Serial
+// these must be unique to the entire satellite
+// keep this in sync with COSMOS
+#define CMDID_ACK_TEMP 4
 
-static bool handleCommand(uint8_t opcode, uint8_t *data);
+
+static bool handleCommand(uint8_t *data);
 
 
 TCB warningAlarmTCB;
@@ -45,7 +51,7 @@ void warningAlarmInit() {
     pinMode(ACK_PIN, INPUT);
 
     // optionally acknowledge temperature through serial
-    bcRegisterCmdHandler(TASKID_ALARM, handleCommand);
+    cmdRegisterCallback(CMDID_ACK_TEMP, handleCommand);
 }
 
 void warningAlarm(void *warningAlarmData) {
@@ -163,7 +169,7 @@ void warningAlarm(void *warningAlarmData) {
 }
 
 // handle command from serial
-static bool handleCommand(uint8_t opcode, uint8_t *data) {
+static bool handleCommand(uint8_t *data) {
     temperatureAlarmAcked = true;
     return true;
 }
