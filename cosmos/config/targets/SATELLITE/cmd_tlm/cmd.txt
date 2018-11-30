@@ -12,13 +12,13 @@ COMMAND SATELLITE THRUSTER LITTLE_ENDIAN "Send thruster command"
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 2, id: 2 } %>
   
-  APPEND_PARAMETER DURATION 8 UINT 0 255 10 "Duration"
-    UNITS Seconds s
   APPEND_PARAMETER MAG 4 UINT 0 15 15 "Magnitude"
   APPEND_PARAMETER LEFT 1 UINT 0 1 0 "Left thruster"
   APPEND_PARAMETER RIGHT 1 UINT 0 1 0 "Right thruster"
   APPEND_PARAMETER UP 1 UINT 0 1 0 "Up thruster"
   APPEND_PARAMETER DOWN 1 UINT 0 1 0 "Down thruster"
+  APPEND_PARAMETER DURATION 8 UINT 0 255 10 "Duration"
+    UNITS Seconds s
 
 COMMAND SATELLITE VEHICLE LITTLE_ENDIAN "Send vehicle command"
   # This must always be the first entry in any command packet

@@ -134,7 +134,7 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
     // command is the last command entered to this function
     static uint16_t command = 0;
 
-    // lastUpdateEpochMs is the system time of the last thrusterSubsystem call
+    // lastUpdateEpochMs is the system time of the last new thruster command
     static unsigned long lastUpdateEpochMs = globalTimeBase();
 
     // cast the input to the correct ThrusterSubsystemData type
@@ -144,7 +144,6 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
     // calculate how long the last command has been running
     unsigned long currentEpochMs = globalTimeBase();
     unsigned long timePassedMs = currentEpochMs - lastUpdateEpochMs;
-    lastUpdateEpochMs = currentEpochMs;
 
     // calculate the fuel expended during the duration
     uint8_t numThrustersInUse = THRUSTER_CMD_LEFT(command)
@@ -179,7 +178,8 @@ void thrusterSubsystem(void *thrusterSubsystemData) {
         // double-accepted.
         command = *data->thrusterCommand;
         *data->thrusterCommand = THRUSTER_CMD_NONE;
-    } else if (timePassedMs >= 1000 * THRUSTER_CMD_DUR(command)) {
+        lastUpdateEpochMs = currentEpochMs;
+    } else if (timePassedMs >= 1000 * ((unsigned long) THRUSTER_CMD_DUR(command))) {
         // if the current command is past its duration, clear the command
         command = 0;
     }
@@ -214,7 +214,8 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
 }
 
 bool thrusterSubsystemProcessCommand(uint8_t *data) {
-    // TODO this seems to be broken somehow
-    thrusterCommand = *((uint16_t *) data);
+    uint8_t *buf = (uint8_t *) &thrusterCommand;
+    buf[0] = data[1];
+    buf[1] = data[0];
     return true;
 }
