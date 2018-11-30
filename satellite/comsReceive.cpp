@@ -52,7 +52,7 @@ void comsRxInit() {
         &comsRxTCB,
         &cmdData,
         comsRxUpdate,
-        TASKID_COMMAND,
+        TASKID_COMSRX,
         1
     );
 
@@ -66,8 +66,8 @@ void comsRxUpdate(void *cmdData) {
     CmdData *data = (CmdData *) cmdData;
 
     // process commands from each serial bus
-    for (uint8_t i = 0; i < sizeof(serialBuses) / sizeof(serial_bus); i++) {
-        serial_bus *bus = serialBuses[0];
+    for (uint8_t i = 0; i < sizeof(serialBuses) / sizeof(serial_bus *); i++) {
+        serial_bus *bus = serialBuses[i];
         while (sync(bus)) {
             processCommand(bus, data);
         }
@@ -75,6 +75,7 @@ void comsRxUpdate(void *cmdData) {
 
     // send metadata telementry
     cmdTlmPacket.numErrors = *data->numErrors;
+    cmdTlmPacket.numCmdHandlers = numCommandHandlers;
     comsTxSend(TLMID_CMD_STATUS);
 }
 
@@ -84,8 +85,8 @@ void comsRxRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {
         return;
     }
     commandHandlers[numCommandHandlers++] = {
-        cmdId,
-        callback
+        .cmdId = cmdId,
+        .handle = callback
     };
 }
 
@@ -121,6 +122,6 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
 
     // report unhandled commands
     if (!handled) {
-        cmdData->numErrors++;
+        (*(cmdData->numErrors))++;
     }
 }

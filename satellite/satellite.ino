@@ -66,6 +66,7 @@ void setup() {
     tft.fillScreen(BLACK);
 
     comsTxInit(); // must be called first
+    comsRxInit(); // must be called before other inits, except comxTxInit
     scheduleInit();
     consoleDisplayInit();
     consoleKeypadInit();
@@ -77,7 +78,6 @@ void setup() {
     transportDistanceInit();
     vehicleCommsInit();
     warningAlarmInit();
-    comsRxInit();
 
     powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);

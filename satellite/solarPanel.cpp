@@ -73,7 +73,7 @@ void solarPanelControlInit() {
     comsTxRegisterSender(BUS_GROUND, TLMID_SOLAR_PANEL, sizeof(tlmPacket),
             &tlmPacket);
     comsRxRegisterCallback(CMDID_INC_PANEL_SPEED, handleIncCommand);
-    comsRxRegisterCallback(CMDID_INC_PANEL_SPEED, handleDecCommand);
+    comsRxRegisterCallback(CMDID_DEC_PANEL_SPEED, handleDecCommand);
 }
 
 void solarPanelControl(void *solarPanelControlData) {
