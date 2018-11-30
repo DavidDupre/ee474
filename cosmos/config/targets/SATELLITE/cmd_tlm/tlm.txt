@@ -40,7 +40,6 @@ TELEMETRY SATELLITE SOLAR_PANEL LITTLE_ENDIAN "Solar panel"
 TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 3 } %>
 
-  APPEND_ITEM PAD 16 UINT "Padding"
   APPEND_ITEM DURATION 8 UINT "Duration"
     UNITS Seconds s
   APPEND_ITEM MAG 4 UINT "Magnitude"

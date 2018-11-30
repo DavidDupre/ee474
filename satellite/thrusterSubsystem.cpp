@@ -26,7 +26,7 @@
 
 
 TLM_PACKET {
-    uint32_t command;
+    uint16_t command;
     uint16_t fuel;
 } ThrusterTlmPacket;
 

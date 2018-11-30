@@ -23,7 +23,7 @@
 
 
 typedef struct {
-    unsigned int *thrusterCommand;
+    uint16_t *thrusterCommand;
     unsigned short *fuelLevel;
 } ThrusterSubsystemData;
 
