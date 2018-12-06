@@ -15,6 +15,8 @@
 #include "schedule.h"
 #include "transportDistance.h"
 #include "tft.h"
+#include "pirateDetectionSubsystem.h"
+#include "pirateManagementSubsystem.h"
 
 #include <AUnit.h>  // Test framework
 
@@ -37,6 +39,8 @@ char vehicleCommand;
 char vehicleResponse;
 uint8_t numCmdErrors;
 bool batteryTempHigh;
+bool detected;
+unsigned int pirateProximity;
 
 bool temperatureAlarmAcked;
 
@@ -58,6 +62,8 @@ void setup() {
     batteryTempHigh = false;
     vehicleCommand = '\0';
     vehicleResponse = '\0';
+    detected = false;
+    pirateProximity = PIRATE_PROXIMITY_INITIAL;
 
     Serial.begin(250000);
     Serial1.begin(9600);
@@ -78,6 +84,8 @@ void setup() {
     vehicleCommsInit();
     warningAlarmInit();
     comsRxInit();
+    pirateDetectionInit();
+    pirateManagementInit();
 
     powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);
@@ -93,6 +101,9 @@ void setup() {
 
     vehicleCommsTCB.priority = 4;
     taskQueueInsert(&vehicleCommsTCB);
+
+    pirateDetectionSubsystemTCB.priority = 1;
+    taskQueueInsert(&pirateDetectionSubsystemTCB);
 
 #ifdef ENABLE_BINARY_COMS
     comsTxTCB.priority = 5;

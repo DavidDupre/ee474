@@ -28,6 +28,8 @@ typedef enum {
     TASKID_IMAGE =    10,
     TASKID_DISTANCE = 11,
     TASKID_COMMAND =  12,
+    TASKID_PIRATE_DETECTION = 13,
+    TASKID_PIRATE_MANAGEMENT = 14,
 } TaskId;
 
 typedef void (*tcb_task_fn)(void *data);

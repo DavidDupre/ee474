@@ -111,6 +111,11 @@ void satelliteComs(void* satelliteComsData) {
     Serial.println(*data->powerGeneration);
     Serial.print(F("Vehicle Response: A "));
     Serial.println(*data->vehicleResponse);
+    // for debugging
+    Serial.println("The pirate is: ");
+    Serial.println(pirateProximity);
+    Serial.println(" away!");
+
     *data->vehicleResponse = '\0';
 
 #ifndef ENABLE_BINARY_COMS
