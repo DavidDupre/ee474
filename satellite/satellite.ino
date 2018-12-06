@@ -19,7 +19,7 @@
 #include <AUnit.h>  // Test framework
 
 
-unsigned int thrusterCommand;
+uint16_t thrusterCommand;
 unsigned short fuelLevel;
 SolarPanelState solarPanelState;
 bool solarPanelDeploy;
