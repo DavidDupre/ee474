@@ -21,7 +21,7 @@
 #include <AUnit.h>  // Test framework
 
 
-unsigned int thrusterCommand;
+uint16_t thrusterCommand;
 unsigned short fuelLevel;
 SolarPanelState solarPanelState;
 bool solarPanelDeploy;
@@ -72,6 +72,7 @@ void setup() {
     tft.fillScreen(BLACK);
 
     comsTxInit(); // must be called first
+    comsRxInit(); // must be called before other inits, except comxTxInit
     scheduleInit();
     consoleDisplayInit();
     consoleKeypadInit();
@@ -83,7 +84,6 @@ void setup() {
     transportDistanceInit();
     vehicleCommsInit();
     warningAlarmInit();
-    comsRxInit();
     pirateDetectionInit();
     pirateManagementInit();
 

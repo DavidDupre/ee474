@@ -42,7 +42,7 @@ void comsTxInit() {
         &comsTxTCB,
         &comsTxData,
         comsTx,
-        TASKID_BINCOMS,
+        TASKID_COMSTX,
         1
     );
 

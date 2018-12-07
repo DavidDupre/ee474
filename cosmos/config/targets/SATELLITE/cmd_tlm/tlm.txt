@@ -1,10 +1,10 @@
-TELEMETRY SATELLITE TLM_STATUS LITTLE_ENDIAN "Telemetry Status"
+TELEMETRY SATELLITE TX_STATUS LITTLE_ENDIAN "Coms Transmit Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 0 } %>
   
   APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
 
 
-TELEMETRY SATELLITE CMD_STATUS LITTLE_ENDIAN "Command Status"
+TELEMETRY SATELLITE RX_STATUS LITTLE_ENDIAN "Coms Rx Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 9 } %>
   
   APPEND_ITEM NERRS 8 UINT "Number of errors"
@@ -40,9 +40,6 @@ TELEMETRY SATELLITE SOLAR_PANEL LITTLE_ENDIAN "Solar panel"
 TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 3 } %>
 
-  APPEND_ITEM PAD 16 UINT "Padding"
-  APPEND_ITEM DURATION 8 UINT "Duration"
-    UNITS Seconds s
   APPEND_ITEM MAG 4 UINT "Magnitude"
   APPEND_ITEM LEFT 1 UINT "Left thruster"
     STATE ON  1
@@ -56,6 +53,8 @@ TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
   APPEND_ITEM DOWN 1 UINT "Down thruster"
     STATE ON  1
     STATE OFF 0
+  APPEND_ITEM DURATION 8 UINT "Duration"
+    UNITS Seconds s
   APPEND_ITEM FUEL 16 UINT "Fuel level"
     LIMITS DEFAULT 1 ENABLED 10 50 101 101
 
@@ -63,7 +62,7 @@ TELEMETRY SATELLITE THRUSTER LITTLE_ENDIAN "Thruster Subsystem"
 TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 5 } %>
   
-  <%= render "_exec_time.txt", locals: { tname: "BINCOMS" } %>
+  <%= render "_exec_time.txt", locals: { tname: "COMSTX" } %>
   <%= render "_exec_time.txt", locals: { tname: "DISPLAY" } %>
   <%= render "_exec_time.txt", locals: { tname: "KEYPAD" } %>
   <%= render "_exec_time.txt", locals: { tname: "POWER" } %>
@@ -75,7 +74,7 @@ TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "_exec_time.txt", locals: { tname: "ALARM" } %>
   <%= render "_exec_time.txt", locals: { tname: "IMAGE" } %>
   <%= render "_exec_time.txt", locals: { tname: "DISTANCE" } %>
-  <%= render "_exec_time.txt", locals: { tname: "COMMAND" } %>
+  <%= render "_exec_time.txt", locals: { tname: "COMSRX" } %>
   APPEND_ITEM PAD 96 UINT
 
 TELEMETRY SATELLITE IMAGE LITTLE_ENDIAN "Image capture freq."

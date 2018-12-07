@@ -3,6 +3,7 @@
 
 #include "solarPanel.h"
 #include "schedule.h"
+#include <stdint.h>
 
 
 typedef struct {
@@ -15,7 +16,7 @@ typedef struct {
     unsigned short *fuelLevel;
     unsigned short *powerConsumption;
     unsigned short *powerGeneration;
-    unsigned int *thrusterCommand;
+    uint16_t *thrusterCommand;
     char *vehicleCommand;
     char *vehicleResponse;
     unsigned int *imageData;
