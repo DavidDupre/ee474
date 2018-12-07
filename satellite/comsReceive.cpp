@@ -108,7 +108,7 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
 
     // read the body of the command
     uint8_t data[256];
-    bus->readBytes(data, length);
+    bus->readBytes(data, length - 3); // subtract 3 for the header bytes
 
     // dispatch to different entities
     bool handled = false;

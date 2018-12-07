@@ -1,16 +1,16 @@
 COMMAND SATELLITE INC_PANEL_SPEED LITTLE_ENDIAN "Increase panel speed"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 0, id: 0 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 0 } %>
 
 
 COMMAND SATELLITE DEC_PANEL_SPEED LITTLE_ENDIAN "Decrease panel speed"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 0, id: 1 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 1 } %>
 
 
 COMMAND SATELLITE THRUSTER LITTLE_ENDIAN "Send thruster command"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 2, id: 2 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 5, id: 2 } %>
   
   APPEND_PARAMETER MAG 4 UINT 0 15 15 "Magnitude"
   APPEND_PARAMETER LEFT 1 UINT 0 1 0 "Left thruster"
@@ -22,10 +22,10 @@ COMMAND SATELLITE THRUSTER LITTLE_ENDIAN "Send thruster command"
 
 COMMAND SATELLITE VEHICLE LITTLE_ENDIAN "Send vehicle command"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 1, id: 3 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 4, id: 3 } %>
 
   APPEND_PARAMETER COMMAND 8 STRING "A" "Command"
 
 COMMAND SATELLITE ACK_TEMP LITTLE_ENDIAN "Acknowledge temp. alarm"
   # This must always be the first entry in any command packet
-  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 0, id: 4 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 4 } %>
