@@ -36,7 +36,7 @@ TimePacket timePacket;
 void scheduleInit() {
     missionElapsedTime = millis();
 
-    comsTxRegisterSender(BUS_CONSOLE, TLMID_TIMES, sizeof(timePacket),
+    comsTxRegisterSender(BUS_SATELLITE, TLMID_TIMES, sizeof(timePacket),
             &timePacket);
 }
 

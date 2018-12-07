@@ -2,8 +2,11 @@
 #include "comsTransmit.h"
 #include "imageCapture.h"
 #include "schedule.h"
+#include "satelliteComs.h"
 
 uint8_t numCmdErrors;
+
+char command;
 
 unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
@@ -14,6 +17,8 @@ void setup() {
     comsTxInit(); // must be called first
     comsRxInit(); // must be called before other inits but after comsTxInit
     imageCaptureInit();
+    satelliteComsInit();
+
 
     imageCaptureTCB.priority = 1;
     taskQueueInsert(&imageCaptureTCB);

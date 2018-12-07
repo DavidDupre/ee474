@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "imageCapture.h"
 
+#define TLMID_RESPONSE 5
+
 /*
  * These variables must have global scope.
  *
@@ -13,6 +15,8 @@
  */
 
 extern uint8_t numCmdErrors;
+
+extern char command;
 
 extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];

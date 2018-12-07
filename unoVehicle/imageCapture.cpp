@@ -4,6 +4,7 @@
 #include "fft.h"
 #include <string.h>
 #include <Arduino.h>
+#include "comsReceive.h"
 #include "sharedVariables.h"
 
 
@@ -31,6 +32,10 @@ TLM_PACKET {
     uint16_t frequency;
 } ImagePacket;
 
+TLM_PACKET {
+    char response;
+} ResponsePacket;
+
 // convert a raw analogRead measurement to +-2.5V
 float imageCaptureRawToVolts(unsigned short raw);
 
@@ -45,10 +50,8 @@ ImageCaptureData imageCaptureData;
 volatile unsigned short imageDataRawest[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 volatile unsigned int imageDataRawestIndex;
 
-static ImagePacket tlmPacket;
-
-bool handleSendImCapture(uint8_t *data);
-bool handleSendImCommand(uint8_t *data);
+static ImagePacket imagePacket;
+static ResponsePacket responsePacket;
 
 bool capture;
 bool send;
@@ -80,15 +83,11 @@ void imageCaptureInit() {
         imageDataRawest[i] = 0;
     }
     imageDataRawestIndex = 0;
-
-    comsRxRegisterCallback(CMDID_IMAGE_CAPTURE, handleSendImCapture);
-    comsRxRegisterCallback(CMDID_IMAGE_SEND, handleSendImCommand);
     
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_IMAGE, sizeof(tlmPacket),
-            &tlmPacket);
-
-    capture = false;
-    send = false;
+    comsTxRegisterSender(BUS_SATELLITE, TLMID_IMAGE, sizeof(imagePacket),
+            &imagePacket);
+    comsTxRegisterSender(BUS_SATELLITE, TLMID_RESPONSE, sizeof(responsePacket),
+            &responsePacket);
 }
 
 float imageCaptureRawToVolts(unsigned short raw) {
@@ -102,12 +101,12 @@ void imageCapture(void *imageCaptureData) {
 
     int n = IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
 
-    if (capture == true) {
+    if (command == 'S') {
         for (int i = 0; i < n; i++) {
             imageDataRawest[imageDataRawestIndex] = analogRead(PIN_IMAGE_CAPTURE);
             imageDataRawestIndex = (imageDataRawestIndex + 1)
                     % n;
-            delayMicros(SAMPLE_PERIOD);
+            delayMicroseconds(SAMPLE_PERIOD);
         }
 
         // copy the latest readings into a buffer while the timer is disabled
@@ -140,24 +139,18 @@ void imageCapture(void *imageCaptureData) {
             data->imageData[i] = data->imageData[i - 1];
         }
         data->imageData[0] = frequency;
-    }
 
+        responsePacket.response = 'W';
+        comsTxSend(TLMID_RESPONSE);
+
+        command = '\0';
+    }
 
     // send telemetry
-    if (send == true) {
-        tlmPacket.frequency = frequency;
+    if (command == 'I') {
+        imagePacket.frequency = data->imageData[0];
         comsTxSend(TLMID_IMAGE);
-        send = false;
+
+        command = '\0';
     }
-}
-
-// TODO: Make these do the capture and send
-bool handleSendImCapture(uint8_t *data) {
-    capture = true;
-    return true;
-}
-
-bool handleSendImCommand(uint8_t *data) {
-    send = true;
-    return true;
 }
