@@ -4,13 +4,6 @@ TELEMETRY SATELLITE TX_STATUS LITTLE_ENDIAN "Coms Transmit Status"
   APPEND_ITEM NTLM 8 UINT "Number of telemetry senders"
 
 
-TELEMETRY SATELLITE RX_STATUS LITTLE_ENDIAN "Coms Rx Status"
-  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 9 } %>
-  
-  APPEND_ITEM NERRS 8 UINT "Number of errors"
-  APPEND_ITEM NCMD 8 UINT "Number of command handlers"
-
-
 TELEMETRY SATELLITE POWER LITTLE_ENDIAN "Power Subsystem"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 1 } %>
   
@@ -77,7 +70,7 @@ TELEMETRY SATELLITE TIMES BIG_ENDIAN "Execution times"
   <%= render "_exec_time.txt", locals: { tname: "COMSRX" } %>
   <%= render "_exec_time.txt", locals: { tname: "PIRATE_DET" } %>
   <%= render "_exec_time.txt", locals: { tname: "PIRATE_MAN" } %>
-  APPEND_ITEM PAD 80 UINT
+  APPEND_ITEM PAD 32 UINT
 
 TELEMETRY SATELLITE IMAGE LITTLE_ENDIAN "Image capture freq."
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 6 } %>
@@ -94,3 +87,20 @@ TELEMETRY SATELLITE VEHICLE LITTLE_ENDIAN "Vehicle Communications"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 8 } %>
 
   APPEND_ITEM RESPONSE 8 STRING "Response"
+
+TELEMETRY SATELLITE RX_STATUS LITTLE_ENDIAN "Coms Rx Status"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 9 } %>
+  
+  APPEND_ITEM NERRS 8 UINT "Number of errors"
+  APPEND_ITEM NCMD 8 UINT "Number of command handlers"
+
+TELEMETRY SATELLITE CMD_ACK LITTLE_ENDIAN "Command acknowledgement"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 10 } %>
+
+  APPEND_ITEM CMDID 8 UINT "Command ID"
+    STATE INC_PANEL 0
+    STATE DEC_PANEL 1
+    STATE THRUSTER  2
+    STATE VEHICLE   3
+    STATE ACK_TEMP  4
+    STATE ERROR     255
