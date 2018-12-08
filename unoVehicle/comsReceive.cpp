@@ -8,20 +8,11 @@
 #define CMD_SYNC_PATTERN     0xFC
 #define SERIAL_TIMEOUT_MS    100
 
-// Telemetry IDs unique to the entire satellite
-// Keep this in sync with COSMOS
-#define TLMID_CMD_STATUS 9
-
 
 typedef struct {
     uint8_t cmdId;
     cmd_callback_fn handle;
 } CommandHandler;
-
-TLM_PACKET {
-    uint8_t numErrors;
-    uint8_t numCmdHandlers;
-} CmdTlmPacket;
 
 
 // reads an incoming command from Serial and dispatches it to a command handler
@@ -35,11 +26,7 @@ CommandHandler commandHandlers[MAX_COMMAND_HANDLERS];
 uint8_t numCommandHandlers = 0;
 
 TCB comsRxTCB;
-CmdData cmdData = {
-    &numCmdErrors
-};
-
-CmdTlmPacket cmdTlmPacket;
+CmdData cmdData = { };
 
 serial_bus *serialBuses[] = {
     BUS_SATELLITE,
@@ -55,10 +42,7 @@ void comsRxInit() {
         1
     );
 
-    numCmdErrors = 0;
     memset(commandHandlers, 0, sizeof(commandHandlers));
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_CMD_STATUS, sizeof(cmdTlmPacket),
-        &cmdTlmPacket);
 }
 
 void comsRxUpdate(void *cmdData) {
@@ -71,11 +55,6 @@ void comsRxUpdate(void *cmdData) {
             processCommand(bus, data);
         }
     }
-
-    // send metadata telementry
-    cmdTlmPacket.numErrors = *data->numErrors;
-    cmdTlmPacket.numCmdHandlers = numCommandHandlers;
-    comsTxSend(TLMID_CMD_STATUS);
 }
 
 void comsRxRegisterCallback(uint8_t cmdId, cmd_callback_fn callback) {
@@ -107,20 +86,14 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
 
     // read the body of the command
     uint8_t data[256];
-    bus->readBytes(data, length);
+    bus->readBytes(data, length - 3);
 
     // dispatch to different entities
-    bool handled = false;
     for (uint8_t i = 0; i < numCommandHandlers; i++) {
         CommandHandler *h = &commandHandlers[i];
         if (cmdId == h->cmdId) {
-            handled = h->handle(data);
-            break;
+            h->handle(data);
+            return;
         }
-    }
-
-    // report unhandled commands
-    if (!handled) {
-        (*(cmdData->numErrors))++;
     }
 }

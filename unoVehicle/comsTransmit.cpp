@@ -6,10 +6,6 @@
 #define MAX_TLM_SENDERS      32
 #define TLM_SYNC_PATTERN     0xFC
 
-// Telemetry IDs unique to the entire satellite
-// Keep this in sync with COSMOS
-#define TLMID_TLM_STATUS 0
-
 
 typedef struct {
     serial_bus *bus;
@@ -18,10 +14,6 @@ typedef struct {
     uint8_t *data;
     bool ready;
 } TelemetrySender;
-
-TLM_PACKET {
-    uint8_t numTlmSenders;
-} MetaPacket;
 
 
 void sendTelemetryPacket(serial_bus *bus, uint8_t tlmId, uint8_t *data,
@@ -34,8 +26,6 @@ ComsTxData comsTxData;
 TelemetrySender tlmSenders[MAX_TLM_SENDERS];
 uint8_t numTlmSenders = 0;
 
-MetaPacket metaPacket;
-
 
 void comsTxInit() {
     tcbInit(
@@ -47,8 +37,6 @@ void comsTxInit() {
     );
 
     memset(tlmSenders, 0, sizeof(tlmSenders));
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_TLM_STATUS, sizeof(metaPacket),
-            &metaPacket);
 }
 
 void comsTx(void *comsTxData) {
@@ -62,10 +50,6 @@ void comsTx(void *comsTxData) {
             tlmSenders[i].ready = false;
         }
     }
-
-    // update meta packet
-    metaPacket.numTlmSenders = numTlmSenders;
-    comsTxSend(TLMID_TLM_STATUS);
 }
 
 void comsTxRegisterSender(serial_bus *bus, uint8_t tlmId, uint8_t length,
