@@ -46,15 +46,6 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
 
 /******************************************************************************
  * name: powerSubsystem
- * 
- * SolarPanelState *solarPanelState;
-    bool *solarPanelDeploy;
-    bool *solarPanelRetract;
-    volatile unsigned int *batteryLevelPtr;
-    volatile unsigned int *batteryTempPtr;
-    unsigned short *powerConsumption;
-    unsigned short *powerGeneration;
-    bool *batteryTempHigh;
  *
  * inputs:
  * 
