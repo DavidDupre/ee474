@@ -1,26 +1,15 @@
 #include "comsReceive.h"
-#include "comsTransmit.h"
 #include "imageCapture.h"
-#include "schedule.h"
 
 void setup() {
     Serial.begin(9600);
 
-    comsTxInit(); // must be called first
-    comsRxInit(); // must be called before other inits but after comsTxInit
+    comsRxInit(); // must be called first
     imageCaptureInit();
-
-
-    imageCaptureTCB.priority = 1;
-    taskQueueInsert(&imageCaptureTCB);
-
-    comsRxTCB.priority = 2;
-    taskQueueInsert(&comsRxTCB);
-
-    comsTxTCB.priority = 2;
-    taskQueueInsert(&comsTxTCB);
 }
 
 void loop() {
-    schedule();
+    comsRxUpdate();
+    imageCapture();
+    delay(500);
 }

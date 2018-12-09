@@ -1,5 +1,4 @@
 #include "imageCapture.h"
-#include "schedule.h"
 #include "comsTransmit.h"
 #include "fft.h"
 #include <string.h>
@@ -38,10 +37,6 @@ float imageCaptureRawToVolts(unsigned short raw);
 bool handleCommand(char opcode, uint8_t *data);
 
 
-TCB imageCaptureTCB;
-
-ImageCaptureData imageCaptureData;
-
 // This is kind of a lot of memory.
 Complex samples[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 Complex tmp[IMAGE_CAPTURE_RAW_BUFFER_LENGTH / 2];
@@ -51,20 +46,9 @@ static ImagePacket imagePacket;
 char command;
 
 void imageCaptureInit() {
-    tcbInit(
-        &imageCaptureTCB,
-        &imageCaptureData,
-        imageCapture,
-        TASKID_IMAGE,
-        1
-    );
-
     // initialize the analog pin
     pinMode(PIN_IMAGE_CAPTURE, INPUT);
 
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_IMAGE, sizeof(imagePacket),
-            &imagePacket);
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_IMAGE_READY, 0, 0);
     comsRxRegisterCallback(CMDID_IMAGE, handleCommand);
 }
 
@@ -74,9 +58,7 @@ float imageCaptureRawToVolts(unsigned short raw) {
     return offsetted * IMAGE_CAPTURE_MAX_MVOLTS / rawScale;
 }
 
-void imageCapture(void *imageCaptureData) {
-    ImageCaptureData *data = (ImageCaptureData *) imageCaptureData;
-
+void imageCapture() {
     if (command == 'S') {
         int n = IMAGE_CAPTURE_RAW_BUFFER_LENGTH;
 
@@ -93,10 +75,10 @@ void imageCapture(void *imageCaptureData) {
         imagePacket.frequency = fftFrequency(samples, IMAGE_CAPTURE_FREQ_HZ, n);
 
         // notify the satellite that its image capture data is ready
-        comsTxSend(TLMID_IMAGE_READY);
+        comsTxSend(TLMID_IMAGE_READY, 0, 0);
     } else if (command == 'I') {
         // send telemetry
-        comsTxSend(TLMID_IMAGE);
+        comsTxSend(TLMID_IMAGE, &imagePacket, sizeof(imagePacket));
     }
 
     command = '\0';
