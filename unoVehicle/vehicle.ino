@@ -4,8 +4,6 @@
 #include "schedule.h"
 #include "satelliteComs.h"
 
-uint8_t numCmdErrors;
-
 char command;
 
 unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];

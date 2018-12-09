@@ -14,8 +14,6 @@
  * are not given TCBs.
  */
 
-extern uint8_t numCmdErrors;
-
 extern char command;
 
 extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
