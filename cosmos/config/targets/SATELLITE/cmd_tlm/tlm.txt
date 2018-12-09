@@ -88,10 +88,8 @@ TELEMETRY SATELLITE VEHICLE LITTLE_ENDIAN "Vehicle Communications"
 
   APPEND_ITEM RESPONSE 8 STRING "Response"
 
-<<<<<<< HEAD
 TELEMETRY SATELLITE IMAGE_READY LITTLE_ENDIAN "Image data ready"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 50 } %>
-=======
 TELEMETRY SATELLITE RX_STATUS LITTLE_ENDIAN "Coms Rx Status"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 9 } %>
   
@@ -108,4 +106,3 @@ TELEMETRY SATELLITE CMD_ACK LITTLE_ENDIAN "Command acknowledgement"
     STATE VEHICLE   3
     STATE ACK_TEMP  4
     STATE ERROR     255
->>>>>>> master
