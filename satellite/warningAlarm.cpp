@@ -6,6 +6,7 @@
 #include "comsReceive.h"
 #include "comsTransmit.h"
 #include "tft.h"
+#include "consoleDisplay.h"
 
 #define HALF_FUEL       50
 #define LOW_FUEL        10
@@ -29,12 +30,13 @@ static bool handleCommand(uint8_t *data);
 TCB warningAlarmTCB;
 
 WarningAlarmData warningAlarmData = {
-    &batteryLow,
-    &fuelLow,
-    batteryLevelPtr,
-    &fuelLevel,
-    &batteryTempHigh,
-    &temperatureAlarmAcked
+    .batteryLow = &batteryLow,
+    .fuelLow = &fuelLow,
+    .batteryLevelPtr =  batteryLevelPtr,
+    .fuelLevel = &fuelLevel,
+    .batteryTempHigh = &batteryTempHigh,
+    .temperatureAlarmAcked = &temperatureAlarmAcked,
+    .cStatus = &cStatus,
 };
 
 void warningAlarmInit() {
@@ -70,98 +72,100 @@ void warningAlarm(void *warningAlarmData) {
     unsigned long timePassedMsBattery = currentEpochMs - lastBatteryUpdateEpochMs;
     unsigned long timePassedMsFuel = currentEpochMs - lastFuelUpdateEpochMs;
 
-    // Update battery status
-    tft.setTextSize(4);
-    tft.setCursor(0,0);
-    if (data->batteryLevelPtr[0] <= HALF_BATTERY) {
-        // Only update flash if the last update time was over a second ago
-        if (timePassedMsBattery >= BATTERY_RATE) {
-            // Draw black over batter portion
-            if (data->batteryLevelPtr[0] <= LOW_BATTERY) {
-                tft.setTextColor(RED);
-                *(data->batteryLow) = true;
-            } else {
-                tft.setTextColor(ORANGE);
-                *(data->batteryLow) = false;
+    if (*data->cStatus ==  consoleOn) {
+        // Update battery status
+        tft.setTextSize(4);
+        tft.setCursor(0,0);
+        if (data->batteryLevelPtr[0] <= HALF_BATTERY) {
+            // Only update flash if the last update time was over a second ago
+            if (timePassedMsBattery >= BATTERY_RATE) {
+                // Draw black over batter portion
+                if (data->batteryLevelPtr[0] <= LOW_BATTERY) {
+                    tft.setTextColor(RED);
+                    *(data->batteryLow) = true;
+                } else {
+                    tft.setTextColor(ORANGE);
+                    *(data->batteryLow) = false;
+                }
+                if (batteryFlashed) {
+                    tft.fillRect(0,0,300,30,BLACK);
+                    batteryFlashed = false;
+                } else {
+                    tft.print(F("BATTERY"));
+                    batteryFlashed = true;
+                }
+                // Update last time
+                lastBatteryUpdateEpochMs = currentEpochMs;
             }
-            if (batteryFlashed) {
-                tft.fillRect(0,0,300,30,BLACK);
-                batteryFlashed = false;
-            } else {
-                tft.print(F("BATTERY"));
-                batteryFlashed = true;
-            }
-            // Update last time
-            lastBatteryUpdateEpochMs = currentEpochMs;
+
+        } else {
+            tft.setTextColor(GREEN);
+            tft.print(F("BATTERY"));
+            batteryFlashed = false;
+            *(data->batteryLow) = false;
+            // Last update time doesn't change if status is GREEN
+            // This makes sure that the flashing starts immediately rather than
+            // a second late
         }
 
-    } else {
-        tft.setTextColor(GREEN);
-        tft.print(F("BATTERY"));
-        batteryFlashed = false;
-        *(data->batteryLow) = false;
-        // Last update time doesn't change if status is GREEN
-        // This makes sure that the flashing starts immediately rather than
-        // a second late
-    }
+        // Update fuel status
+        tft.setCursor(200,0);
+        if (*(data->fuelLevel) <= HALF_FUEL) {
+            // Only update flash if the last update time was over two seconds ago
+            if (timePassedMsFuel >= FUEL_RATE) {
+                // Draw black over batter portion
+                if (*(data->fuelLevel) <= LOW_FUEL) {
+                    tft.setTextColor(RED);
+                    *(data->fuelLow) = true;
+                } else {
+                    tft.setTextColor(ORANGE);
+                    *(data->fuelLow) = false;
+                }
+                if (fuelFlashed) {
+                    tft.fillRect(200,0,300,30,BLACK);
+                    fuelFlashed = false;
+                } else {
+                    tft.print(F("FUEL"));
+                    fuelFlashed = true;
+                }
+                // Update last time
+                lastFuelUpdateEpochMs = currentEpochMs;
+            }
 
-    // Update fuel status
-    tft.setCursor(200,0);
-    if (*(data->fuelLevel) <= HALF_FUEL) {
-        // Only update flash if the last update time was over two seconds ago
-        if (timePassedMsFuel >= FUEL_RATE) {
-            // Draw black over batter portion
-            if (*(data->fuelLevel) <= LOW_FUEL) {
-                tft.setTextColor(RED);
-                *(data->fuelLow) = true;
-            } else {
-                tft.setTextColor(ORANGE);
-                *(data->fuelLow) = false;
-            }
-            if (fuelFlashed) {
-                tft.fillRect(200,0,300,30,BLACK);
-                fuelFlashed = false;
-            } else {
-                tft.print(F("FUEL"));
-                fuelFlashed = true;
-            }
-            // Update last time
-            lastFuelUpdateEpochMs = currentEpochMs;
+        } else {
+            tft.setTextColor(GREEN);
+            tft.print(F("FUEL"));
+            fuelFlashed = false;
+            *(data->fuelLow) = false;
+            // Last update time doesn't change if status is GREEN
+            // This makes sure that the flashing starts immediately rather than
+            // a second late
         }
 
-    } else {
-        tft.setTextColor(GREEN);
-        tft.print(F("FUEL"));
-        fuelFlashed = false;
-        *(data->fuelLow) = false;
-        // Last update time doesn't change if status is GREEN
-        // This makes sure that the flashing starts immediately rather than
-        // a second late
-    }
+        *data->temperatureAlarmAcked |= digitalRead(ACK_PIN);
 
-    *data->temperatureAlarmAcked |= digitalRead(ACK_PIN);
-
-    if(*data->batteryTempHigh) {
-        if (*data->temperatureAlarmAcked) {
-            *data->temperatureAlarmAcked = false;
-            Serial.println("Entered into flipping of batterytemphigh");
-            *data->batteryTempHigh = false;
-            tempWarningStart = 0;
-            tft.fillRect(0, 150, 270, 60, BLACK);
-        } else if(tempWarningStart == 0) {
-            tempWarningStart = globalTimeBase();
-            tft.setTextColor(RED);
-            tft.setCursor(0, 150);
-            tft.print(F("TEMPERATURE"));
-        } else if (globalTimeBase() > tempWarningStart + ACK_PERIOD) {
-            if (tempFlashed) {
+        if(*data->batteryTempHigh) {
+            if (*data->temperatureAlarmAcked) {
+                *data->temperatureAlarmAcked = false;
+                Serial.println("Entered into flipping of batterytemphigh");
+                *data->batteryTempHigh = false;
+                tempWarningStart = 0;
                 tft.fillRect(0, 150, 270, 60, BLACK);
-            } else {
+            } else if(tempWarningStart == 0) {
+                tempWarningStart = globalTimeBase();
                 tft.setTextColor(RED);
                 tft.setCursor(0, 150);
                 tft.print(F("TEMPERATURE"));
+            } else if (globalTimeBase() > tempWarningStart + ACK_PERIOD) {
+                if (tempFlashed) {
+                    tft.fillRect(0, 150, 270, 60, BLACK);
+                } else {
+                    tft.setTextColor(RED);
+                    tft.setCursor(0, 150);
+                    tft.print(F("TEMPERATURE"));
+                }
+                tempFlashed = !tempFlashed;
             }
-            tempFlashed = !tempFlashed;
         }
     }
 

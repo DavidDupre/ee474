@@ -4,6 +4,12 @@
 #include "solarPanel.h"
 #include "schedule.h"
 
+typedef enum {
+    consoleOn,
+    consoleOff,
+    consoleTurningOff,
+} ConsoleStatus;
+
 
 typedef struct {
     SolarPanelState *solarPanelState;
@@ -15,6 +21,8 @@ typedef struct {
 
     bool *batteryLow;
     bool *fuelLow;
+
+    ConsoleStatus *cStatus;
 } ConsoleDisplayData;
 
 

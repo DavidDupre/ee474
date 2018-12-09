@@ -41,6 +41,7 @@ uint8_t numCmdErrors;
 bool batteryTempHigh;
 bool detected;
 unsigned int pirateProximity;
+ConsoleStatus cStatus;
 
 bool temperatureAlarmAcked;
 
@@ -64,6 +65,7 @@ void setup() {
     vehicleResponse = '\0';
     detected = false;
     pirateProximity = PIRATE_PROXIMITY_INITIAL;
+    cStatus = consoleOn;
 
     Serial.begin(250000);
     Serial1.begin(9600);

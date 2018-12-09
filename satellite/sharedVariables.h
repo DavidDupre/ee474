@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include "imageCapture.h"
 #include "transportDistance.h"
+#include "consoleDisplay.h"
 
 
 /*
@@ -44,5 +45,7 @@ extern bool temperatureAlarmAcked;
 
 extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
+
+extern ConsoleStatus cStatus;
 
 #endif /* _SHARED_VARIABLES_H_ */

@@ -2,6 +2,7 @@
 #define _WARNING_ALARM_H_
 
 #include "schedule.h"
+#include "consoleDisplay.h"
 
 
 typedef struct {
@@ -11,6 +12,7 @@ typedef struct {
     unsigned short *fuelLevel;
     bool *batteryTempHigh;
     bool *temperatureAlarmAcked;
+    ConsoleStatus *cStatus;
 } WarningAlarmData;
 
 

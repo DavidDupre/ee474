@@ -29,3 +29,7 @@ COMMAND SATELLITE VEHICLE LITTLE_ENDIAN "Send vehicle command"
 COMMAND SATELLITE ACK_TEMP LITTLE_ENDIAN "Acknowledge temp. alarm"
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 4 } %>
+
+  COMMAND SATELLITE DISPLAY_TOGGLE LITTLE_ENDIAN "Toggle display on/off"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 30 } %>
