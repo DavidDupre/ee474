@@ -17,6 +17,7 @@
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
 #define TLMID_IMAGE 6
+#define TLMID_IMAGE_READY 7
 
 // command IDs for commands over Serial
 // must be unique for entire vehicle
@@ -31,10 +32,6 @@
 TLM_PACKET {
     uint16_t frequency;
 } ImagePacket;
-
-TLM_PACKET {
-    char response;
-} ResponsePacket;
 
 // convert a raw analogRead measurement to +-2.5V
 float imageCaptureRawToVolts(unsigned short raw);
@@ -51,7 +48,6 @@ volatile unsigned short imageDataRawest[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 volatile unsigned int imageDataRawestIndex;
 
 static ImagePacket imagePacket;
-static ResponsePacket responsePacket;
 
 bool capture;
 bool send;
@@ -83,11 +79,10 @@ void imageCaptureInit() {
         imageDataRawest[i] = 0;
     }
     imageDataRawestIndex = 0;
-    
+
     comsTxRegisterSender(BUS_SATELLITE, TLMID_IMAGE, sizeof(imagePacket),
             &imagePacket);
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_RESPONSE, sizeof(responsePacket),
-            &responsePacket);
+    comsTxRegisterSender(BUS_SATELLITE, TLMID_IMAGE_READY, 0, 0);
 }
 
 float imageCaptureRawToVolts(unsigned short raw) {
@@ -140,8 +135,8 @@ void imageCapture(void *imageCaptureData) {
         }
         data->imageData[0] = frequency;
 
-        responsePacket.response = 'W';
-        comsTxSend(TLMID_RESPONSE);
+        // notify the satellite that its image capture data is ready
+        comsTxSend(TLMID_IMAGE_READY);
 
         command = '\0';
     }

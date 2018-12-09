@@ -4,7 +4,7 @@
 
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
-#define TLMID_TIMES 5
+#define TLMID_TIMES 123
 
 
 TLM_PACKET {
