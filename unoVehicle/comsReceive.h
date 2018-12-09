@@ -1,18 +1,10 @@
 #pragma once
 
 #include <stdint.h>
-#include "schedule.h"
 
 
 // returns true if the command was handled
-typedef bool (*cmd_callback_fn)(uint8_t*);
-
-typedef struct {
-    uint8_t *numErrors;
-} CmdData;
-
-
-extern TCB comsRxTCB;
+typedef bool (*cmd_callback_fn)(char opcode, uint8_t*);
 
 
 void comsRxInit();
