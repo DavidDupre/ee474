@@ -11,6 +11,10 @@
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
 #define TLMID_CMD_STATUS 9
+#define TLMID_CMD_ACK    10
+
+// special code to represent an unknown command ID
+#define CMDID_ERR 255
 
 
 typedef struct {
@@ -22,6 +26,10 @@ TLM_PACKET {
     uint8_t numErrors;
     uint8_t numCmdHandlers;
 } CmdTlmPacket;
+
+TLM_PACKET {
+    uint8_t cmdId;
+} AckTlmPacket;
 
 
 // reads an incoming command from Serial and dispatches it to a command handler
@@ -40,6 +48,7 @@ CmdData cmdData = {
 };
 
 CmdTlmPacket cmdTlmPacket;
+AckTlmPacket ackTlmPacket;
 
 serial_bus *serialBuses[] = {
     BUS_GROUND,
@@ -60,6 +69,8 @@ void comsRxInit() {
     memset(commandHandlers, 0, sizeof(commandHandlers));
     comsTxRegisterSender(BUS_GROUND, TLMID_CMD_STATUS, sizeof(cmdTlmPacket),
         &cmdTlmPacket);
+    comsTxRegisterSender(BUS_GROUND, TLMID_CMD_ACK, sizeof(ackTlmPacket),
+        &ackTlmPacket);
 }
 
 void comsRxUpdate(void *cmdData) {
@@ -123,5 +134,11 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
     // report unhandled commands
     if (!handled) {
         (*(cmdData->numErrors))++;
+    }
+
+    // if this was from the ground, update the ack packet and send it
+    if (bus == BUS_GROUND) {
+        ackTlmPacket.cmdId = handled ? cmdId : CMDID_ERR;
+        comsTxSend(TLMID_CMD_ACK);
     }
 }

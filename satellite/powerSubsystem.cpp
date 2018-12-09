@@ -40,8 +40,6 @@ static PowerTlmPacket tlmPacket;
 
 static bool handleCommand(uint8_t opcode, uint8_t *data);
 unsigned int normBattery(unsigned int input);
-// Flags
-// volatile bool readyToMeasure;
 volatile unsigned long batteryInitializationTime;
 
 void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTempHigh);
@@ -50,37 +48,40 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
  * name: powerSubsystem
  *
  * inputs:
+ * 
  * powerSubsystemData (void*): must be of Type powerSubsystemData*.
  * powerSubsystemData holds pointers to the following variables:
- *
- * solarPanelState: bool representing whether solar panel is deployed.
- * batteryLevel: unsigned short representing the percentage level of the battery level
- *               initally set to 100.
+ * 
+ * solarPanelDeploy: bool representing whether the solar panel is deployed
+ * solarPanelRetract: bool representing whether the solar panel is retracted
+ * batteryLevelPtr: volatile unsigned int* representing a pointer to the buffer
+ * storing the 16 most recent battery level measurements.
+ * batteryTempPtr: volatile unsigned int* representing a pointer to the buffer
+ * with the 16 most recent temperature level measurements
  * powerConsumption: unsigned short representing the power consumption initally set to 0.
  * powerGeneration: unsigned short representing the power generation.
+ * batteryTempHigh: bool representing whether the battery temperature is currently too high
  *
  * outputs: void
  *
  * description:
  *  powerSubsystem manages the satellite's power subsystem. The primary goal in managing the power
  *  subsystem is to ensure that the satellite has sufficient energy to continue operation. The power
- *  subsystem monitors the power consumption and power generation in order to properly deploy the solar
- *  panel to the most appropriate position.
- *
- *
+ *  subsystem monitors the power consumption, power generation, the battery and the temperature in order
+ *  to properly deploy the solar panel to the most appropriate position and set the appropriate warnings.
  *
  * pseudocode:
  *
- * init
+ * powerSubsystemInit
  *  set initalization time to 0
  *  attach interrupt to EXTERNAL_MEASUREMENT_EVENT_PIN
+ *  measure temp
+ *  set batteryTempHigh to false
  *
  * interrupt:
  *  set initalization to current time from globalTimeBase
  *
- *
- *
- *  measure and update buffer:
+ * measure and update buffer:
  *  for every measurement in indices 0-14 (first 15 measurements)
  *  move them to the next index (indices 1-15)
  *  add new measurement to index 0 via analogRead of EXTERNAL_MEASUREMENT_EVENT_PIN
@@ -91,18 +92,14 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
  *
  * measure temperature:
  *  record measurement from analog read pins MEASURE_TEMP_PIN_1 and MEASURE_TEMP_PIN_2 in the range of 0-325mV
- *  Calculating greatest recent measurement to compare new measurements against
+ *  normalize readings to 0-325mV (0.325V)
+ *  calculate greatest recent measurement to compare new measurements against
  *  if either of the two readings are 20% greater than the greater of the two previous readings
  *   set batteryTempHigh flag to true
- *
- *  call normalizing function to normalize readings to 0-3250mV (3.25V)
- *  convert readings to celsius: 32*battTemp + 33
- *
  *  store data and update buffer
- *  for every measurement in indices 0-14 (first 15 measurements)
- *  move them to the next index (indices 1-15)
- *  add new measurements to index 0,1 via analogRead of
- *
+ *  for every measurement in indices 0-13 (first 14 measurements)
+ *  move them to the next index (indices 2-15)
+ *  add new measurements to index 0,1
  *
  * power generation and consumption
  *
