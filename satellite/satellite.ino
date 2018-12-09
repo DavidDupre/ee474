@@ -20,6 +20,9 @@
 
 #include <AUnit.h>  // Test framework
 
+#define CMDID_START 21
+#define CMDID_STOP 22
+
 
 uint16_t thrusterCommand;
 unsigned short fuelLevel;
@@ -49,23 +52,7 @@ unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
-    thrusterCommand = 0;
-    fuelLevel = 100;
-    solarPanelState = SOLAR_PANEL_RETRACTED;
-    memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
-    memset((unsigned int *) batteryTempPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
-    solarPanelDeploy = false;
-    solarPanelRetract = false;
-    powerConsumption = 0;
-    powerGeneration = 0;
-    batteryLow = false;
-    fuelLow = false;
-    batteryTempHigh = false;
-    vehicleCommand = '\0';
-    vehicleResponse = '\0';
-    detected = false;
-    pirateProximity = PIRATE_PROXIMITY_INITIAL;
-    cStatus = consoleOn;
+    initializeData();
 
     Serial.begin(250000);
     Serial1.begin(9600);
@@ -89,6 +76,56 @@ void setup() {
     pirateDetectionInit();
     pirateManagementInit();
 
+    setupTaskQueue();
+
+    sei(); // enable interrupts
+
+    comsRxRegisterCallback(CMDID_START, start);
+    comsRxRegisterCallback(CMDID_STOP, stop);
+}
+
+void loop() {
+    schedule();
+    return;
+}
+
+// Start task execution
+// Tasks are running by defualt
+void start() {
+//    interrupts();
+   initializeData();
+setupTaskQueue();
+}
+
+
+// Stop most task execution but keep up COSMOS coms
+void stop() {
+    // noInterrupts();
+    clearAll();
+    tft.fillScreen(BLACK);
+}
+
+void initializeData() {
+    thrusterCommand = 0;
+    fuelLevel = 100;
+    solarPanelState = SOLAR_PANEL_RETRACTED;
+    memset((unsigned int *) batteryLevelPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
+    memset((unsigned int *) batteryTempPtr, 0, BATTERY_LEVEL_BUFFER_LENGTH);
+    solarPanelDeploy = false;
+    solarPanelRetract = false;
+    powerConsumption = 0;
+    powerGeneration = 0;
+    batteryLow = false;
+    fuelLow = false;
+    batteryTempHigh = false;
+    vehicleCommand = '\0';
+    vehicleResponse = '\0';
+    detected = false;
+    pirateProximity = PIRATE_PROXIMITY_INITIAL;
+    cStatus = consoleOn;
+}
+
+void setupTaskQueue() {
     powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);
 
@@ -120,11 +157,4 @@ void setup() {
 
     consoleDisplayTCB.priority = 4;
     taskQueueInsert(&consoleDisplayTCB);
-
-    sei(); // enable interrupts
-}
-
-void loop() {
-    schedule();
-    return;
 }
