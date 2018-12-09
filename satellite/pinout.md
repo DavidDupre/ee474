@@ -4,8 +4,8 @@
 | Serial RX                      | 19         |
 | MEAUSURE_INTERRUPT_PIN         | 20         |
 | PIN_SOLAR_PANEL_STOPPED        | 21         |
+| PHOTON_PIN                     | 41         |
 | PHASOR_PIN                     | 42         |
-| PHOTON_PIN                     | 43         |
 | PIN_SOLAR_PANEL_OUTPUT         | 44         |
 | distance SENSOR_PIN            | 45         |
 | PIN_DRIVE_MOTOR_SPEED_INC      | 50         |

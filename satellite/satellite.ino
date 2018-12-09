@@ -78,7 +78,7 @@ void setup() {
     scheduleInit();
     consoleDisplayInit();
     consoleKeypadInit();
-    imageCaptureInit();
+    // imageCaptureInit();
     powerSubsystemInit();
     satelliteComsInit();
     solarPanelControlInit();
@@ -95,8 +95,8 @@ void setup() {
     thrusterSubsystemTCB.priority = 1;
     taskQueueInsert(&thrusterSubsystemTCB);
 
-    imageCaptureTCB.priority = 1;
-    taskQueueInsert(&imageCaptureTCB);
+    // imageCaptureTCB.priority = 1;
+    // taskQueueInsert(&imageCaptureTCB);
 
     comsRxTCB.priority = 2;
     taskQueueInsert(&comsRxTCB);
