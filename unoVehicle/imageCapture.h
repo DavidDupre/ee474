@@ -1,8 +1,5 @@
 #pragma once
 
-#include "schedule.h"
-
-#define IMAGE_CAPTURE_FREQ_BUFFER_LENGTH 16
 #define IMAGE_CAPTURE_RAW_BUFFER_LENGTH  256 // must be a power of 2
 
 #define PIN_IMAGE_CAPTURE A0
@@ -10,14 +7,6 @@
 // The sample frequency. Keep this in sync with the timer interrupt.
 #define IMAGE_CAPTURE_FREQ_HZ 256
 
-
-typedef struct {
-    unsigned int *imageData;
-    unsigned short *imageDataRaw;
-} ImageCaptureData;
-
-
-extern TCB imageCaptureTCB;
 
 /******************************************************************************
  * name: imageCaptureInit
@@ -52,4 +41,4 @@ void imageCaptureInit();
  *
  * author: David Dupre
  *****************************************************************************/
-void imageCapture(void *imageCaptureData);
+void imageCapture();
