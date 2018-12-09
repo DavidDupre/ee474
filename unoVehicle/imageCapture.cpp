@@ -21,8 +21,8 @@
 // must be unique for entire vehicle
 #define CMDID_IMAGE 10
 
-// us per sample for 256 Hz sampling
-#define SAMPLE_PERIOD 3906
+// us per sample for 7500 Hz sampling
+#define SAMPLE_PERIOD 133
 
 
 TLM_PACKET {
@@ -64,10 +64,14 @@ void imageCapture() {
 
         // copy the samples into the real part of the fft input
         for (int i = 0; i < n; i++) {
+            long startTime = micros();
             int rawSample = analogRead(PIN_IMAGE_CAPTURE);
             samples[i].real = imageCaptureRawToVolts(rawSample);
             samples[i].imag = 0;
-            delayMicroseconds(SAMPLE_PERIOD);
+            long timePassed = micros() - startTime;
+            if (timePassed < SAMPLE_PERIOD) {
+                delayMicroseconds(SAMPLE_PERIOD - timePassed);
+            }
         }
 
         // perform the fft
