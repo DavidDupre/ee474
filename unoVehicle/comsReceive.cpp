@@ -2,9 +2,8 @@
 #include "comsReceive.h"
 #include "comsTransmit.h"
 #include <Arduino.h>
-#include "sharedVariables.h"
 
-#define MAX_COMMAND_HANDLERS 16
+#define MAX_COMMAND_HANDLERS 1
 #define CMD_SYNC_PATTERN     0xFC
 #define SERIAL_TIMEOUT_MS    100
 
@@ -103,7 +102,7 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
     bus->readBytes(&opcode, 1);
 
     // read the body of the command
-    uint8_t data[256];
+    uint8_t data[8];
     bus->readBytes(data, length - 4);
 
     // dispatch to different entities
@@ -111,8 +110,10 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
     for (uint8_t i = 0; i < numCommandHandlers; i++) {
         CommandHandler *h = &commandHandlers[i];
         if (cmdId == h->cmdId) {
-            handled = h->handle(data);
-            break;
+            handled = h->handle(opcode, data);
+            if (handled) {
+                break;
+            }
         }
     }
 

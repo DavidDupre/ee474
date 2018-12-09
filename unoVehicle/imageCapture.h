@@ -2,8 +2,7 @@
 
 #include "schedule.h"
 
-#define IMAGE_CAPTURE_FREQ_BUFFER_LENGTH 16
-#define IMAGE_CAPTURE_RAW_BUFFER_LENGTH  256 // must be a power of 2
+#define IMAGE_CAPTURE_RAW_BUFFER_LENGTH 64 // must be a power of 2
 
 #define PIN_IMAGE_CAPTURE A0
 
@@ -12,8 +11,6 @@
 
 
 typedef struct {
-    unsigned int *imageData;
-    unsigned short *imageDataRaw;
 } ImageCaptureData;
 
 

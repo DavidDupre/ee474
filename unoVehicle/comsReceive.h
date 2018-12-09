@@ -5,10 +5,9 @@
 
 
 // returns true if the command was handled
-typedef bool (*cmd_callback_fn)(uint8_t*);
+typedef bool (*cmd_callback_fn)(char opcode, uint8_t*);
 
 typedef struct {
-    uint8_t *numErrors;
 } CmdData;
 
 

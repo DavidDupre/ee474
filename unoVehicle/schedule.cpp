@@ -2,17 +2,6 @@
 #include "comsTransmit.h"
 #include <Arduino.h>
 
-// Telemetry IDs unique to the entire satellite
-// Keep this in sync with COSMOS
-#define TLMID_TIMES 123
-
-
-TLM_PACKET {
-    // the execution time of each task in microseconds
-    // indexed by task ID
-    uint32_t execTimeMicros[MAX_NUM_TASKS];
-} TimePacket;
-
 
 /*
  * Delay until an epoch has been reached, or do nothing if the current MET is
@@ -30,14 +19,9 @@ unsigned long missionElapsedTime = 0;
 TCB *taskQueueHead = NULL;
 TCB *taskQueueTail = NULL;
 
-TimePacket timePacket;
-
 
 void scheduleInit() {
     missionElapsedTime = millis();
-
-    comsTxRegisterSender(BUS_SATELLITE, TLMID_TIMES, sizeof(timePacket),
-            &timePacket);
 }
 
 void schedule() {
@@ -55,20 +39,9 @@ void schedule() {
         // run through the task queue
         TCB *tcb = taskQueueHead;
         while (tcb != NULL) {
-#ifdef GET_TIMES
-            unsigned long taskStart = micros();
-#endif  /* GET_TIMES */
             tcb->task(tcb->data);
-#ifdef GET_TIMES
-            timePacket.execTimeMicros[tcb->taskId] = micros() - taskStart;
-#endif  /* GET_TIMES */
             tcb = tcb->next;
         }
-
-#ifdef GET_TIMES
-        // send the execution times packet
-        comsTxSend(TLMID_TIMES);
-#endif /* GET_TIMES */
 
         // remove tasks marked for deletion
         purgeTaskQueue();

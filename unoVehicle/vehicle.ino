@@ -3,11 +3,6 @@
 #include "imageCapture.h"
 #include "schedule.h"
 
-char command;
-
-unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
-unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
-
 void setup() {
     Serial.begin(9600);
 

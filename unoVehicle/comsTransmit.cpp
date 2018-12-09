@@ -1,10 +1,9 @@
 #include "comsTransmit.h"
 #include "schedule.h"
 #include <Arduino.h>
-#include "sharedVariables.h"
 
-#define MAX_TLM_SENDERS      32
-#define TLM_SYNC_PATTERN     0xFC
+#define MAX_TLM_SENDERS  3
+#define TLM_SYNC_PATTERN 0xFC
 
 
 typedef struct {
