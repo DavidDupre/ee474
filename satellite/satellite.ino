@@ -11,7 +11,6 @@
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
-#include "imageCapture.h"
 #include "schedule.h"
 #include "transportDistance.h"
 #include "tft.h"
@@ -48,7 +47,6 @@ ConsoleStatus cStatus;
 
 bool temperatureAlarmAcked;
 
-unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
