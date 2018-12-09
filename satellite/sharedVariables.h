@@ -4,6 +4,7 @@
 #define BATTERY_LEVEL_BUFFER_LENGTH 16
 #define BATTERY_TEMP_BUFFER_LENGTH 16
 #define TRANSPORT_DISTANCE_BUFFER_LENGTH 8
+#define IMAGE_CAPTURE_FREQ_BUFFER_LENGTH 16
 
 #include "solarPanel.h"
 #include <stdint.h>
@@ -42,7 +43,6 @@ extern unsigned int pirateProximity;
 
 extern bool temperatureAlarmAcked;
 
-extern unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 extern unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 extern ConsoleStatus cStatus;
