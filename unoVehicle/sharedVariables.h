@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include "imageCapture.h"
 
-#define TLMID_RESPONSE 5
-
 /*
  * These variables must have global scope.
  *

@@ -8,11 +8,21 @@
 #define CMD_SYNC_PATTERN     0xFC
 #define SERIAL_TIMEOUT_MS    100
 
+// Telemetry IDs unique to the entire satellite
+#define TLMID_CMD_ACK 5
+
+// special code to represent an unknown command ID
+#define CMDID_ERR 255
+
 
 typedef struct {
     uint8_t cmdId;
     cmd_callback_fn handle;
 } CommandHandler;
+
+TLM_PACKET {
+    uint8_t cmdId;
+} AckTlmPacket;
 
 
 // reads an incoming command from Serial and dispatches it to a command handler
@@ -27,6 +37,8 @@ uint8_t numCommandHandlers = 0;
 
 TCB comsRxTCB;
 CmdData cmdData = { };
+
+AckTlmPacket ackTlmPacket;
 
 serial_bus *serialBuses[] = {
     BUS_SATELLITE,
@@ -89,11 +101,16 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
     bus->readBytes(data, length - 3);
 
     // dispatch to different entities
+    bool handled = false;
     for (uint8_t i = 0; i < numCommandHandlers; i++) {
         CommandHandler *h = &commandHandlers[i];
         if (cmdId == h->cmdId) {
-            h->handle(data);
-            return;
+            handled = h->handle(data);
+            break;
         }
     }
+
+    // update the ack packet and send it
+    ackTlmPacket.cmdId = handled ? cmdId : CMDID_ERR;
+    comsTxSend(TLMID_CMD_ACK);
 }

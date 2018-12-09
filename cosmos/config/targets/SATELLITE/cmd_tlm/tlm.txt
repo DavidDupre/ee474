@@ -92,3 +92,6 @@ TELEMETRY SATELLITE VEHICLE LITTLE_ENDIAN "Vehicle Communications"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 8 } %>
 
   APPEND_ITEM RESPONSE 8 STRING "Response"
+
+TELEMETRY SATELLITE IMAGE_READY LITTLE_ENDIAN "Image data ready"
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 50 } %>

@@ -2,7 +2,6 @@
 #include "comsTransmit.h"
 #include "imageCapture.h"
 #include "schedule.h"
-#include "satelliteComs.h"
 
 char command;
 
@@ -15,7 +14,6 @@ void setup() {
     comsTxInit(); // must be called first
     comsRxInit(); // must be called before other inits but after comsTxInit
     imageCaptureInit();
-    satelliteComsInit();
 
 
     imageCaptureTCB.priority = 1;
