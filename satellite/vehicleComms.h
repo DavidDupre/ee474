@@ -3,7 +3,6 @@
 
 #include "schedule.h"
 
-
 typedef struct {
     char *vehicleCommand;
     char *vehicleResponse;

@@ -6,23 +6,43 @@
 #include "comsReceive.h"
 #include "comsTransmit.h"
 #include "transportDistance.h"
+#include "udools.h"
+
+#define IMAGE_CAPTURE_FREQ_BUFFER_LENGTH 16
 
 // command IDs for commands over Serial
 // these must be unique to the entire satellite
 // keep this in sync with COSMOS
-#define CMDID_VEHICLE 3
+#define CMDID_EARTH 3
+#define CMDID_VEHICLE_RESPONSE 5
+#define CMDID_VEHICLE_IMAGE 6
+#define CMDID_IMAGE_READY 7
 
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
-#define TLMID_VEHICLE 8
+#define TLMID_VEHICLE 10
+#define TLMID_IMAGE 6
+#define TLMID_EARTH 8
+#define TLMID_IMAGE_READY 50
 
 
 TLM_PACKET {
     char response;
-} VehiclePacket;
+} VehicleResponsePacket;
+
+TLM_PACKET {
+    char command;
+} SatellitePacket;
+
+TLM_PACKET {
+    uint16_t frequency;
+} ImagePacket;
 
 
 bool handleCommand(uint8_t *data);
+bool handleImage(uint8_t *data);
+bool handleResponse(uint8_t *data);
+bool handleImageReady(uint8_t *data);
 
 
 TCB vehicleCommsTCB;
@@ -32,7 +52,9 @@ VehicleCommsData vehicleCommsData = {
     &vehicleResponse
 };
 
-static VehiclePacket tlmPacket;
+static VehicleResponsePacket responseTlmPacket;
+static SatellitePacket commandTlmPacket;
+static ImagePacket imagePacket;
 
 
 void vehicleCommsInit() {
@@ -43,9 +65,18 @@ void vehicleCommsInit() {
         TASKID_VEHCOMS,
         1
     );
-    comsTxRegisterSender(BUS_GROUND, TLMID_VEHICLE, sizeof(tlmPacket),
-            &tlmPacket);
-    comsRxRegisterCallback(CMDID_VEHICLE, handleCommand);
+    comsTxRegisterSender(BUS_GROUND, TLMID_EARTH, sizeof(responseTlmPacket),
+            &responseTlmPacket);
+    comsTxRegisterSender(BUS_VEHICLE, TLMID_VEHICLE, sizeof(commandTlmPacket),
+            &commandTlmPacket);
+    comsTxRegisterSender(BUS_GROUND, TLMID_IMAGE_READY, 0, 0);
+    comsTxRegisterSender(BUS_GROUND, TLMID_IMAGE, sizeof(imagePacket),
+            &imagePacket);
+
+    comsRxRegisterCallback(CMDID_EARTH, handleCommand);
+    comsRxRegisterCallback(CMDID_VEHICLE_RESPONSE, handleResponse);
+    comsRxRegisterCallback(CMDID_VEHICLE_IMAGE, handleImage);
+    comsRxRegisterCallback(CMDID_IMAGE_READY, handleImageReady);
 }
 
 /******************************************************************************
@@ -87,33 +118,46 @@ void vehicleComms(void *vehicleCommsData) {
     VehicleCommsData *data = (VehicleCommsData *) vehicleCommsData;
 
     // Set response if serial is available
-    if (Serial1.available()) {
-        *data->vehicleResponse = Serial1.read();
-
-        if (*data->vehicleResponse == 'D') {
-            taskQueueInsert(&transportDistanceTCB);
-        }
-
-        // relay response to binary comms
-        tlmPacket.response = *data->vehicleResponse;
-        comsTxSend(TLMID_VEHICLE);
+    if (*data->vehicleResponse == 'D') {
+        taskQueueInsert(&transportDistanceTCB);
     }
+
+    // relay response to binary comms
+    // tlmPacket.response = *data->vehicleResponse;
+    // comsTxSend(TLMID_EARTH);
 
     if (*data->vehicleCommand == 'C') {
         taskQueueDelete(&transportDistanceTCB);
     }
-
-    // Print command to Serial1 for the Uno to pick up
-    // Do not print if there is no command
-    if (*data->vehicleCommand != '\0') {
-        Serial1.print(*data->vehicleCommand);
-        *data->vehicleCommand = '\0';
-    }
-
-
 }
 
 bool handleCommand(uint8_t *data) {
     vehicleCommand = data[0];
+    commandTlmPacket.command = vehicleCommand;
+    comsTxSend(TLMID_VEHICLE);
+    return true;
+}
+
+bool handleResponse(uint8_t *data) {
+    vehicleResponse = data[0];
+    responseTlmPacket.response = vehicleResponse;
+    comsTxSend(TLMID_EARTH);
+    return true;
+}
+
+bool handleImage(uint8_t *data) {
+    // for (int i = 0; i < IMAGE_CAPTURE_FREQ_BUFFER_LENGTH; i++) {
+    //     imageData[i] = data[i];
+    // }
+    uint16_t* dader = (uint16_t*) data;
+    unsigned int freq = *dader;
+    addToBuffer<unsigned int>(freq, imageData, IMAGE_CAPTURE_FREQ_BUFFER_LENGTH);
+    imagePacket.frequency = freq;
+    comsTxSend(TLMID_IMAGE);
+    return true;
+}
+
+bool handleImageReady(uint8_t *data) {
+    comsTxSend(TLMID_IMAGE_READY);
     return true;
 }
