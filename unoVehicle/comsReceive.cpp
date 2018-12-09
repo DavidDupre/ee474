@@ -21,7 +21,7 @@ typedef struct {
 } CommandHandler;
 
 TLM_PACKET {
-    uint8_t cmdId;
+    char opcode; // the letter sent
 } AckTlmPacket;
 
 
@@ -55,6 +55,8 @@ void comsRxInit() {
     );
 
     memset(commandHandlers, 0, sizeof(commandHandlers));
+    comsTxRegisterSender(BUS_SATELLITE, TLMID_CMD_ACK, sizeof(ackTlmPacket),
+        &ackTlmPacket);
 }
 
 void comsRxUpdate(void *cmdData) {
@@ -96,9 +98,13 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
     bus->readBytes(&length, 1);
     bus->readBytes(&cmdId, 1);
 
+    // read the letter (opcode)
+    char opcode;
+    bus->readBytes(&opcode, 1);
+
     // read the body of the command
     uint8_t data[256];
-    bus->readBytes(data, length - 3);
+    bus->readBytes(data, length - 4);
 
     // dispatch to different entities
     bool handled = false;
@@ -111,6 +117,6 @@ void processCommand(serial_bus *bus, CmdData *cmdData) {
     }
 
     // update the ack packet and send it
-    ackTlmPacket.cmdId = handled ? cmdId : CMDID_ERR;
+    ackTlmPacket.opcode = opcode;
     comsTxSend(TLMID_CMD_ACK);
 }
