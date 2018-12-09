@@ -7,7 +7,6 @@
 
 #include "solarPanel.h"
 #include <stdint.h>
-#include "imageCapture.h"
 #include "transportDistance.h"
 
 
