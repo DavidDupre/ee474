@@ -11,7 +11,6 @@
 #include "vehicleComms.h"
 #include "warningAlarm.h"
 #include "solarPanel.h"
-#include "imageCapture.h"
 #include "schedule.h"
 #include "transportDistance.h"
 #include "tft.h"
@@ -48,7 +47,6 @@ ConsoleStatus cStatus;
 
 bool temperatureAlarmAcked;
 
-unsigned short imageDataRaw[IMAGE_CAPTURE_RAW_BUFFER_LENGTH];
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
@@ -65,7 +63,6 @@ void setup() {
     scheduleInit();
     consoleDisplayInit();
     consoleKeypadInit();
-    imageCaptureInit();
     powerSubsystemInit();
     satelliteComsInit();
     solarPanelControlInit();
@@ -94,7 +91,8 @@ void loop() {
 void start() {
 //    interrupts();
    initializeData();
-setupTaskQueue();
+   setupTaskQueue();
+   drawLabels();
 }
 
 
@@ -131,9 +129,6 @@ void setupTaskQueue() {
 
     thrusterSubsystemTCB.priority = 1;
     taskQueueInsert(&thrusterSubsystemTCB);
-
-    imageCaptureTCB.priority = 1;
-    taskQueueInsert(&imageCaptureTCB);
 
     comsRxTCB.priority = 2;
     taskQueueInsert(&comsRxTCB);

@@ -32,4 +32,6 @@ void consoleDisplayInit();
 
 void consoleDisplay(void *consoleDisplayData);
 
+void drawLabels();
+
 #endif  /* _CONSOLE_DISPLAY_H_ */
