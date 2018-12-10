@@ -6,4 +6,9 @@ SCREEN AUTO AUTO 1.0
   BUTTON 'Start all' 'cmd("SATELLITE START_EXECUTION")'
   SPACER 0 10
   BUTTON 'Toggle Display' 'cmd("SATELLITE DISPLAY_TOGGLE")'
+  
+  SECTIONHEADER "Weapons"
+  NAMED_WIDGET CHECK CHECKBUTTON 'Weapon safety' CHECKED
+  BUTTON 'Fire photo torpedo!' 'if get_named_widget("CHECK").checked? then cmd("SATELLITE FIRE_PHOTON") else cmd_no_hazardous_check("SATELLITE FIRE_PHOTON") end'
+  BUTTON 'Fire phaser!' 'if get_named_widget("CHECK").checked? then cmd("SATELLITE FIRE_PHASOR") else cmd_no_hazardous_check("SATELLITE FIRE_PHASOR") end'
 END

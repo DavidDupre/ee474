@@ -42,10 +42,12 @@ COMMAND SATELLITE STOP_EXECUTION LITTLE_ENDIAN "Stops task execute but leaves CO
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 22 } %>
   
-  COMMAND SATELLITE FIRE_PHOTON LITTLE_ENDIAN "Fires photon"
+COMMAND SATELLITE FIRE_PHOTON LITTLE_ENDIAN "Fires photon"
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 28 } %>
+  HAZARDOUS
   
-  COMMAND SATELLITE FIRE_PHASOR LITTLE_ENDIAN "Fires phasor"
+COMMAND SATELLITE FIRE_PHASOR LITTLE_ENDIAN "Fires phasor"
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 29 } %>
+  HAZARDOUS
