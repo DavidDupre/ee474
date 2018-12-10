@@ -214,8 +214,6 @@ uint16_t createThrusterCommand(bool useLeft, bool useRight, bool useUp,
 }
 
 bool thrusterSubsystemProcessCommand(uint8_t *data) {
-    uint8_t *buf = (uint8_t *) &thrusterCommand;
-    buf[0] = data[1];
-    buf[1] = data[0];
+    thrusterCommand = *((uint16_t *) data);
     return true;
 }
