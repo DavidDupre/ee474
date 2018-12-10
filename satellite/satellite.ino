@@ -23,6 +23,10 @@
 #define CMDID_STOP 22
 
 
+bool start(uint8_t *data);
+bool stop(uint8_t *data);
+
+
 uint16_t thrusterCommand;
 unsigned short fuelLevel;
 SolarPanelState solarPanelState;
@@ -88,19 +92,21 @@ void loop() {
 
 // Start task execution
 // Tasks are running by defualt
-void start() {
+bool start(uint8_t *data) {
 //    interrupts();
    initializeData();
    setupTaskQueue();
    drawLabels();
+   return true;
 }
 
 
 // Stop most task execution but keep up COSMOS coms
-void stop() {
+bool stop(uint8_t *data) {
     // noInterrupts();
     clearAll();
     tft.fillScreen(BLACK);
+    return true;
 }
 
 void initializeData() {

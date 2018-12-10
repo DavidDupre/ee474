@@ -98,7 +98,7 @@ TELEMETRY SATELLITE RX_STATUS LITTLE_ENDIAN "Coms Rx Status"
   APPEND_ITEM NCMD 8 UINT "Number of command handlers"
 
 TELEMETRY SATELLITE CMD_ACK LITTLE_ENDIAN "Command acknowledgement"
-  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 10 } %>
+  <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 245 } %>
 
   APPEND_ITEM CMDID 8 UINT "Command ID"
     STATE INC_PANEL        0

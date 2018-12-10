@@ -4,14 +4,14 @@
 #include "sharedVariables.h"
 #include <Arduino.h>
 
-#define MAX_COMMAND_HANDLERS 16
+#define MAX_COMMAND_HANDLERS 32
 #define CMD_SYNC_PATTERN     0xFC
 #define SERIAL_TIMEOUT_MS    100
 
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
 #define TLMID_CMD_STATUS 9
-#define TLMID_CMD_ACK    10
+#define TLMID_CMD_ACK    245
 
 // special code to represent an unknown command ID
 #define CMDID_ERR 255

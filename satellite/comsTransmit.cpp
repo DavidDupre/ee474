@@ -3,7 +3,7 @@
 #include "sharedVariables.h"
 #include <Arduino.h>
 
-#define MAX_TLM_SENDERS      32
+#define MAX_TLM_SENDERS      64
 #define TLM_SYNC_PATTERN     0xFC
 
 // Telemetry IDs unique to the entire satellite
