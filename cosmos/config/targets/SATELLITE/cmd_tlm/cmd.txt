@@ -30,6 +30,14 @@ COMMAND SATELLITE ACK_TEMP LITTLE_ENDIAN "Acknowledge temp. alarm"
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 4 } %>
 
-  COMMAND SATELLITE DISPLAY_TOGGLE LITTLE_ENDIAN "Toggle display on/off"
+COMMAND SATELLITE DISPLAY_TOGGLE LITTLE_ENDIAN "Toggle display on/off"
   # This must always be the first entry in any command packet
   <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 30 } %>
+
+COMMAND SATELLITE START_EXECUTION LITTLE_ENDIAN "Starts task execution"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 21 } %>
+  
+COMMAND SATELLITE STOP_EXECUTION LITTLE_ENDIAN "Stops task execute but leaves COSMOS coms"
+  # This must always be the first entry in any command packet
+  <%= render "../../SYSTEM/cmd_tlm/_shared_cmd_header.txt", locals: { length: 3, id: 22 } %>

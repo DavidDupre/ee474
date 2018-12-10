@@ -1,0 +1,9 @@
+SCREEN AUTO AUTO 1.0
+
+  TITLE "Enable/Disable"
+
+  BUTTON 'Stop all' 'cmd("SATELLITE STOP_EXECUTION")'
+  BUTTON 'Start all' 'cmd("SATELLITE START_EXECUTION")'
+  SPACER 0 10
+  BUTTON 'Toggle Display' 'cmd("SATELLITE DISPLAY_TOGGLE")'
+END

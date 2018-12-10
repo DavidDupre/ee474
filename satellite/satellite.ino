@@ -19,6 +19,9 @@
 
 #include <AUnit.h>  // Test framework
 
+#define CMDID_START 21
+#define CMDID_STOP 22
+
 
 uint16_t thrusterCommand;
 unsigned short fuelLevel;
@@ -47,6 +50,60 @@ bool temperatureAlarmAcked;
 unsigned int imageData[IMAGE_CAPTURE_FREQ_BUFFER_LENGTH];
 
 void setup() {
+    initializeData();
+
+    Serial.begin(250000);
+    Serial1.begin(9600);
+    tft.begin(tft.readID());
+    tft.setRotation(1);
+    tft.fillScreen(BLACK);
+
+    comsTxInit(); // must be called first
+    comsRxInit(); // must be called before other inits, except comxTxInit
+    scheduleInit();
+    consoleDisplayInit();
+    consoleKeypadInit();
+    powerSubsystemInit();
+    satelliteComsInit();
+    solarPanelControlInit();
+    thrusterSubsystemInit();
+    transportDistanceInit();
+    vehicleCommsInit();
+    warningAlarmInit();
+    pirateDetectionInit();
+    pirateManagementInit();
+
+    setupTaskQueue();
+
+    sei(); // enable interrupts
+
+    comsRxRegisterCallback(CMDID_START, start);
+    comsRxRegisterCallback(CMDID_STOP, stop);
+}
+
+void loop() {
+    schedule();
+    return;
+}
+
+// Start task execution
+// Tasks are running by defualt
+void start() {
+//    interrupts();
+   initializeData();
+   setupTaskQueue();
+   drawLabels();
+}
+
+
+// Stop most task execution but keep up COSMOS coms
+void stop() {
+    // noInterrupts();
+    clearAll();
+    tft.fillScreen(BLACK);
+}
+
+void initializeData() {
     thrusterCommand = 0;
     fuelLevel = 100;
     solarPanelState = SOLAR_PANEL_RETRACTED;
@@ -64,37 +121,14 @@ void setup() {
     detected = false;
     pirateProximity = PIRATE_PROXIMITY_INITIAL;
     cStatus = consoleOn;
+}
 
-    Serial.begin(250000);
-    Serial1.begin(9600);
-    tft.begin(tft.readID());
-    tft.setRotation(1);
-    tft.fillScreen(BLACK);
-
-    comsTxInit(); // must be called first
-    comsRxInit(); // must be called before other inits, except comxTxInit
-    scheduleInit();
-    consoleDisplayInit();
-    consoleKeypadInit();
-    // imageCaptureInit();
-    powerSubsystemInit();
-    satelliteComsInit();
-    solarPanelControlInit();
-    thrusterSubsystemInit();
-    transportDistanceInit();
-    vehicleCommsInit();
-    warningAlarmInit();
-    pirateDetectionInit();
-    pirateManagementInit();
-
+void setupTaskQueue() {
     powerSubsystemTCB.priority = 1;
     taskQueueInsert(&powerSubsystemTCB);
 
     thrusterSubsystemTCB.priority = 1;
     taskQueueInsert(&thrusterSubsystemTCB);
-
-    // imageCaptureTCB.priority = 1;
-    // taskQueueInsert(&imageCaptureTCB);
 
     comsRxTCB.priority = 2;
     taskQueueInsert(&comsRxTCB);
@@ -118,11 +152,4 @@ void setup() {
 
     consoleDisplayTCB.priority = 4;
     taskQueueInsert(&consoleDisplayTCB);
-
-    sei(); // enable interrupts
-}
-
-void loop() {
-    schedule();
-    return;
 }

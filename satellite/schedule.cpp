@@ -2,6 +2,8 @@
 #include "schedule.h"
 #include "comsTransmit.h"
 #include <Arduino.h>
+#include "comsReceive.h"
+#include "comsTransmit.h"
 
 // Telemetry IDs unique to the entire satellite
 // Keep this in sync with COSMOS
@@ -25,6 +27,10 @@ void delayUntil(unsigned long epochMs);
  * Delete all dying tasks from the task queue.
  */
 void purgeTaskQueue();
+
+
+// Clear all tasks except for the COSMOS communication tasks
+void clearAll();
 
 
 unsigned long missionElapsedTime = 0;
@@ -52,6 +58,8 @@ void schedule() {
     for (unsigned int i = 0; i < minorCyclesPerMajorCycle; i++) {
         // update the global time base
         missionElapsedTime = millis();
+
+        memset(timePacket.execTimeMicros, 0, sizeof(timePacket.execTimeMicros));
 
         // run through the task queue
         TCB *tcb = taskQueueHead;
@@ -107,9 +115,10 @@ unsigned long globalTimeBase() {
 }
 
 void taskQueueInsert(TCB *node) {
+    node->status = TCBStatusRunning;
+
     // don't add a node that's already on the queue
     if (taskQueueIncludes(node)) {
-        node->status = TCBStatusRunning;
         return;
     }
 
@@ -205,4 +214,16 @@ void tcbInit(TCB *tcb, void *data, tcb_task_fn task, TaskId taskId,
     tcb->next = NULL;
     tcb->prev = NULL;
     tcb->status = TCBStatusRunning;
+}
+
+void clearAll() {
+    TCB *tcb = taskQueueHead;
+
+    while(tcb != NULL) {
+        if (!(tcb == &comsRxTCB || tcb == &comsTxTCB)) {
+            taskQueueDeleteLater(tcb);
+        }
+        tcb = tcb->next;
+    }
+    purgeTaskQueue();
 }

@@ -101,9 +101,12 @@ TELEMETRY SATELLITE CMD_ACK LITTLE_ENDIAN "Command acknowledgement"
   <%= render "../../SYSTEM/cmd_tlm/_shared_tlm_header.txt", locals: { id: 10 } %>
 
   APPEND_ITEM CMDID 8 UINT "Command ID"
-    STATE INC_PANEL 0
-    STATE DEC_PANEL 1
-    STATE THRUSTER  2
-    STATE VEHICLE   3
-    STATE ACK_TEMP  4
-    STATE ERROR     255
+    STATE INC_PANEL        0
+    STATE DEC_PANEL        1
+    STATE THRUSTER         2
+    STATE VEHICLE          3
+    STATE ACK_TEMP         4
+    STATE DISPLAY_TOGGLE  30
+    STATE START_ALL       21
+    STATE STOP_ALL        22
+    STATE ERROR          255

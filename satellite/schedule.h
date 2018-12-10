@@ -25,7 +25,6 @@ typedef enum {
     TASKID_THRUST =   7,
     TASKID_VEHCOMS =  8,
     TASKID_ALARM =    9,
-    TASKID_IMAGE =    10,
     TASKID_DISTANCE = 11,
     TASKID_COMSRX  =  12,
     TASKID_PIRATE_DETECTION = 13,
@@ -182,6 +181,8 @@ bool taskQueueIncludes(TCB *node);
  * author: David Dupre
  *****************************************************************************/
 unsigned short taskQueueLength();
+
+void clearAll();
 
 /******************************************************************************
  * name: tcbInit
