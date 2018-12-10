@@ -5,7 +5,7 @@
 #define MAX_INTEGER 32767
 #define PHASOR_PIN 42
 #define PHOTON_PIN 41
-#define PIRATE_DISTANCE_PIN 10
+#define PIRATE_DISTANCE_PIN A10
 
 
 #include "pirateManagementSubsystem.h"

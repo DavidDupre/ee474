@@ -11,7 +11,7 @@
 #define SENSOR_PIN 45
 
 #define MIN_FREQ 0
-#define MAX_FREQ 10000
+#define MAX_FREQ 8000
 #define MIN_DISTANCE 100
 #define MAX_DISTANCE 2000
 #define MEASURE_DIFF 0.10
