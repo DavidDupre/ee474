@@ -16,13 +16,13 @@ PirateDetectionSubsystemData pirateDetectionSubsystemData = {
  * name: pirateDetectionSubsystem
  *
  * inputs:
- * 
+ *
  * pirateDetectionSubsystemData (void*): must be of Type pirateDetectionSubsystemData*.
  * pirateDetectionSubsystemData holds pointers to the following variables:
- * 
+ *
  * pirateProximity: unsigned int representing the distance of the nearest pirate in meters
  * detected: bool representing if a pirate has been detected within 100 meters
- * 
+ *
  * outputs: void
  *
  * description:
@@ -30,13 +30,13 @@ PirateDetectionSubsystemData pirateDetectionSubsystemData = {
  *  the satellite.
  *
  * pseudocode:
- * 
+ *
  * init:
  *  pirateProximity = max_integer;
  *  detected = false
  *  configure tcb
  *  configure pins
- * 
+ *
  * pirate detection:
  *  if pirate less than or equal to 100
  *   set detected to true
@@ -70,11 +70,9 @@ void pirateDetectionInit() {
 void pirateDetectionSubsystem(void* pirateDetectionSubsystemData) {
     PirateDetectionSubsystemData *data = (PirateDetectionSubsystemData *) pirateDetectionSubsystemData;
     unsigned int distance = analogRead(PIRATE_DISTANCE_PIN);
-    Serial.println(distance);
     // distance = norm<unsigned int>(distance, 0, 1023, 0, 400);
     // Serial.println(distance);
     *data->pirateProximity = distance;
-    // *data->pirateProximity = analogRead(PIRATE_DISTANCE_PIN);
     if(*data->pirateProximity <= 100) {
         *data->detected = true;
         taskQueueInsert(&pirateManagementSubsystemTCB);
