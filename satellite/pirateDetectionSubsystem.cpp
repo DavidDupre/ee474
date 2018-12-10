@@ -12,6 +12,42 @@ PirateDetectionSubsystemData pirateDetectionSubsystemData = {
     &pirateProximity
 };
 
+/******************************************************************************
+ * name: pirateDetectionSubsystem
+ *
+ * inputs:
+ * 
+ * pirateDetectionSubsystemData (void*): must be of Type pirateDetectionSubsystemData*.
+ * pirateDetectionSubsystemData holds pointers to the following variables:
+ * 
+ * pirateProximity: unsigned int representing the distance of the nearest pirate in meters
+ * detected: bool representing if a pirate has been detected within 100 meters
+ * 
+ * outputs: void
+ *
+ * description:
+ *  pirateDetectionSubsystem handles the detection of nearby pirates attempting to infiltrate
+ *  the satellite.
+ *
+ * pseudocode:
+ * 
+ * init:
+ *  pirateProximity = max_integer;
+ *  detected = false
+ *  configure tcb
+ *  configure pins
+ * 
+ * pirate detection:
+ *  if pirate less than or equal to 100
+ *   set detected to true
+ *   schedule pirate management
+ *  else
+ *   set detected to false
+ *   unschedule pirate management
+ *
+ * author: Nick Orlov
+*****************************************************************************/
+
 // Initialize the LED outputs for displaying the weapons firing 42,43
 // Initialize the pirate distance to INTEGER_MAX
 // Having a pirate detected to be false
