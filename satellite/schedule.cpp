@@ -30,7 +30,7 @@ void purgeTaskQueue();
 
 
 // Clear all tasks except for the COSMOS communication tasks
-void clearAll ();
+void clearAll();
 
 
 unsigned long missionElapsedTime = 0;
@@ -89,7 +89,6 @@ void schedule() {
     // delay until the major cycle is over
     delayUntil(majorStartTime + MAJOR_CYCLE_DURATION_MS);
 
-    Serial.write(5);
     return;
 }
 
@@ -116,9 +115,10 @@ unsigned long globalTimeBase() {
 }
 
 void taskQueueInsert(TCB *node) {
+    node->status = TCBStatusRunning;
+
     // don't add a node that's already on the queue
     if (taskQueueIncludes(node)) {
-        node->status = TCBStatusRunning;
         return;
     }
 
@@ -216,7 +216,7 @@ void tcbInit(TCB *tcb, void *data, tcb_task_fn task, TaskId taskId,
     tcb->status = TCBStatusRunning;
 }
 
-void clearAll () {
+void clearAll() {
     TCB *tcb = taskQueueHead;
 
     while(tcb != NULL) {
