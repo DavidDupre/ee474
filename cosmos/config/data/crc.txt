@@ -1,12 +1,12 @@
 "lib/user_version.rb" 0x8F282EE9
 "config/data/README.txt" 0x93B2C07E
 "config/system/system.txt" 0x6CB79668
-"config/targets/SATELLITE/cmd_tlm/cmd.txt" 0x5F804E05
+"config/targets/SATELLITE/cmd_tlm/cmd.txt" 0xE37C6BFC
 "config/targets/SATELLITE/cmd_tlm/tlm.txt" 0x2129C485
 "config/targets/SATELLITE/cmd_tlm/_exec_time.txt" 0x13FB2CE9
 "config/targets/SATELLITE/cmd_tlm_server.txt" 0x0B705F53
 "config/targets/SATELLITE/screens/coms.txt" 0x909EC2FD
-"config/targets/SATELLITE/screens/meta.txt" 0xD3894E3F
+"config/targets/SATELLITE/screens/meta.txt" 0x260317C8
 "config/targets/SATELLITE/screens/power.txt" 0xD0739C05
 "config/targets/SATELLITE/screens/thruster.txt" 0x78A502DD
 "config/targets/SATELLITE/screens/vehicle.txt" 0x328DCB6B
