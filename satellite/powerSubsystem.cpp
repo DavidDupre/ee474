@@ -48,10 +48,10 @@ void measureTemperature(volatile unsigned int* batteryTempPtr, bool* batteryTemp
  * name: powerSubsystem
  *
  * inputs:
- * 
+ *
  * powerSubsystemData (void*): must be of Type powerSubsystemData*.
  * powerSubsystemData holds pointers to the following variables:
- * 
+ *
  * solarPanelDeploy: bool representing whether the solar panel is deployed
  * solarPanelRetract: bool representing whether the solar panel is retracted
  * batteryLevelPtr: volatile unsigned int* representing a pointer to the buffer
@@ -244,11 +244,15 @@ void powerSubsystem(void* powerSubsystemData) {
         if(timesCalled % 2 == 0) {
             *data->powerConsumption +=2;
         } else {
-            *data->powerConsumption -=1;
+            if (*data->powerConsumption > 0) {
+                *data->powerConsumption -=1;
+            }
         }
     } else if (timesCalled % 2 == 0) {
         // If on an even call: decrement by 2, odd call: increment by 1
-        *data->powerConsumption -=2;
+        if (*data->powerConsumption > 1) {
+            *data->powerConsumption -=2;
+        }
     } else {
         *data->powerConsumption +=1;
     }

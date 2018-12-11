@@ -19,6 +19,6 @@ SCREEN AUTO AUTO 1.0
   
   SECTIONHEADER "Weapons"
   NAMED_WIDGET CHECK CHECKBUTTON 'Weapon safety' CHECKED
-  BUTTON 'Fire photo torpedo!' 'if get_named_widget("CHECK").checked? then cmd("SATELLITE FIRE_PHOTON") else cmd_no_hazardous_check("SATELLITE FIRE_PHOTON") end'
+  BUTTON 'Fire photon torpedo!' 'if get_named_widget("CHECK").checked? then cmd("SATELLITE FIRE_PHOTON") else cmd_no_hazardous_check("SATELLITE FIRE_PHOTON") end'
   BUTTON 'Fire phaser!' 'if get_named_widget("CHECK").checked? then cmd("SATELLITE FIRE_PHASOR") else cmd_no_hazardous_check("SATELLITE FIRE_PHASOR") end'
 END
