@@ -59,8 +59,6 @@ void schedule() {
         // update the global time base
         missionElapsedTime = millis();
 
-        memset(timePacket.execTimeMicros, 0, sizeof(timePacket.execTimeMicros));
-
         // run through the task queue
         TCB *tcb = taskQueueHead;
         while (tcb != NULL) {
@@ -163,6 +161,9 @@ void taskQueueDelete(TCB *node) {
     if (!taskQueueIncludes(node)) {
         return;
     }
+
+    // clear the TCB's execution time
+    timePacket.execTimeMicros[node->taskId] = 0;
 
     // update surrounding nodes' links
     if (node->prev) {
